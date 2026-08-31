@@ -13,4 +13,8 @@ CILGAS necesita centralizar y relacionar la información operativa, documental y
 
 ## Tutora
 
-Sofia Carnevale
+- Sofia Carnevale
+
+## Grupo
+
+- 213

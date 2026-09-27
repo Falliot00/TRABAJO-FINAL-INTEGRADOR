@@ -15,6 +15,21 @@ Trabajo Final Integrador de la Tecnicatura Universitaria en Programación de la 
 
 El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan con acceso de escritura.
 
+## Segunda entrega — Diseño y módulos
+
+**Fecha de preparación: 27/09/2026. Estado: preparada para revisión; aprobación de la tutora y del comité pendiente.**
+
+El [índice de la segunda entrega](docs/segunda-entrega/README.md) reúne el diseño relacional, las fichas relevadas, los módulos priorizados, la arquitectura y el registro de validación. El [modelo de datos](docs/segunda-entrega/MODELO_DATOS.md), el [diccionario completo](database/DICCIONARIO_DATOS.md) y el [DDL](database/01-esquema.sql) se complementan para mostrar tablas, campos, tipos, claves, relaciones e índices.
+
+- [Listado de módulos y permisos](docs/segunda-entrega/MODULOS.md).
+- [Arquitectura y tecnologías definitivas propuestas](docs/segunda-entrega/ARQUITECTURA.md).
+- [Reglas de negocio y ejemplos financieros](docs/segunda-entrega/REGLAS_NEGOCIO.md).
+- [Relevamiento de las cinco fichas](docs/segunda-entrega/RELEVAMIENTO_FICHAS.md).
+- [Continuidad funcional con el sistema original](docs/segunda-entrega/REFERENCIA_FUNCIONAL.md).
+- [Checklist y registro de aprobación](docs/segunda-entrega/APROBACION.md).
+
+`/frontend`, `/backend` y `/packages/contracts` contienen solamente carpetas con marcadores vacíos. `/database` contiene diseño SQL declarativo y `/docs` contiene documentación y diagramas. **No se incorpora código de aplicación en esta entrega.** La entrega efectiva requiere publicación en el repositorio único; la implementación comenzará luego de las aprobaciones exigidas por la cátedra.
+
 ## Cliente
 
 CILGAS es un taller que presta servicios relacionados con equipos de Gas Natural Comprimido (GNC). Dentro de su actividad intervienen responsabilidades propias de los Talleres de Montaje, los Productores de Equipos Completos y los Centros de Revisión Periódica de Cilindros.
@@ -31,11 +46,11 @@ Los perjuicios priorizados por CILGAS son:
 2. errores documentales;
 3. demora administrativa.
 
-CILGAS no posee actualmente un registro centralizado que relacione personas, vehículos, equipos de GNC, servicios realizados, componentes, fichas técnicas, obleas, revisiones quinquenales, vencimientos, cobros, convenios, proveedores, obligaciones y pagos.
+El relevamiento de la primera entrega identificó la necesidad de un registro centralizado que relacione personas, vehículos, equipos de GNC, servicios realizados, componentes, fichas técnicas, obleas, revisiones quinquenales, vencimientos, cobros, convenios, proveedores, obligaciones y pagos.
 
 El volumen aproximado es de 500 obleas, 150 pruebas hidráulicas y 400 movimientos financieros mensuales, con cuatro convenios comerciales y movimientos económicos superiores a ARS 10.000.000 por mes. No se espera alta concurrencia; la dificultad se encuentra en la consistencia y trazabilidad del dominio.
 
-## Situación actual
+## Situación relevada en la primera entrega
 
 En el flujo habitual de una revisión quinquenal:
 
@@ -50,7 +65,7 @@ En el flujo habitual de una revisión quinquenal:
 9. alguno de ellos carga la operación manualmente en SICGNC;
 10. se conserva el identificador resultante y se imprime la documentación correspondiente.
 
-La ficha técnica reúne datos del taller, PEC, operación, obleas, vehículo, propietario, regulador, cilindros, válvulas y demás componentes. Actualmente una prueba hidráulica se representa marcando `REVISIÓN ANUAL` y agregando manualmente `PH`.
+La ficha técnica reúne datos del taller, PEC, operación, obleas, vehículo, propietario, regulador, cilindros, válvulas y demás componentes. En el flujo relevado y en la ficha F01, la PH se indica junto con `REVISIÓN ANUAL` mediante una anotación manual. Las [cinco fichas relevadas](docs/segunda-entrega/RELEVAMIENTO_FICHAS.md) muestran variantes que requieren conservar por separado operación documental y ensayo realizado.
 
 ## Propuesta de valor
 
@@ -101,18 +116,18 @@ El titular del vehículo, la persona de contacto y quien paga pueden ser diferen
 2. Seleccionar o registrar el vehículo y consultar su configuración técnica vigente.
 3. Crear un borrador a partir de un servicio del catálogo.
 4. Ajustar componentes, cantidades, precios, costos y resultados a lo realmente realizado.
-5. Confirmar el servicio. Recién entonces se originan sus efectos técnicos, documentales y financieros.
+5. Confirmar el servicio. Recién entonces se originan sus efectos técnicos, documentales y las obligaciones con proveedores. Los cobros, incluidos anticipos vinculados al borrador, se registran explícitamente cuando se recibe dinero.
 6. Generar la ficha técnica, la oblea, la revisión de cilindros y los demás resultados aplicables.
 7. Registrar cobros, obligaciones con proveedores y egresos sin confundir importes vendidos con dinero recibido.
 8. Descargar e imprimir el PDF y completar manualmente el flujo de SICGNC.
 9. Conservar la ficha confirmada y cualquier rectificación posterior.
 10. Consultar historia, saldos, vencimientos y alertas desde información relacionada.
 
-No se modelará un flujo operativo detallado con estados como “en taller” o “esperando repuesto”. Un borrador podrá editarse libremente y, al confirmarse, representará un servicio ya realizado.
+No se modelará un flujo operativo detallado con estados como “en taller” o “esperando repuesto”. Un borrador podrá editarse mientras se respeten sus cobros explícitos vinculados; guardarlo no genera efectos por sí solo. Al confirmarse, representará un servicio ya realizado.
 
 ## Modelo conceptual
 
-El diseño físico de la base de datos se definirá en una entrega posterior. Para esta propuesta se establecen solamente los conceptos y relaciones principales:
+El diseño físico se presenta en [la segunda entrega](docs/segunda-entrega/MODELO_DATOS.md). Los conceptos y relaciones que lo fundamentan son:
 
 - un **servicio del catálogo** es una oferta configurable;
 - un **servicio realizado** es un trabajo concreto con condiciones históricas propias;
@@ -145,7 +160,7 @@ Se mantendrá una única fuente de hechos financieros:
 A partir de esos hechos se derivarán dos perspectivas:
 
 - **Saldo real:** flujo neto acumulado desde la puesta en marcha, considerando exclusivamente cobros y egresos efectivos registrados.
-- **Saldo teórico:** el mismo flujo, pero descontando las obligaciones con proveedores desde el momento en que nacen.
+- **Saldo teórico:** saldo real menos obligaciones pendientes con proveedores. Reconoce la deuda desde su nacimiento; sus pagos ya incluidos en egresos no se descuentan por segunda vez. La [regla financiera y sus ejemplos](docs/segunda-entrega/REGLAS_NEGOCIO.md) explicitan el cálculo.
 
 Estas perspectivas no serán libros editables independientes. “Saldo real” no significará saldo bancario ni arqueo físico, porque el MVP no realizará conciliación ni partirá de saldos históricos.
 
@@ -216,12 +231,12 @@ La comunicación será REST con JSON y documentación OpenAPI. El backend será 
 | Monorepo | pnpm workspaces | Permite coordinar frontend, backend y contratos compartidos con instalación reproducible. |
 | Contenedores | Docker | Homogeneiza desarrollo y producción y simplifica el despliegue en el VPS existente. |
 | Infraestructura | VPS Hostinger + dominio existente | Evita contratar nueva infraestructura y permite control directo del entorno. |
-| Proxy y HTTPS | Nginx o Caddy | Termina TLS y protege los procesos Node.js; la selección operativa final no modifica la arquitectura. |
+| Proxy y HTTPS | Nginx | Servirá la aplicación estática, enrutará la API y terminará HTTPS en el VPS; decisión técnica detallada en la segunda entrega. |
 | Integración continua | GitHub Actions | Automatiza análisis estático, pruebas y builds en cada cambio integrado. |
 | Testing backend | Jest/Supertest e integración con PostgreSQL | Verifica reglas, API y transacciones sobre una base real de prueba. |
 | Testing frontend | Vitest y Testing Library | Verifica componentes y comportamiento sin depender de recorridos completos. |
 | Testing E2E | Playwright | Cubre los recorridos críticos desde la perspectiva del usuario. |
-| PDF | Plantilla versionada y generación del lado servidor | Permite reproducir la ficha entregada por CILGAS y conservar versiones históricas. La biblioteca concreta se evaluará antes de implementar. |
+| PDF | Playwright/Chromium en el servidor, con plantilla HTML/CSS versionada | Generará el PDF desde el snapshot confirmado; permite reintentar el renderizado sin duplicar efectos del servicio. La fidelidad a la plantilla se verificará al implementar. |
 
 ### PostgreSQL frente a NoSQL
 
@@ -349,4 +364,5 @@ El producto se considerará exitoso si:
 - ciclo posterior de los cilindros usados que quedan en poder de CILGAS;
 - significado y formato definitivo del identificador devuelto por SICGNC;
 - reglas excepcionales de rectificación aceptadas por el circuito regulatorio;
-- selección final de biblioteca para generar el PDF y del proxy inverso del VPS.
+- revisión académica de las decisiones de segunda entrega: Nginx y PDF con Playwright/Chromium;
+- validaciones específicas de las fichas y el diseño indicadas en [APROBACION.md](docs/segunda-entrega/APROBACION.md).

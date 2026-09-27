@@ -1,7 +1,9 @@
 # Relevamiento de fichas técnicas de CILGAS
 
-**Entrega:** segunda entrega — Diseño y Módulos.  
-**Fecha de análisis:** 27/09/2026.  
+**Entrega:** segunda entrega — Diseño y Módulos.
+
+**Fecha de análisis:** 27/09/2026.
+
 **Estado:** evidencia relevada y decisiones de diseño propuestas; pendiente de validación del propietario, responsables técnicos y tutora según su competencia.
 
 ## Objetivo y tratamiento de las fuentes

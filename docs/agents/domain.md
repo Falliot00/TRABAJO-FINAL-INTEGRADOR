@@ -18,7 +18,10 @@ This is a single-context repo:
 /
 ├── CONTEXT.md
 ├── docs/adr/
-└── src/
+├── docs/segunda-entrega/
+├── database/
+├── frontend/
+└── backend/
 ```
 
 ## Use the glossary's vocabulary

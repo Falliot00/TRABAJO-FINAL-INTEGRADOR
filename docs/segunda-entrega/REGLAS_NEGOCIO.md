@@ -44,8 +44,10 @@ Sean:
 
 Entonces:
 
-**Saldo real = C − E**  
-**Obligaciones pendientes = O − P**  
+**Saldo real = C − E**
+
+**Obligaciones pendientes = O − P**
+
 **Saldo teórico = Saldo real − Obligaciones pendientes = C − (E − P) − O**
 
 Las asignaciones de un egreso a obligaciones distribuyen un pago; no constituyen otro egreso. Una liquidación cobrada origina cobros aplicados a los servicios incluidos; su total no se suma nuevamente como un ingreso adicional.

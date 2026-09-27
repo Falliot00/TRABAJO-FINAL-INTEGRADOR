@@ -6,7 +6,7 @@
 
 **Tutora:** Sofía Carnevale · **Fecha de preparación:** 27/09/2026
 
-**Estado:** propuesta de diseño preparada para revisión; aprobación académica pendiente.
+**Estado:** propuesta de diseño publicada para revisión el 27/09/2026; aprobación académica pendiente.
 
 ## Objetivo de la entrega
 
@@ -50,6 +50,6 @@ Las carpetas de aplicación sólo contienen marcadores vacíos. No se generan ap
 
 ## Alcance de la aprobación
 
-La preparación de estos archivos no equivale a la entrega efectiva ni a la aprobación. La entrega será efectiva cuando los archivos estén publicados y actualizados en el repositorio único de GitHub. La tutora debe aprobar explícitamente el diseño y el listado de módulos, y luego debe intervenir el comité conforme a la consigna. Las observaciones recibidas se registrarán y resolverán antes de iniciar la etapa de implementación.
+La publicación en el repositorio único de GitHub fue comprobada el 27/09/2026 y quedó asentada en el registro de revisión y aprobación. Esto acredita disponibilidad del contenido, no aprobación académica. La tutora debe aprobar explícitamente el diseño y el listado de módulos, y luego debe intervenir el comité conforme a la consigna. Las observaciones recibidas se registrarán y resolverán antes de iniciar la etapa de implementación.
 
 La tarea del campus se utilizará para asentar la devolución y deberá marcarse como finalizada según el procedimiento de la cátedra. El contenido se revisa en GitHub.

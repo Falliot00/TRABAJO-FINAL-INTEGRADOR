@@ -17,7 +17,7 @@ El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan
 
 ## Segunda entrega — Diseño y módulos
 
-**Fecha de preparación: 27/09/2026. Estado: preparada para revisión; aprobación de la tutora y del comité pendiente.**
+**Fecha de preparación y publicación: 27/09/2026. Estado: publicada para revisión; aprobación de la tutora y del comité pendiente.**
 
 El [índice de la segunda entrega](docs/segunda-entrega/README.md) reúne el diseño relacional, las fichas relevadas, los módulos priorizados, la arquitectura y el registro de validación. El [modelo de datos](docs/segunda-entrega/MODELO_DATOS.md), el [diccionario completo](database/DICCIONARIO_DATOS.md) y el [DDL](database/01-esquema.sql) se complementan para mostrar tablas, campos, tipos, claves, relaciones e índices.
 
@@ -28,7 +28,7 @@ El [índice de la segunda entrega](docs/segunda-entrega/README.md) reúne el dis
 - [Continuidad funcional con el sistema original](docs/segunda-entrega/REFERENCIA_FUNCIONAL.md).
 - [Checklist y registro de aprobación](docs/segunda-entrega/APROBACION.md).
 
-`/frontend`, `/backend` y `/packages/contracts` contienen solamente carpetas con marcadores vacíos. `/database` contiene diseño SQL declarativo y `/docs` contiene documentación y diagramas. **No se incorpora código de aplicación en esta entrega.** La entrega efectiva requiere publicación en el repositorio único; la implementación comenzará luego de las aprobaciones exigidas por la cátedra.
+`/frontend`, `/backend` y `/packages/contracts` contienen solamente carpetas con marcadores vacíos. `/database` contiene diseño SQL declarativo y `/docs` contiene documentación y diagramas. **No se incorpora código de aplicación en esta entrega.** El contenido está publicado en el repositorio único, con evidencia en el registro de aprobación; la implementación comenzará luego de las aprobaciones exigidas por la cátedra.
 
 ## Cliente
 

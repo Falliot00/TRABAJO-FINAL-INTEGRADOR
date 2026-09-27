@@ -33,7 +33,7 @@ Trabajo concreto que CILGAS efectúa para un vehículo bajo condiciones técnica
 _Evitar_: Servicio del catálogo, prestación
 
 **Borrador de servicio**:
-Registro preparatorio que puede modificarse libremente y que todavía no produce efectos técnicos, documentales ni financieros.
+Registro preparatorio cuyo guardado no produce efectos técnicos, documentales ni financieros. Puede recibir un anticipo mediante una acción explícita de cobro independiente; si existen cobros vinculados, su edición y descarte deben respetarlos.
 _Evitar_: Servicio realizado
 
 **Configuración del equipo**:
@@ -75,7 +75,7 @@ Flujo neto acumulado desde la puesta en marcha, calculado exclusivamente con cob
 _Evitar_: Dinero disponible, saldo bancario, saldo teórico
 
 **Saldo teórico**:
-Flujo neto acumulado desde la puesta en marcha que, además de los egresos efectivos, descuenta las obligaciones con proveedores desde que nacen.
+Saldo real menos las obligaciones pendientes con proveedores: reconoce esas obligaciones desde que nacen y no vuelve a descontar sus pagos ya incluidos en los egresos efectivos.
 _Evitar_: Saldo real, dinero disponible
 
 ## Actores regulatorios

@@ -33,7 +33,7 @@ La fecha de preparación no acredita la fecha de publicación. La condición de 
 | --- | --- | --- | --- |
 | PV-01 | Alcance y factibilidad | Módulos y prioridades del MVP; capacidades avanzadas postergadas | Tutora y equipo |
 | PV-02 | Diseño relacional | Identidad de componentes, configuración histórica e intervenciones separadas | Tutora y equipo |
-| PV-03 | Interpretación de las fichas | Códigos de operación y MSDB, posiciones y relación entre acciones | CILGAS / responsables técnicos |
+| PV-03 | Interpretación de las fichas | Códigos de operación y MSDB, posiciones y relación entre acciones; resolver la impresión de cuatro recambios de válvula (ocho acciones frente a cuatro casillas, RF-02) sin perder hechos técnicos | CILGAS / responsables técnicos |
 | PV-04 | Roles regulatorios | Identidades diferenciadas de TdM, PEC y CRPC | CILGAS / responsables técnicos |
 | PV-05 | Confirmación y anticipos | Anticipo explícito vinculado a servicio, sin confirmación técnica automática | CILGAS y tutora |
 | PV-06 | Rectificaciones | Nueva versión enlazada, sin sobrescritura ni ajuste económico implícito | CILGAS / responsables técnicos y tutora |

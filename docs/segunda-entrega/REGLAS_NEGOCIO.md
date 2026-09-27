@@ -14,7 +14,7 @@ Fecha: 27/09/2026. Documento derivado de la propuesta del repositorio, sus ADRs 
 | RN-06 | Cilindros, válvulas y reguladores tienen identidad individual. | Se distingue identidad del componente, instalación y acción en una ficha. No se identifica un cilindro sólo por su renglón. |
 | RN-07 | Una ficha admite hasta cuatro cilindros; una oferta comercial habitual puede incluir menos. | Límite documental de posiciones y composición comercial independientes. |
 | RN-08 | PH es un ensayo de una revisión de cilindro; no implica cambiarlo. | Resultado de revisión por cilindro separado de operación de ficha y de reemplazo. |
-| RN-09 | Las fichas aportadas incluyen anotaciones PH junto con distintas operaciones impresas. | No se deriva PH exclusivamente de la letra R ni se inventa un código oficial de operación. |
+| RN-09 | F01 muestra PH junto con revisión anual; la posible variante de operación y anotación de F03 requiere confirmación. | Se registra PH por separado: no se deduce exclusivamente de la letra R ni se inventa un código oficial de operación. |
 | RN-10 | Los renglones pueden registrar montajes, desmontajes, bajas o continuidad según el código validado. | La lista documental de intervenciones no equivale a la configuración final del vehículo. |
 | RN-11 | El reemplazo de válvulas es política operativa indicada en la propuesta de CILGAS. | El servicio registra las válvulas concretas retiradas y colocadas; no se presenta como obligación normativa general. |
 | RN-12 | Una ficha confirmada es inmutable. | Snapshot autocontenido versionado, plantilla identificada y rectificación enlazada con motivo, usuario y fecha. |

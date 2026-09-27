@@ -1,6 +1,6 @@
 # Diagrama entidad–relación físico — CILGAS
 
-Diseño propuesto · 27/09/2026 · 42 tablas. Cada tabla aparece una vez con **todos sus campos**, tipos y marcas PK/FK/UQ. Las vistas tienen como máximo cinco entidades para poder leerlas; las referencias que cruzan una vista se detallan junto al gráfico. El DDL y [diccionario](DICCIONARIO_DATOS.md) especifican nulabilidad, valores, CHECK e índices; `decimal` significa `numeric` y `string` sólo se usa cuando lo exige Mermaid (se conserva longitud en el diccionario).
+Diseño propuesto · 27/09/2026 · 42 tablas. Cada tabla aparece una vez con **todos sus campos**, tipos y marcas PK/FK/UQ. Las vistas tienen como máximo cinco entidades para poder leerlas; las referencias que cruzan una vista se detallan junto al gráfico. El DDL y [diccionario](DICCIONARIO_DATOS.md) especifican nulabilidad, valores, CHECK e índices; `numeric_p_s` representa `numeric(p,s)` (por ejemplo, `numeric_14_2` significa `numeric(14,2)`): se evita la coma dentro del tipo porque Mermaid no la admite. `string` sólo se usa cuando lo exige Mermaid; la definición SQL exacta se conserva en el diccionario y el DDL.
 
 Las líneas muestran asociaciones materializadas por FK dentro de una vista. Una FK permite como máximo un padre por registro; `||` exige padre y `|o` lo permite opcional. Los hijos se representan como 0..1 cuando la FK es única y 0..N en los demás casos. `UK` en una columna significa que participa de una restricción de unicidad, que puede ser compuesta; NO afirma unicidad individual. El diccionario y DDL indican los conjuntos exactos. Los límites de 4 cilindros y reglas entre registros se explican en [MODELO_DATOS](../docs/segunda-entrega/MODELO_DATOS.md).
 
@@ -145,7 +145,7 @@ erDiagram
         varchar(50) codigo_homologacion UK
         varchar(100) marca
         varchar(100) modelo
-        decimal(7,2) capacidad_litros
+        numeric_7_2 capacidad_litros
         boolean activo
     }
     componentes {
@@ -171,7 +171,7 @@ erDiagram
         varchar(140) nombre
         text descripcion
         varchar(25) tipo
-        decimal(14,2) precio_sugerido
+        numeric_14_2 precio_sugerido
         boolean activo
     }
     catalogo_items {
@@ -180,10 +180,10 @@ erDiagram
         smallint orden UK
         varchar(180) descripcion
         varchar(20) tipo
-        decimal(10,2) cantidad
-        decimal(14,2) precio_unitario
+        numeric_10_2 cantidad
+        numeric_14_2 precio_unitario
         bigint proveedor_id FK
-        decimal(14,2) costo_unitario
+        numeric_14_2 costo_unitario
     }
     servicios {
         bigint id PK, UK
@@ -197,7 +197,7 @@ erDiagram
         varchar(25) tipo
         char(1) operacion_ficha
         boolean incluye_ph
-        decimal(14,2) importe_total
+        numeric_14_2 importe_total
         text observaciones
         bigint creado_por FK
         timestamptz creado_en
@@ -246,10 +246,10 @@ erDiagram
         varchar(20) tipo
         bigint componente_id FK
         varchar(15) accion
-        decimal(10,2) cantidad
-        decimal(14,2) precio_unitario
-        decimal(14,2) descuento
-        decimal(14,2) importe
+        numeric_10_2 cantidad
+        numeric_14_2 precio_unitario
+        numeric_14_2 descuento
+        numeric_14_2 importe
     }
     servicio_costos {
         bigint id PK, UK
@@ -258,7 +258,7 @@ erDiagram
         bigint proveedor_id FK, UK
         varchar(180) concepto
         varchar(15) tratamiento
-        decimal(14,2) importe UK
+        numeric_14_2 importe UK
     }
     servicio_preparacion {
         bigint servicio_id PK, FK
@@ -524,7 +524,7 @@ erDiagram
         varchar(15) estado
         date entregada_el
         date vence_el
-        decimal(14,2) importe_total
+        numeric_14_2 importe_total
         bigint creada_por FK
         timestamptz creada_en
         text observaciones
@@ -534,7 +534,7 @@ erDiagram
         bigint convenio_id FK, UK
         bigint servicio_id FK, UK
         varchar(80) numero UK
-        decimal(14,2) importe_autorizado
+        numeric_14_2 importe_autorizado
         date autorizado_el
         bigint liquidacion_id FK
         timestamptz anulado_en
@@ -565,7 +565,7 @@ erDiagram
         bigint liquidacion_id FK
         bigint pagador_id FK
         timestamptz recibido_en
-        decimal(14,2) importe_total
+        numeric_14_2 importe_total
         varchar(140) referencia
         bigint creado_por FK
         timestamptz anulado_en
@@ -578,7 +578,7 @@ erDiagram
         bigint servicio_id FK, UK
         bigint medio_pago_id FK, UK
         varchar(15) tipo
-        decimal(14,2) importe
+        numeric_14_2 importe
         varchar(140) referencia
     }
     obligaciones {
@@ -586,7 +586,7 @@ erDiagram
         bigint servicio_costo_id FK, UK
         bigint servicio_id FK
         bigint proveedor_id FK
-        decimal(14,2) importe FK
+        numeric_14_2 importe FK
         timestamptz nacida_en
         date vence_el
         timestamptz anulada_en
@@ -622,7 +622,7 @@ erDiagram
         bigint cobro_origen_id FK
         timestamptz ocurrido_en
         varchar(180) concepto
-        decimal(14,2) importe_total
+        numeric_14_2 importe_total
         varchar(140) referencia
         bigint creado_por FK
         timestamptz anulado_en
@@ -633,13 +633,13 @@ erDiagram
         bigint id PK
         bigint operacion_id FK, UK
         bigint medio_pago_id FK, UK
-        decimal(14,2) importe
+        numeric_14_2 importe
         varchar(140) referencia
     }
     pagos_obligaciones {
         bigint egreso_id PK, FK
         bigint obligacion_id PK, FK
-        decimal(14,2) importe_aplicado
+        numeric_14_2 importe_aplicado
     }
     operaciones_egreso ||--o{ egresos : "operacion_id"
     egresos ||--o{ pagos_obligaciones : "egreso_id"

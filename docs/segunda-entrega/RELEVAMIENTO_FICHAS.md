@@ -103,7 +103,7 @@ Los componentes retirados o dados de baja pueden figurar en una ficha aunque no 
 | ID | Pregunta | Efecto en el diseño / criterio de cierre |
 | --- | --- | --- |
 | RF-01 | ¿Cuál es la leyenda exacta de MSDB y cómo se aplica a cilindros y válvulas? | Confirmar catálogo de intervenciones y correspondencia con impresión, sin inferirlo de letras manuscritas. |
-| RF-02 | ¿Cómo se relaciona cada válvula retirada o montada con el cilindro intervenido? | Validar asociación explícita y ejemplos de recambio; evitar emparejamientos automáticos por renglón. |
+| RF-02 | ¿Cómo se relaciona cada válvula retirada o montada con el cilindro intervenido y qué debe imprimirse al reemplazar cuatro válvulas? | Validar asociación y ocho acciones (cuatro retiros y cuatro instalaciones) frente a cuatro casillas. Conservar todas las acciones en ítems/movimientos, sin emparejamientos automáticos ni omisiones documentales no autorizadas. Resolver el formato antes de emitir ese caso. |
 | RF-03 | ¿Qué operación documental y anotación corresponden a PH y revisión quinquenal? ¿Qué representa F03? | Acordar una matriz servicio–operación–resultados–plantilla con el propietario y responsable técnico. |
 | RF-04 | ¿Cuáles son la precisión y el significado de habilitación, vencimiento, fabricación y revisión? | Determinar qué campos usan fecha completa y cuáles mes/año; confirmar cálculo de vencimientos. |
 | RF-05 | ¿Qué datos debe contener el resultado/certificado de PH y quién los emite? | Contrastar con certificado o modelo en blanco del CRPC antes de implementar esos campos. |

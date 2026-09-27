@@ -61,6 +61,10 @@ Las tablas responden a identidades, relaciones y hechos con ciclos distintos; no
 
 La cabecera de preparación conserva PEC, TdM, oblea anterior/nueva y fechas. Cada intervención conserva sección, renglón, componente, código, serie, condición, marca M/S/D/B, fechas mes/año, CRPC y resultados PH. `posicion_final` indica la instalación prevista cuando corresponda; **no se deriva automáticamente de la marca documental**. Los accesorios conservan código/serie en los renglones y en la configuración correspondiente.
 
+`servicio_intervenciones` y `ficha_componentes` representan renglones documentales, no el registro exhaustivo de acciones técnicas. Los `servicio_items` identifican todas las acciones concretas y, al confirmar, `movimientos_componentes` conserva cada retiro e instalación. Por ejemplo, reemplazar las válvulas de cuatro cilindros admite ocho ítems y ocho movimientos —cuatro retiros y cuatro instalaciones—, aunque la configuración final tenga sólo cuatro válvulas. Un ítem de retiro puede tener importe cero: registrar la acción no crea un cargo ficticio.
+
+La correspondencia de esas ocho acciones con las cuatro casillas de válvulas del formulario debe validarse con CILGAS en RF-02/PV-03 antes de implementar la emisión. No se presume qué acciones pueden omitirse del papel ni se inventan anexos o páginas adicionales. Si los renglones obligatorios según la matriz validada no caben en la plantilla, el futuro backend deberá impedir confirmar o emitir una ficha incompleta hasta resolver el formato con el responsable técnico. El diseño conserva los hechos técnicos, pero no declara validada la impresión de ese caso.
+
 La confirmación deberá ejecutarse en una transacción, con bloqueo del servicio, vehículo y componentes afectados:
 
 1. Revalidar permisos, estado, importes, antecedentes y completitud técnica.

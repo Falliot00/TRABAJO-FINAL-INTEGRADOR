@@ -143,6 +143,20 @@ Nunca apuntar las variables de pruebas a una base de operación: la integración
 
 GitHub Actions ejecuta instalación con lockfile, generación del cliente Prisma, formato, lint, tipos, pruebas, build y E2E Chromium sobre una base efímera. También construye las imágenes, aplica la migración del perfil `app` y comprueba la API detrás de Nginx en el runner. Las credenciales de CI son ficticias. El workflow tiene permisos de lectura y no despliega ni utiliza secretos productivos. React Doctor se ejecuta al cerrar cambios React con el script fijado por el repositorio.
 
+### Reglas de estilos del frontend
+
+`@shadcn/lint` está instalado como dependencia de desarrollo en la raíz del workspace y se ejecuta con `pnpm lint`, también en CI. Las reglas se configuran en el bloque `frontend/src/**/*.{ts,tsx}` de [`eslint.config.mjs`](../eslint.config.mjs); el backend y los contratos conservan sus comprobaciones existentes.
+
+El paquete no publica un preset `recommended`. Se adopta la selección compatible con el CSS propio del proyecto a partir de su [guía de adopción](https://github.com/shadcn-ui/lint/blob/main/docs/adoption.md#add-more-rules), con severidad `error`:
+
+- `shadcn/no-inline-styles`: impide propiedades de estilo inline y elementos `<style>` en JSX. Permite propiedades CSS personalizadas para valores dinámicos, pero rechaza colores literales en ellas.
+- `shadcn/no-raw-colors`: impide colores literales en atributos SVG y clases de la paleta Tailwind. En los iconos, usar `currentColor`, `none` o una variable CSS del tema.
+- `shadcn/no-arbitrary-values`, con `allow: ["layout"]`: impide valores arbitrarios de apariencia en clases Tailwind y permite los de layout, según la configuración de adopción del paquete.
+
+El frontend no usa Tailwind ni tiene `components.json`. Estas reglas no analizan las declaraciones de los archivos `.css` ni comprueban que sus variables estén definidas. La regla de valores arbitrarios sólo interviene si se introduce esa sintaxis en las clases; sin un tema Tailwind, la de colores no verifica tokens de color no declarados.
+
+`no-unknown-classes` queda sin activar porque las clases propias no se descubren mediante un tema Tailwind. `no-restyle` y `require-static-classes` requieren identificar componentes de un sistema de diseño y sus contratos de clases; los componentes actuales no exponen esa API. Si se incorpora Tailwind o un sistema de componentes, configurar su descubrimiento y revisar esas reglas con la [documentación oficial](https://github.com/shadcn-ui/lint#settings).
+
 ## Preparación para HTTPS y producción
 
 La infraestructura de este incremento permite verificación local; no acredita un despliegue, un respaldo ni una restauración productiva. El VPS, su convivencia con otros servicios y el dominio siguen requiriendo preparación antes de publicar.

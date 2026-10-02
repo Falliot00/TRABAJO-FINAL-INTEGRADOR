@@ -1,0 +1,17 @@
+.agents/
+skills-lock.json
+pnpm-lock.yaml
+node_modules/
+dist/
+coverage/
+backend/src/generated/
+playwright-report/
+test-results/
+# La documentación aprobada conserva su formato; las nuevas guías sí se formatean.
+CONTEXT.md
+README.md
+AGENTS.md
+database/
+docs/adr/
+docs/agents/
+docs/segunda-entrega/

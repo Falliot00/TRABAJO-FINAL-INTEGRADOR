@@ -1,0 +1,46 @@
+{
+  "name": "@cilgas/backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test prisma.config.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:bootstrap": "tsx src/bootstrap-admin.ts"
+  },
+  "dependencies": {
+    "@cilgas/contracts": "workspace:*",
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/platform-express": "12.1.2",
+    "@nestjs/swagger": "12.0.2",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "argon2": "0.45.1",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.15.1",
+    "cookie-parser": "1.4.7",
+    "helmet": "8.3.0",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "1.4.10",
+    "@types/express": "5.0.6",
+    "@types/jest": "30.0.0",
+    "@types/pg": "8.15.6",
+    "@types/supertest": "6.0.3",
+    "jest": "30.5.2",
+    "prisma": "7.10.0",
+    "supertest": "7.3.0",
+    "ts-jest": "29.4.14",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

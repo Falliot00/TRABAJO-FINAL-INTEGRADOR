@@ -1,0 +1,78 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  id          BigInt @id @default(autoincrement())
+  code        String @unique @map("codigo") @db.VarChar(30)
+  name        String @map("nombre") @db.VarChar(80)
+  description String @map("descripcion")
+  permissions RolePermission[]
+  users       User[]
+  @@map("roles")
+}
+
+model Permission {
+  id          BigInt @id @default(autoincrement())
+  code        String @unique @map("codigo") @db.VarChar(80)
+  description String @map("descripcion")
+  roles       RolePermission[]
+  @@map("permisos")
+}
+
+model RolePermission {
+  roleId       BigInt @map("rol_id")
+  permissionId BigInt @map("permiso_id")
+  role         Role @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  @@id([roleId, permissionId])
+  @@map("roles_permisos")
+}
+
+model User {
+  id           BigInt @id @default(autoincrement())
+  roleId       BigInt @map("rol_id")
+  name         String @map("nombre") @db.VarChar(120)
+  email        String @db.VarChar(254)
+  passwordHash String @map("password_hash")
+  active       Boolean @default(true) @map("activo")
+  createdAt    DateTime @default(now()) @map("creado_en") @db.Timestamptz
+  role         Role @relation(fields: [roleId], references: [id])
+  sessions     Session[]
+  events       Audit[]
+  @@map("usuarios")
+}
+
+model Session {
+  id        BigInt @id @default(autoincrement())
+  userId    BigInt @map("usuario_id")
+  tokenHash String @unique @map("token_hash") @db.Char(64)
+  createdAt DateTime @default(now()) @map("creado_en") @db.Timestamptz
+  expiresAt DateTime @map("vence_en") @db.Timestamptz
+  revokedAt DateTime? @map("revocado_en") @db.Timestamptz
+  user      User @relation(fields: [userId], references: [id])
+  @@index([userId, expiresAt], map: "ix_sesiones_usuario_vencimiento")
+  @@map("sesiones")
+}
+
+model Audit {
+  id            BigInt @id @default(autoincrement())
+  actorId       BigInt? @map("usuario_id")
+  occurredAt    DateTime @default(now()) @map("ocurrido_en") @db.Timestamptz
+  action        String @map("accion") @db.VarChar(80)
+  entity        String @map("entidad") @db.VarChar(80)
+  entityId      String? @map("entidad_clave") @db.VarChar(100)
+  result        String @map("resultado") @db.VarChar(15)
+  detail        String? @map("detalle")
+  correlationId String? @map("correlacion_id") @db.Uuid
+  actor         User? @relation(fields: [actorId], references: [id])
+  @@index([occurredAt], map: "ix_auditoria_fecha")
+  @@index([entity, entityId, occurredAt], map: "ix_auditoria_entidad")
+  @@map("auditoria")
+}

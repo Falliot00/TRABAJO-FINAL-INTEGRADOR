@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+backend/src/generated/
+.env
+.env.*
+!.env.example
+*.local
+*.log
+*.tsbuildinfo
+playwright-report/
+test-results/
+.cache/
+.pnpm-store/

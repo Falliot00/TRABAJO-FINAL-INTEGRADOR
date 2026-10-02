@@ -1,0 +1,37 @@
+{
+  "name": "cilgas",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=24.18.0 <25",
+    "pnpm": "11.17.0"
+  },
+  "scripts": {
+    "dev": "dotenv -e .env -- pnpm --parallel --filter @cilgas/backend --filter @cilgas/frontend dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck && tsc -p e2e/tsconfig.json",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "dotenv -e .env -- pnpm -r test",
+    "test:e2e": "dotenv -e .env -- playwright test",
+    "db:generate": "pnpm --filter @cilgas/backend db:generate",
+    "db:migrate": "dotenv -e .env -- pnpm --filter @cilgas/backend db:migrate",
+    "db:bootstrap": "dotenv -e .env -- pnpm --filter @cilgas/backend db:bootstrap",
+    "react-doctor": "react-doctor frontend --verbose"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.13.6",
+    "dotenv-cli": "11.0.0",
+    "eslint": "10.11.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "prettier": "3.9.9",
+    "react-doctor": "0.9.14",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0"
+  }
+}

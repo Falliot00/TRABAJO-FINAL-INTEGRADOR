@@ -1,0 +1,16 @@
+packages:
+  - backend
+  - frontend
+  - packages/*
+
+saveExact: true
+engineStrict: true
+strictPeerDependencies: true
+allowBuilds:
+  "@prisma/engines": true
+  prisma: true
+  argon2: true
+  esbuild: true
+  "@parcel/watcher": true
+  "@scarf/scarf": false
+  unrs-resolver: true

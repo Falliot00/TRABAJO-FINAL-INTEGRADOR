@@ -1,0 +1,114 @@
+name: cilgas
+
+services:
+  postgres:
+    image: postgres:16.14-bookworm@sha256:64154d0babcb1741988719e703419af0382b19953706149f9872fbd0f438efa8
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Configurar POSTGRES_USER en .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Configurar POSTGRES_DB en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configurar POSTGRES_PASSWORD en .env}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - internal
+
+  postgres-test:
+    profiles: ["test"]
+    image: postgres:16.14-bookworm@sha256:64154d0babcb1741988719e703419af0382b19953706149f9872fbd0f438efa8
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Configurar POSTGRES_USER en .env}
+      POSTGRES_DB: cilgas_test
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configurar POSTGRES_PASSWORD en .env}
+    ports:
+      - "127.0.0.1:55433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d cilgas_test']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - internal
+
+  migrate:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+      target: backend-tools
+    image: cilgas-backend-tools:local
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?Configurar DATABASE_URL_DOCKER en .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  backend:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+      target: backend
+    image: cilgas-backend:local
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:?Configurar DATABASE_URL_DOCKER en .env}
+      NODE_ENV: development
+      APP_ORIGIN: http://localhost:8080
+      PORT: "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    init: true
+    restart: unless-stopped
+    networks:
+      - internal
+
+  web:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+      target: web
+    image: cilgas-web:local
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:

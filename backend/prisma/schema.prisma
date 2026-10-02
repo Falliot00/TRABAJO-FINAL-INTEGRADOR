@@ -118,9 +118,63 @@ model ComponentModel {
   model            String? @map("modelo") @db.VarChar(100)
   capacityLiters   Decimal? @map("capacidad_litros") @db.Decimal(7, 2)
   active           Boolean @default(true) @map("activo")
+  components       Component[]
   @@unique([type, homologationCode])
   @@unique([id, type])
   @@map("modelos_componentes")
+}
+
+model Component {
+  id               BigInt @id @default(autoincrement())
+  modelId          BigInt @map("modelo_id")
+  type             String @map("tipo") @db.VarChar(15)
+  serialNumber     String @map("numero_serie") @db.VarChar(80)
+  manufactureMonth DateTime? @map("fabricacion_mes") @db.Date
+  notes            String? @map("observaciones")
+  model            ComponentModel @relation(fields: [modelId, type], references: [id, type], onUpdate: Restrict, onDelete: Restrict)
+  @@unique([modelId, serialNumber])
+  @@unique([id, type])
+  @@map("componentes")
+}
+
+model Supplier {
+  id       BigInt @id @default(autoincrement())
+  name     String @map("nombre_razon_social") @db.VarChar(180)
+  cuit     String? @unique @db.VarChar(20)
+  phone    String? @map("telefono") @db.VarChar(40)
+  email    String? @db.VarChar(254)
+  notes    String? @map("observaciones")
+  active   Boolean @default(true) @map("activo")
+  items    CatalogItem[]
+  @@map("proveedores")
+}
+
+model CatalogOffer {
+  id             BigInt @id @default(autoincrement())
+  code           String @unique @map("codigo") @db.VarChar(40)
+  name           String @map("nombre") @db.VarChar(140)
+  description    String @map("descripcion")
+  type           String @map("tipo") @db.VarChar(25)
+  suggestedPrice Decimal @map("precio_sugerido") @db.Decimal(14, 2)
+  active         Boolean @default(true) @map("activo")
+  items          CatalogItem[]
+  @@map("catalogo_servicios")
+}
+
+model CatalogItem {
+  id           BigInt @id @default(autoincrement())
+  offerId      BigInt @map("catalogo_servicio_id")
+  order        Int @map("orden") @db.SmallInt
+  description  String @map("descripcion") @db.VarChar(180)
+  type         String @map("tipo") @db.VarChar(20)
+  quantity     Decimal @map("cantidad") @db.Decimal(10, 2)
+  unitPrice    Decimal @map("precio_unitario") @db.Decimal(14, 2)
+  supplierId   BigInt? @map("proveedor_id")
+  unitCost     Decimal @default(0) @map("costo_unitario") @db.Decimal(14, 2)
+  offer        CatalogOffer @relation(fields: [offerId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+  supplier     Supplier? @relation(fields: [supplierId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+  @@unique([offerId, order])
+  @@map("catalogo_items")
 }
 
 model Person {

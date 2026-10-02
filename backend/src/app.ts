@@ -27,6 +27,15 @@ import { PeopleController } from "./modules/people/people.controller";
 import { VehiclesService } from "./modules/people/vehicles.service";
 import { VehiclesController } from "./modules/people/vehicles.controller";
 import {
+  ComponentsController,
+  VehicleConfigurationsController,
+} from "./modules/components/components.controller";
+import { ComponentsService } from "./modules/components/components.service";
+import { SuppliersController } from "./modules/suppliers/suppliers.controller";
+import { SuppliersService } from "./modules/suppliers/suppliers.service";
+import { CatalogController } from "./modules/catalog/catalog.controller";
+import { CatalogService } from "./modules/catalog/catalog.service";
+import {
   ComponentModelsController,
   RegulatoryActorsController,
   WorkshopController,
@@ -74,6 +83,10 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       ComponentModelsController,
       PeopleController,
       VehiclesController,
+      ComponentsController,
+      VehicleConfigurationsController,
+      SuppliersController,
+      CatalogController,
     ],
     providers: [
       { provide: IdentityService, useValue: identity },
@@ -86,6 +99,12 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       },
       { provide: PeopleService, useValue: new PeopleService(db, audit) },
       { provide: VehiclesService, useValue: new VehiclesService(db, audit) },
+      {
+        provide: ComponentsService,
+        useValue: new ComponentsService(db, audit),
+      },
+      { provide: SuppliersService, useValue: new SuppliersService(db, audit) },
+      { provide: CatalogService, useValue: new CatalogService(db, audit) },
       {
         provide: "DatabaseLifecycle",
         useValue: { onModuleDestroy: () => db.$disconnect() },

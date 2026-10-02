@@ -15,7 +15,7 @@ Trabajo Final Integrador de la Tecnicatura Universitaria en Programación de la 
 
 El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan con acceso de escritura.
 
-## Desarrollo — acceso, maestros, catálogo y borradores de servicios
+## Desarrollo — servicios y confirmación transaccional
 
 La base de la aplicación incorpora el monorepo con React/Vite y NestJS, contratos compartidos y migraciones de PostgreSQL para identidad y auditoría. Permite iniciar y cerrar sesión, administrar cuentas y roles, desactivar usuarios, revocar sesiones y consultar la auditoría según permisos. La interfaz incluye temas oscuro y claro y navegación adaptable.
 
@@ -27,7 +27,9 @@ El siguiente tramo incorpora la identidad individual de componentes (base de M04
 
 El primer tramo de M06 permite crear, buscar, recuperar y editar borradores de servicios compartidos entre usuarios autorizados. Copia la propuesta del catálogo y conserva sus propios conceptos, cantidades, precios y costos; permite ajustar personas por rol, componentes y preparación técnica/documental incompleta. Cada cambio queda auditado con su autor real y una versión evita sobrescribir ediciones simultáneas. El operador continúa borradores ajenos sin acceder a costos ni proveedores. Guardar no modifica configuraciones ni emite documentos; tampoco genera obligaciones o movimientos financieros.
 
-La confirmación de servicios, las fichas/PDF, finanzas, convenios y alertas se implementarán en los siguientes incrementos de [MODULOS.md](docs/segunda-entrega/MODULOS.md). Los archivos de la segunda entrega conservan el diseño aprobado y sus criterios de aceptación; el SQL de `/database` sigue siendo referencia de diseño. Las migraciones ejecutables de cada incremento se encuentran en `/backend/prisma/migrations`.
+El segundo tramo de M06 incorpora el motor de confirmación transaccional: configuración e historia de componentes, resultados técnicos, obligaciones por costos de proveedores, snapshot inmutable y auditoría. La ficha conserva su PDF pendiente de generación. Los requisitos regulatorios aún no validados se muestran como bloqueos: el motor no habilita confirmaciones incompletas ni interpreta por su cuenta códigos, certificados, firmas o vencimientos. RF-07 y RF-08 siguen pendientes para todas las fichas; los demás bloqueos se determinan según el caso. La guía de desarrollo distingue las pruebas con evidencia sintética de la habilitación operativa pendiente.
+
+La generación de PDF, cobros, pagos, caja, convenios y alertas quedan para los siguientes incrementos de [MODULOS.md](docs/segunda-entrega/MODULOS.md). Los archivos de la segunda entrega conservan el diseño aprobado y sus criterios de aceptación; el SQL de `/database` sigue siendo referencia de diseño. Las migraciones ejecutables de cada incremento se encuentran en `/backend/prisma/migrations`.
 
 ## Segunda entrega — Diseño y módulos
 

@@ -1,6 +1,6 @@
 # Desarrollo de CILGAS
 
-La aplicación implementa identidad, acceso, permisos, auditoría, M02 (configuración y referencias), M03 (personas y vehículos), la base de identidad de componentes de M04, el catálogo de M05, los proveedores comerciales necesarios de M10 y los borradores de servicios de M06. La confirmación de servicios, su historia técnica, las fichas y las finanzas se implementarán en incrementos posteriores según el [diseño aprobado](segunda-entrega/README.md). El DDL de `database/` sigue siendo referencia del modelo completo; no se ejecuta sobre la aplicación para adelantar módulos.
+La aplicación implementa identidad, acceso, permisos, auditoría, M02 (configuración y referencias), M03 (personas y vehículos), componentes de M04, el catálogo de M05, proveedores de M10 y borradores de M06. El motor de confirmación integra historia técnica, resultados, obligaciones y ficha inmutable, con PDF pendiente. La confirmación operativa permanece bloqueada por los requisitos regulatorios pendientes que se detallan abajo. Cobros, pagos, caja y generación de PDF siguen fuera de este incremento. El DDL de `database/` conserva el [diseño aprobado](segunda-entrega/README.md); la aplicación utiliza exclusivamente sus migraciones versionadas.
 
 ## Herramientas y configuración
 
@@ -35,7 +35,7 @@ docker compose up -d --wait postgres
 pnpm db:migrate
 ```
 
-`db:migrate` aplica las migraciones versionadas de `backend/prisma/migrations/` mediante `prisma migrate deploy`. Puede repetirse; no reinicia ni vacía la base. Las migraciones crean identidad, permisos, sesiones y auditoría, junto con los maestros y relaciones de M02/M03, componentes individuales, proveedores, catálogo y borradores con su preparación técnica. Para actualizar una instalación existente, generar el cliente Prisma y aplicar las migraciones antes de iniciar el nuevo backend.
+`db:migrate` aplica las migraciones versionadas de `backend/prisma/migrations/` mediante `prisma migrate deploy`. Puede repetirse; no reinicia ni vacía la base. Las migraciones crean identidad, permisos, sesiones y auditoría, junto con los maestros y relaciones de M02/M03, componentes individuales, proveedores, catálogo, borradores y los hechos de confirmación de M06. Para actualizar una instalación existente, generar el cliente Prisma y aplicar las migraciones antes de iniciar el nuevo backend. Aplicar la migración de confirmación no confirma borradores ni levanta los bloqueos regulatorios.
 
 Definir nombre, email válido y una contraseña de entre 12 y 128 caracteres en las variables `BOOTSTRAP_ADMIN_*` de `.env`. No hay contraseña de acceso predeterminada. Luego ejecutar:
 
@@ -100,7 +100,7 @@ La tabla de configuración conserva la identidad comercial del taller y una refe
 
 ### Recorridos de componentes, proveedores y catálogo
 
-Desde **Componentes**, registrar una identidad eligiendo un modelo técnico existente, su número de serie y, si se conoce, el mes y año de fabricación. Buscar por serie o referencia, recuperar coincidencias y editar los datos descriptivos. La serie conserva sus ceros iniciales; modelo y serie identifican un único componente. Registrar el componente no lo instala en ningún vehículo. La consulta de historia indica expresamente que estará disponible con la confirmación de servicios; no presenta una configuración vacía como prueba de que un vehículo carece de equipo.
+Desde **Componentes**, registrar una identidad eligiendo un modelo técnico existente, su número de serie y, si se conoce, el mes y año de fabricación. Buscar por serie o referencia, recuperar coincidencias y editar los datos descriptivos. La serie conserva sus ceros iniciales; modelo y serie identifican un único componente. Registrar el componente no lo instala en ningún vehículo. La consulta de historia distingue movimientos, intervenciones sin recambio y resultados de PH originados en confirmaciones, con referencia al servicio. Una historia vacía no demuestra que el vehículo carezca de equipo.
 
 Desde **Proveedores**, el administrador registra nombre, CUIT opcional y contacto, busca coincidencias y edita o desactiva el proveedor. El proveedor comercial permanece separado de PEC, CRPC y TdM. Desde **Catálogo**, puede crear y editar ofertas, precios de venta y composición, con cantidades, precios unitarios, costos y proveedores sugeridos. Las propuestas de revisión anual y quinquenal permiten preparar la composición habitual; la quinquenal incluye anual, oblea, PH y recambio de válvulas ajustable. No se precargan precios comerciales del taller.
 
@@ -118,7 +118,32 @@ Completar o dejar pendiente la preparación documental: actores regulatorios, ob
 
 Guardar, buscar por vehículo o persona y recuperar el borrador. Ingresar con otra cuenta autorizada y continuar el mismo registro: se conserva el creador y cada guardado registra su actor en auditoría. Si dos personas parten de la misma versión, el segundo guardado informa el conflicto; debe recuperarse la versión actual antes de continuar, sin sobrescribirla silenciosamente.
 
-Este tramo no ofrece confirmación, cancelación, cobros ni pagos. Guardar un borrador no instala ni retira componentes, no modifica configuraciones, no emite obleas o documentos y no genera obligaciones o movimientos de dinero. La consulta de historia técnica sigue indicando que depende de la confirmación. Las migraciones de este tramo sólo agregan el almacenamiento preparatorio y su control de versión; deben aplicarse antes de iniciar el backend actualizado.
+Guardar un borrador no instala ni retira componentes, no modifica configuraciones, no emite obleas o documentos y no genera obligaciones o movimientos de dinero. La revisión y confirmación son acciones separadas, descritas a continuación. Cancelación, cobros y pagos quedan fuera de este incremento.
+
+### Confirmación de servicios y límites regulatorios
+
+Desde **Servicios**, revisar la confirmación de un borrador ya guardado. La revisión recupera su versión y la configuración actual del vehículo, y muestra los requisitos pendientes devueltos por el servidor. Cerrar la revisión permite continuar editando el borrador. El chequeo no confirma el trabajo ni reserva componentes; al confirmar, el servidor vuelve a validar los datos dentro de la transacción.
+
+La confirmación fija los valores históricos del trabajo y coordina configuración, movimientos de componentes, resultados técnicos, obligaciones por costos externos, ficha y auditoría. Un costo absorbido no genera obligación. El control de versión y de configuración detecta preparaciones desactualizadas; una clave de idempotencia conserva el resultado de una solicitud repetida. La ficha queda en estado PDF **PENDIENTE**. Guardar o revisar un borrador sigue sin producir esos efectos.
+
+Los servicios confirmados y sus fichas se consultan sin edición. La ficha conserva datos autocontenidos de personas, vehículo, taller, actores, componentes y resultados; las modificaciones posteriores de maestros no reemplazan el snapshot. Los permisos técnicos no habilitan la consulta de costos u obligaciones. La generación del PDF y las rectificaciones no se implementan en este tramo.
+
+El [relevamiento aprobado](segunda-entrega/RELEVAMIENTO_FICHAS.md#pendientes-concretos-de-validación) sigue dejando pendientes las reglas siguientes. Sus códigos pertenecen a ese documento, no a las reglas financieras que reutilizan el prefijo RF.
+
+| Pendiente     | Casos afectados                        | Información necesaria                                                                                                                     |
+| ------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| RF-07 / RF-08 | Todas las fichas                       | Campos y firmas exigibles por operación, identidades regulatorias vigentes y responsables con sus matrículas.                             |
+| RF-01         | Intervenciones con marcas documentales | Significado y aplicación de M/S/D/B.                                                                                                      |
+| RF-02         | Recambios de válvulas                  | Asociación con cilindros y representación documental de retiros e instalaciones, especialmente cuatro recambios frente a cuatro casillas. |
+| RF-03         | PH y revisión quinquenal               | Matriz de operación, resultados y plantilla; interpretación de F03.                                                                       |
+| RF-04         | Fechas de habilitación y revisión      | Significado y precisión de las fechas y criterio de vencimiento, sin plazos inferidos.                                                    |
+| RF-05         | Ensayos PH                             | Contenido requerido del certificado y emisor competente.                                                                                  |
+
+No se recibió una validación posterior que cierre RF-07/RF-08: **actualmente ninguna ficha tiene habilitada su confirmación operativa**, incluida una oferta de tipo Otros. Los casos incompletos se conservan como borradores. El formato SICGNC y el circuito de rectificación no agregan bloqueos indiscriminados a este tramo; tampoco se presume el destino posterior de los componentes retirados.
+
+Las pruebas del motor usan evidencia regulatoria sintética inyectada al construir la aplicación de prueba, con PostgreSQL aislado y solicitudes HTTP reales. Eso permite verificar la transacción sin presentar los datos sintéticos como reglas aprobadas de CILGAS. La aplicación normal utiliza el diagnóstico de pendientes: no incorpora un parámetro HTTP ni una variable de entorno para saltearlo. Habilitar casos reales requiere primero la validación correspondiente y luego implementar sus reglas y pruebas específicas.
+
+Existen además dos límites de preparación técnica que no se presentan como reglas regulatorias: todavía no hay un recorrido de relevamiento inicial del equipo, y los accesorios documentales no identifican por sí solos la configuración física. Sin configuración conocida, el motor sólo admite preparar una primera configuración mediante una conversión con instalaciones explícitas; los demás casos se bloquean. Las instalaciones o retiros de accesorios se bloquean hasta contar con su representación explícita. Ninguno de esos límites se resuelve suponiendo que un historial vacío equivale a un vehículo sin equipo.
 
 ### Ejecutar las comprobaciones
 

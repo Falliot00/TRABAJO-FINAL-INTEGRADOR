@@ -23,7 +23,7 @@ async function login(page: Page, email: string, password: string) {
   ).toBeVisible();
 }
 
-test("accede a los borradores compartidos del taller sin acciones de confirmación o cobro", async ({
+test("accede a los borradores compartidos del taller sin cobros ni pagos", async ({
   page,
 }) => {
   await login(page, administrator.email, administrator.password);
@@ -42,6 +42,103 @@ test("accede a los borradores compartidos del taller sin acciones de confirmaci�
       name: /Confirmar servicio|Registrar cobro|Registrar pago/,
     }),
   ).toHaveCount(0);
+});
+
+test("explica los bloqueos regulatorios y conserva el borrador editable sin confirmar", async ({
+  page,
+}, testInfo) => {
+  await login(page, administrator.email, administrator.password);
+  const suffix = randomUUID().slice(0, 8).toUpperCase();
+  const plate =
+    Array.from({ length: 3 }, () =>
+      String.fromCharCode(randomInt(65, 91)),
+    ).join("") + String(randomInt(100, 1000));
+  const vehicle = await createFixture(page, "vehicles", {
+    plate,
+    brand: "Marca sintética",
+    model: "Modelo sintético",
+    year: 2020,
+  });
+  const offer = await createFixture(page, "catalog-services", {
+    code: `CONF-${suffix}`,
+    name: `Confirmación ${suffix}`,
+    description: "Revisión pendiente de validación regulatoria",
+    type: "REVISION_ANUAL",
+    suggestedPrice: "100.00",
+    items: [
+      {
+        order: 1,
+        description: "Inspección",
+        type: "INSPECCION",
+        quantity: "1",
+        unitPrice: "100.00",
+        unitCost: "0",
+      },
+    ],
+  });
+  const draft: ServiceDraft = await createFixture(page, "service-drafts", {
+    vehicleId: vehicle.id,
+    catalogOfferId: offer.id,
+    serviceDate: "2026-10-02",
+  });
+  await page
+    .getByRole("navigation", { name: "Navegación principal" })
+    .getByRole("button", { name: "Servicios", exact: true })
+    .click();
+  await page
+    .getByLabel("Buscar borradores", { exact: true })
+    .fill(vehicle.plate);
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: `Revisar confirmación ${draft.id}`,
+      exact: true,
+    })
+    .click();
+  const review = page.getByRole("region", {
+    name: `Revisar confirmación del servicio ${draft.id}`,
+    exact: true,
+  });
+  await expect(review).toContainText("RF-07");
+  await expect(review).toContainText("RF-08");
+  await expect(
+    review.getByRole("button", { name: "Confirmar servicio", exact: true }),
+  ).toHaveCount(0);
+  const csrf = await (await page.request.get("/api/auth/csrf")).json();
+  const rejected = await page.request.post(
+    `/api/service-drafts/${draft.id}/confirm`,
+    {
+      headers: { Origin: appOrigin, "X-CSRF-Token": csrf.csrfToken },
+      data: {
+        version: draft.version,
+        idempotencyKey: randomUUID(),
+        expectedConfigurationId: null,
+      },
+    },
+  );
+  expect(rejected.status()).toBe(409);
+  const preserved = await (
+    await page.request.get(`/api/service-drafts/${draft.id}`)
+  ).json();
+  expect(preserved).toEqual(draft);
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.screenshot({
+    path: testInfo.outputPath("confirmacion-bloqueada-tablet.png"),
+    fullPage: true,
+  });
+  await review
+    .getByRole("button", { name: "Cerrar revisión", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: `Editar borrador ${draft.id}`, exact: true })
+    .click();
+  await page
+    .getByLabel("Descripción del servicio", { exact: true })
+    .fill(`Pendiente ${suffix}`);
+  await page
+    .getByRole("button", { name: "Guardar borrador", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Borrador guardado");
 });
 
 test("recupera la propuesta ajustada desde otra cuenta y conserva la autoría sin exponer costos", async ({

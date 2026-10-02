@@ -78,7 +78,10 @@ test("identifica un cilindro por su modelo y serie y recupera su fabricación si
     .click();
   await expect(
     page.getByRole("region", { name: "Historia técnica", exact: true }),
-  ).toContainText("confirmación");
+  ).toContainText("Sin movimientos registrados.");
+  await expect(
+    page.getByRole("region", { name: "Historia técnica", exact: true }),
+  ).toContainText("Sin intervenciones registradas.");
   await expect(
     page.getByRole("button", { name: "Instalar", exact: true }),
   ).toHaveCount(0);

@@ -5,7 +5,15 @@ import { Icon } from "../../shared/ui";
 interface HomeProps {
   user: SessionUser;
   onNavigate: (
-    page: "users" | "audit" | "people" | "vehicles" | "settings",
+    page:
+      | "users"
+      | "audit"
+      | "people"
+      | "vehicles"
+      | "settings"
+      | "components"
+      | "catalog"
+      | "suppliers",
   ) => void;
 }
 
@@ -13,6 +21,10 @@ export function Home({ user, onNavigate }: HomeProps) {
   const canManage = user.permissions.includes("usuarios.administrar");
   const canAudit = user.permissions.includes("auditoria.consultar");
   const canAttend = user.permissions.includes("personas.gestionar");
+  const canReadCatalog = user.permissions.includes("catalogo.consultar");
+  const canManageCatalog = user.permissions.includes("catalogo.administrar");
+  const hasActions =
+    canManage || canAudit || canAttend || canReadCatalog || canManageCatalog;
   return (
     <>
       <header className="page-heading">
@@ -65,12 +77,10 @@ export function Home({ user, onNavigate }: HomeProps) {
           aria-labelledby="actions-title"
         >
           <h2 id="actions-title">
-            {canManage || canAudit || canAttend
-              ? "Accesos del taller"
-              : "Trabajá con tu cuenta"}
+            {hasActions ? "Accesos del taller" : "Trabajá con tu cuenta"}
           </h2>
           <p className="muted">
-            {canManage || canAudit || canAttend
+            {hasActions
               ? "Buscá datos del taller y accedé a las acciones de tu rol."
               : "Cada persona del equipo utiliza su propio acceso para conservar la autoría de sus acciones."}
           </p>
@@ -99,7 +109,46 @@ export function Home({ user, onNavigate }: HomeProps) {
                   </span>
                   <Icon name="arrow" />
                 </button>
+                <button
+                  className="action-card"
+                  onClick={() => onNavigate("components")}
+                >
+                  <Icon name="workshop" />
+                  <span>
+                    <strong>Buscar componentes</strong>
+                    <small>
+                      Identidad de cilindros, válvulas y reguladores
+                    </small>
+                  </span>
+                  <Icon name="arrow" />
+                </button>
               </>
+            )}
+            {canReadCatalog && (
+              <button
+                className="action-card"
+                onClick={() => onNavigate("catalog")}
+              >
+                <Icon name="audit" />
+                <span>
+                  <strong>Consultar catálogo</strong>
+                  <small>Ofertas y composición habitual de servicios</small>
+                </span>
+                <Icon name="arrow" />
+              </button>
+            )}
+            {canManageCatalog && (
+              <button
+                className="action-card"
+                onClick={() => onNavigate("suppliers")}
+              >
+                <Icon name="users" />
+                <span>
+                  <strong>Administrar proveedores</strong>
+                  <small>Contactos comerciales del catálogo</small>
+                </span>
+                <Icon name="arrow" />
+              </button>
             )}
             {canManage && (
               <button
@@ -127,7 +176,7 @@ export function Home({ user, onNavigate }: HomeProps) {
                 <Icon name="arrow" />
               </button>
             )}
-            {!canManage && !canAudit && !canAttend && (
+            {!hasActions && (
               <div className="notice notice-info">
                 Al terminar de trabajar, cerrá tu sesión si compartís este
                 dispositivo.

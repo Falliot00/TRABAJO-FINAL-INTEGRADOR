@@ -5,6 +5,7 @@ import { vehiclesApi, type VehiclesQuery } from "../../shared/people-api";
 import { Loading, RetryNotice } from "../../shared/ui";
 import { VehicleEditor } from "./VehicleEditor";
 import { VehiclePeople } from "./VehiclePeople";
+import { TechnicalHistory } from "../components/TechnicalHistory";
 import "../people/people.css";
 
 interface VehiclesProps {
@@ -21,6 +22,7 @@ export function Vehicles({ onSessionLost, person }: VehiclesProps) {
   const [editing, setEditing] = useState<Vehicle | null>(null);
   const [creating, setCreating] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [configurationId, setConfigurationId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [retry, setRetry] = useState(0);
 
@@ -76,6 +78,7 @@ export function Vehicles({ onSessionLost, person }: VehiclesProps) {
           onClick={() => {
             setCreating(true);
             setSelectedId(null);
+            setConfigurationId(null);
             setNotice("");
           }}
         >
@@ -134,6 +137,15 @@ export function Vehicles({ onSessionLost, person }: VehiclesProps) {
             setNotice("");
             setQuery((current) => ({ ...current, cursor: undefined }));
           }}
+        />
+      )}
+      {configurationId && !editing && !creating && (
+        <TechnicalHistory
+          key={configurationId}
+          id={configurationId}
+          kind="vehicle"
+          onSessionLost={onSessionLost}
+          onClose={() => setConfigurationId(null)}
         />
       )}
       <form className="panel panel-padding records-search" onSubmit={search}>
@@ -214,6 +226,7 @@ export function Vehicles({ onSessionLost, person }: VehiclesProps) {
                           onClick={() => {
                             setEditing(vehicle);
                             setSelectedId(null);
+                            setConfigurationId(null);
                             setNotice("");
                           }}
                         >
@@ -225,10 +238,23 @@ export function Vehicles({ onSessionLost, person }: VehiclesProps) {
                           aria-label={`Personas e historia de ${vehicle.plate}`}
                           onClick={() => {
                             setSelectedId(vehicle.id);
+                            setConfigurationId(null);
                             setNotice("");
                           }}
                         >
                           Personas e historia
+                        </button>
+                        <button
+                          className="secondary table-action"
+                          disabled={creating || editing !== null}
+                          aria-label={`Ver configuraciones de ${vehicle.plate}`}
+                          onClick={() => {
+                            setConfigurationId(vehicle.id);
+                            setSelectedId(null);
+                            setNotice("");
+                          }}
+                        >
+                          Configuraciones
                         </button>
                       </div>
                     </td>

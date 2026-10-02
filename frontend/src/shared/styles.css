@@ -377,6 +377,7 @@ fieldset {
   position: sticky;
   top: 0;
   height: 100dvh;
+  overflow-y: auto;
 }
 .sidebar .brand {
   padding: 0 0.7rem;
@@ -914,6 +915,7 @@ td strong {
     height: auto;
     position: relative;
     padding: 1rem;
+    overflow: visible;
   }
   .sidebar .brand {
     margin-bottom: 1.1rem;

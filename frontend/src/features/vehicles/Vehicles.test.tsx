@@ -38,6 +38,55 @@ const car: VehicleDetail = {
 };
 afterEach(() => vi.unstubAllGlobals());
 
+test("consulta las configuraciones del vehículo y muestra el límite de confirmación sin ofrecer cambios de instalación", async () => {
+  const requests: string[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string, init?: RequestInit) => {
+      const url = new URL(input, "http://localhost");
+      const method = init?.method ?? "GET";
+      requests.push(`${method} ${url.pathname}`);
+      if (method === "GET" && url.pathname === "/api/vehicles")
+        return Response.json({ items: [car], nextCursor: null });
+      if (
+        method === "GET" &&
+        url.pathname === `/api/vehicles/${car.id}/configurations`
+      )
+        return Response.json({
+          vehicleId: car.id,
+          available: false,
+          message:
+            "Las configuraciones del equipo estarán disponibles con la confirmación de servicios.",
+        });
+      throw new Error(`Petición inesperada: ${method} ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Vehicles onSessionLost={vi.fn()} />);
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Ver configuraciones de AB123CD",
+    }),
+  );
+  const history = screen.getByRole("region", { name: "Historia técnica" });
+  expect(
+    await within(history).findByText(
+      "Las configuraciones del equipo estarán disponibles con la confirmación de servicios.",
+    ),
+  ).toBeInTheDocument();
+  expect(within(history).getAllByRole("button")).toHaveLength(1);
+  await user.click(
+    within(history).getByRole("button", { name: "Cerrar historia" }),
+  );
+  expect(
+    screen.queryByRole("region", { name: "Historia técnica" }),
+  ).not.toBeInTheDocument();
+  expect(requests).toEqual([
+    "GET /api/vehicles",
+    `GET /api/vehicles/${car.id}/configurations`,
+  ]);
+});
+
 test("recupera un vehículo duplicado todavía no vinculado a la persona y permite asociarlo", async () => {
   vi.stubGlobal(
     "fetch",

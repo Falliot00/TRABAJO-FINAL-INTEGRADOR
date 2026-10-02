@@ -9,6 +9,9 @@ import { Audit } from "../features/audit/Audit";
 import { Settings } from "../features/settings/Settings";
 import { People } from "../features/people/People";
 import { Vehicles } from "../features/vehicles/Vehicles";
+import { Components } from "../features/components/Components";
+import { Catalog } from "../features/catalog/Catalog";
+import { Suppliers } from "../features/suppliers/Suppliers";
 
 const navigation = [
   { id: "home", label: "Inicio", icon: "home", permission: null },
@@ -29,6 +32,24 @@ const navigation = [
     label: "Configuración",
     icon: "shield",
     permission: "personas.gestionar",
+  },
+  {
+    id: "components",
+    label: "Componentes",
+    icon: "workshop",
+    permission: "personas.gestionar",
+  },
+  {
+    id: "catalog",
+    label: "Catálogo",
+    icon: "audit",
+    permission: "catalogo.consultar",
+  },
+  {
+    id: "suppliers",
+    label: "Proveedores",
+    icon: "users",
+    permission: "catalogo.administrar",
   },
   {
     id: "users",
@@ -92,7 +113,18 @@ function PageContent({
       );
     if (page === "settings")
       return <Settings user={user} onSessionLost={onSessionLost} />;
+    if (page === "components")
+      return <Components onSessionLost={onSessionLost} />;
   }
+  if (page === "catalog" && user.permissions.includes("catalogo.consultar"))
+    return (
+      <Catalog
+        editable={user.permissions.includes("catalogo.administrar")}
+        onSessionLost={onSessionLost}
+      />
+    );
+  if (page === "suppliers" && user.permissions.includes("catalogo.administrar"))
+    return <Suppliers onSessionLost={onSessionLost} />;
   if (page === "users" && user.permissions.includes("usuarios.administrar"))
     return (
       <Users

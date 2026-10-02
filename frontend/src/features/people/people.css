@@ -31,8 +31,38 @@
 .records-section {
   margin-top: 1.5rem;
 }
+.records-identity small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted);
+}
 .records-description {
   color: var(--muted);
   font-size: 0.85rem;
   line-height: 1.6;
+}
+.records-picker {
+  margin: 1rem 0;
+}
+.picker-results {
+  list-style: none;
+  padding: 0;
+}
+.picker-results li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+.catalog-item {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+.catalog-item legend {
+  font-weight: 600;
+  padding: 0 0.4rem;
 }

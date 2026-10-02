@@ -1,6 +1,6 @@
 # Desarrollo de CILGAS
 
-La aplicación implementa identidad, acceso, permisos, auditoría y los módulos M02 (configuración y referencias) y M03 (personas y vehículos). El catálogo, los servicios, las fichas y las finanzas se implementarán en incrementos posteriores según el [diseño aprobado](segunda-entrega/README.md). El DDL de `database/` sigue siendo referencia del modelo completo; no se ejecuta sobre la aplicación para adelantar módulos.
+La aplicación implementa identidad, acceso, permisos, auditoría, M02 (configuración y referencias), M03 (personas y vehículos), la base de identidad de componentes de M04, el catálogo de M05 y los proveedores comerciales necesarios de M10. La confirmación de servicios, su historia técnica, las fichas y las finanzas se implementarán en incrementos posteriores según el [diseño aprobado](segunda-entrega/README.md). El DDL de `database/` sigue siendo referencia del modelo completo; no se ejecuta sobre la aplicación para adelantar módulos.
 
 ## Herramientas y configuración
 
@@ -35,7 +35,7 @@ docker compose up -d --wait postgres
 pnpm db:migrate
 ```
 
-`db:migrate` aplica las migraciones versionadas de `backend/prisma/migrations/` mediante `prisma migrate deploy`. Puede repetirse; no reinicia ni vacía la base. Las migraciones crean identidad, permisos, sesiones y auditoría, junto con los maestros y relaciones de M02/M03. Para actualizar una instalación existente, generar el cliente Prisma y aplicar las migraciones antes de iniciar el nuevo backend.
+`db:migrate` aplica las migraciones versionadas de `backend/prisma/migrations/` mediante `prisma migrate deploy`. Puede repetirse; no reinicia ni vacía la base. Las migraciones crean identidad, permisos, sesiones y auditoría, junto con los maestros y relaciones de M02/M03, componentes individuales, proveedores y catálogo. Para actualizar una instalación existente, generar el cliente Prisma y aplicar las migraciones antes de iniciar el nuevo backend.
 
 Definir nombre, email válido y una contraseña de entre 12 y 128 caracteres en las variables `BOOTSTRAP_ADMIN_*` de `.env`. No hay contraseña de acceso predeterminada. Luego ejecutar:
 
@@ -97,6 +97,16 @@ Los documentos, dominios, códigos y matrículas se transportan como texto. La A
 Las relaciones del vehículo distinguen **titular** y **contacto**, con inicio y fin de vigencia. Un cambio de titular cierra el vínculo anterior y conserva su historia; la fecha de fin es exclusiva y debe ser posterior al inicio. El **pagador** se asignará al servicio en M06: no se agrega como vínculo permanente del vehículo. Los maestros actuales no implementan ni alteran snapshots o PDF; la preservación documental completa se verificará con M08.
 
 La tabla de configuración conserva la identidad comercial del taller y una referencia explícita al actor TdM. Los datos documentales del actor siguen siendo independientes. Las referencias de marcas/modelos de este tramo corresponden a los modelos técnicos de componentes; los vehículos conservan marca y modelo textuales según el diseño aprobado.
+
+### Recorridos de componentes, proveedores y catálogo
+
+Desde **Componentes**, registrar una identidad eligiendo un modelo técnico existente, su número de serie y, si se conoce, el mes y año de fabricación. Buscar por serie o referencia, recuperar coincidencias y editar los datos descriptivos. La serie conserva sus ceros iniciales; modelo y serie identifican un único componente. Registrar el componente no lo instala en ningún vehículo. La consulta de historia indica expresamente que estará disponible con la confirmación de servicios; no presenta una configuración vacía como prueba de que un vehículo carece de equipo.
+
+Desde **Proveedores**, el administrador registra nombre, CUIT opcional y contacto, busca coincidencias y edita o desactiva el proveedor. El proveedor comercial permanece separado de PEC, CRPC y TdM. Desde **Catálogo**, puede crear y editar ofertas, precios de venta y composición, con cantidades, precios unitarios, costos y proveedores sugeridos. Las propuestas de revisión anual y quinquenal permiten preparar la composición habitual; la quinquenal incluye anual, oblea, PH y recambio de válvulas ajustable. No se precargan precios comerciales del taller.
+
+Probar una oferta con precio y costos decimales, editar su composición y recuperarla. Luego ingresar como operador: puede consultar la oferta y sus precios de venta, pero no administrar el catálogo ni consultar proveedores o costos. La API aplica esas restricciones aunque se fabrique una petición fuera de la interfaz. Cada modificación autorizada conserva su auditoría transaccional.
+
+Este tramo no confirma servicios, no registra instalaciones, retiros ni bajas efectivas de componentes y no crea obligaciones, cobros, pagos o saldos. La preservación de valores propios de servicios confirmados y las invariantes de configuración se verificarán junto con M06; no quedan acreditadas por las pruebas de estos maestros.
 
 ### Ejecutar las comprobaciones
 

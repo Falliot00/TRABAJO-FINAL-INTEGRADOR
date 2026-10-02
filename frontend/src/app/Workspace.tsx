@@ -109,6 +109,7 @@ function PageContent({
     return (
       <Services
         canViewCosts={user.permissions.includes("finanzas.consultar")}
+        canViewSheets={user.permissions.includes("fichas.consultar")}
         onSessionLost={onSessionLost}
       />
     );

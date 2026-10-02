@@ -43,6 +43,348 @@ const draft: ServiceDraft = {
 
 afterEach(() => vi.unstubAllGlobals());
 
+test("revisa el borrador guardado y muestra sólo los bloqueos de confirmación informados por el servidor", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/service-drafts/31/confirmation-check")
+        return Response.json({
+          serviceId: "31",
+          version: 1,
+          currentConfigurationId: null,
+          canConfirm: false,
+          blockers: [
+            {
+              code: "RF-07",
+              message:
+                "Falta validar la obligatoriedad de la operación con el responsable técnico.",
+            },
+          ],
+        });
+      if (url.pathname === "/api/service-drafts/31")
+        return Response.json(draft);
+      if (url.pathname === "/api/service-drafts")
+        return Response.json({ items: [draft], nextCursor: null });
+      throw new Error(`Petición inesperada: ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Services canViewCosts={false} onSessionLost={vi.fn()} />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revisar confirmación 31" }),
+  );
+  const review = await screen.findByRole("region", {
+    name: "Revisar confirmación del servicio 31",
+  });
+  expect(
+    await within(review).findByText(/Falta validar la obligatoriedad/),
+  ).toBeInTheDocument();
+  expect(within(review).getByText("RF-07")).toBeInTheDocument();
+  expect(within(review).getByText(/AA123BB/)).toBeInTheDocument();
+  expect(
+    within(review).queryByRole("button", { name: "Confirmar servicio" }),
+  ).not.toBeInTheDocument();
+  expect(
+    within(review).queryByText(/RF-01|RF-03|Cobrar|Pagar/),
+  ).not.toBeInTheDocument();
+});
+
+test("confirma conscientemente la versión revisada y reintenta con la misma clave tras perder la respuesta", async () => {
+  const attempts: unknown[] = [];
+  let confirmed = false;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string, init?: RequestInit) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/auth/csrf")
+        return Response.json({ csrfToken: "csrf" });
+      if (url.pathname === "/api/service-drafts/31/confirmation-check")
+        return Response.json({
+          serviceId: "31",
+          version: 1,
+          currentConfigurationId: "19",
+          canConfirm: true,
+          blockers: [],
+        });
+      if (url.pathname === "/api/service-drafts/31/confirm") {
+        attempts.push(JSON.parse(String(init?.body)));
+        if (attempts.length === 1) throw new TypeError("Respuesta perdida");
+        confirmed = true;
+        return Response.json({
+          ...draft,
+          status: "CONFIRMADO",
+          confirmedAt: "2026-10-02T15:00:00Z",
+          confirmedBy: "1",
+          configurationId: "20",
+          sheetId: "90",
+          pdfStatus: "PENDIENTE",
+        });
+      }
+      if (url.pathname === "/api/service-drafts/31")
+        return Response.json(draft);
+      if (url.pathname === "/api/service-drafts")
+        return Response.json({
+          items: confirmed ? [] : [draft],
+          nextCursor: null,
+        });
+      throw new Error(`Petición inesperada: ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Services canViewCosts={false} onSessionLost={vi.fn()} />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revisar confirmación 31" }),
+  );
+  const confirm = await screen.findByRole("button", {
+    name: "Confirmar servicio",
+  });
+  expect(confirm).toBeDisabled();
+  await user.click(
+    screen.getByLabelText(
+      "Revisé los datos guardados y confirmo el trabajo realizado",
+    ),
+  );
+  await user.click(confirm);
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "No pudimos conectarnos",
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Reintentar confirmación" }),
+  );
+  expect(await screen.findByRole("status")).toHaveTextContent(
+    "Servicio confirmado",
+  );
+  expect(attempts).toHaveLength(2);
+  expect(attempts[0]).toEqual(attempts[1]);
+  expect(attempts[1]).toEqual({
+    version: 1,
+    expectedConfigurationId: "19",
+    idempotencyKey: expect.any(String),
+  });
+  expect(screen.getByText("PDF pendiente de generación.")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Editar borrador 31" }),
+  ).not.toBeInTheDocument();
+});
+
+test("un conflicto de confirmación conserva la revisión y exige revisar la versión compartida antes de otro intento", async () => {
+  let version = 1;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/auth/csrf")
+        return Response.json({ csrfToken: "csrf" });
+      if (url.pathname === "/api/service-drafts/31/confirmation-check")
+        return Response.json({
+          serviceId: "31",
+          version,
+          currentConfigurationId: null,
+          canConfirm: true,
+          blockers: [],
+        });
+      if (url.pathname === "/api/service-drafts/31/confirm") {
+        version = 2;
+        return Response.json(
+          { message: "La configuración cambió durante la revisión." },
+          { status: 409 },
+        );
+      }
+      if (url.pathname === "/api/service-drafts/31")
+        return Response.json({
+          ...draft,
+          version,
+          description:
+            version === 1
+              ? draft.description
+              : "Preparación compartida actualizada",
+        });
+      if (url.pathname === "/api/service-drafts")
+        return Response.json({ items: [draft], nextCursor: null });
+      throw new Error(`Petición inesperada: ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Services canViewCosts={false} onSessionLost={vi.fn()} />);
+  await user.click(
+    await screen.findByRole("button", { name: "Revisar confirmación 31" }),
+  );
+  await user.click(
+    await screen.findByLabelText(
+      "Revisé los datos guardados y confirmo el trabajo realizado",
+    ),
+  );
+  await user.click(screen.getByRole("button", { name: "Confirmar servicio" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "La configuración cambió",
+  );
+  const review = screen.getByRole("region", {
+    name: "Revisar confirmación del servicio 31",
+  });
+  expect(within(review).getByText("Revisión anual")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Reintentar confirmación" }),
+  ).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Volver a revisar" }));
+  expect(
+    await screen.findByText("Preparación compartida actualizada"),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Confirmar servicio" }),
+  ).toBeDisabled();
+});
+
+test("recupera servicios confirmados y consulta la ficha histórica en sólo lectura sin solicitar obligaciones al operario", async () => {
+  const service = {
+    ...draft,
+    status: "CONFIRMADO",
+    confirmedAt: "2026-10-02T15:00:00Z",
+    confirmedBy: "1",
+    configurationId: "20",
+    sheetId: "90",
+    pdfStatus: "PENDIENTE",
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/service-drafts")
+        return Response.json({ items: [], nextCursor: null });
+      if (url.pathname === "/api/services")
+        return Response.json({ items: [service], nextCursor: null });
+      if (url.pathname === "/api/services/31") return Response.json(service);
+      if (url.pathname === "/api/services/31/sheet")
+        return Response.json({
+          id: "90",
+          serviceId: "31",
+          version: 1,
+          snapshotVersion: 1,
+          templateVersion: "1",
+          pdfStatus: "PENDIENTE",
+          issuedAt: service.confirmedAt,
+          content: {
+            documento: { emitidaEn: "2026-10-02T01:30:00Z" },
+            vehiculo: { dominio: "AA123BB", marca: "Fiat", modelo: "Siena" },
+            titular: {
+              nombreRazonSocial: "Titular al confirmar",
+              documentoNumero: "20000000",
+            },
+            revisionesPH: [{ cilindroSerie: "CIL-900", resultado: "APROBADO" }],
+          },
+        });
+      throw new Error(`Petición inesperada: ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Services canViewCosts={false} onSessionLost={vi.fn()} />);
+  await user.click(
+    screen.getByRole("button", { name: "Ver servicios confirmados" }),
+  );
+  await user.click(
+    await screen.findByRole("button", { name: "Ver ficha del servicio 31" }),
+  );
+  const sheet = await screen.findByRole("region", {
+    name: "Ficha confirmada 90",
+  });
+  expect(within(sheet).getByText("Titular al confirmar")).toBeInTheDocument();
+  expect(within(sheet).getByText("Nombre / razón social")).toBeInTheDocument();
+  expect(within(sheet).getByText("CIL-900")).toBeInTheDocument();
+  expect(within(sheet).getByText("Aprobado")).toBeInTheDocument();
+  expect(within(sheet).getByText("01/10/2026, 22:30")).toBeInTheDocument();
+  expect(
+    within(sheet).getByText("PDF pendiente de generación."),
+  ).toBeInTheDocument();
+  expect(within(sheet).queryByRole("textbox")).not.toBeInTheDocument();
+  expect(
+    within(sheet).queryByText(/Obligaciones|Costos/),
+  ).not.toBeInTheDocument();
+});
+
+test("muestra costos históricos y obligaciones a quien tiene permiso financiero sin acciones de cobro o pago", async () => {
+  const service = {
+    ...draft,
+    items: [
+      {
+        ...draft.items[0]!,
+        costs: [
+          {
+            supplierId: "80",
+            concept: "Provisión oblea",
+            treatment: "PROVEEDOR",
+            amount: "5000.00",
+          },
+        ],
+      },
+    ],
+    status: "CONFIRMADO",
+    confirmedAt: "2026-10-02T15:00:00Z",
+    confirmedBy: "1",
+    configurationId: "20",
+    sheetId: "90",
+    pdfStatus: "PENDIENTE",
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/service-drafts")
+        return Response.json({ items: [], nextCursor: null });
+      if (url.pathname === "/api/services")
+        return Response.json({ items: [service], nextCursor: null });
+      if (url.pathname === "/api/services/31") return Response.json(service);
+      if (url.pathname === "/api/services/31/sheet")
+        return Response.json({
+          id: "90",
+          serviceId: "31",
+          version: 1,
+          snapshotVersion: 1,
+          templateVersion: "1",
+          pdfStatus: "PENDIENTE",
+          issuedAt: service.confirmedAt,
+          content: { vehicle: { plate: "AA123BB" } },
+        });
+      if (url.pathname === "/api/services/31/obligations")
+        return Response.json({
+          items: [
+            {
+              id: "110",
+              serviceId: "31",
+              costId: "41",
+              supplierId: "80",
+              concept: "Provisión oblea",
+              amount: "5000.00",
+              bornAt: service.confirmedAt,
+            },
+          ],
+          nextCursor: null,
+        });
+      throw new Error(`Petición inesperada: ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Services canViewCosts onSessionLost={vi.fn()} />);
+  await user.click(
+    screen.getByRole("button", { name: "Ver servicios confirmados" }),
+  );
+  await user.click(
+    await screen.findByRole("button", { name: "Ver ficha del servicio 31" }),
+  );
+  const obligations = await screen.findByRole("region", {
+    name: "Obligaciones con proveedores",
+  });
+  expect(
+    await within(obligations).findByText("Provisión oblea"),
+  ).toBeInTheDocument();
+  expect(obligations).toHaveTextContent("5000.00 ARS");
+  expect(
+    screen.getByRole("region", { name: "Costos del servicio confirmado" }),
+  ).toHaveTextContent("5000.00 ARS");
+  expect(
+    screen.queryByRole("button", { name: /Cobrar|Pagar|Caja/ }),
+  ).not.toBeInTheDocument();
+});
+
 test("corrige el vehículo del borrador sin sustituir sus personas ni preparación", async () => {
   const prepared = {
     ...draft,

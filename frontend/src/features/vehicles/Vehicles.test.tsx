@@ -38,7 +38,7 @@ const car: VehicleDetail = {
 };
 afterEach(() => vi.unstubAllGlobals());
 
-test("consulta las configuraciones del vehículo y muestra el límite de confirmación sin ofrecer cambios de instalación", async () => {
+test("consulta las configuraciones del vehículo sin inferir equipo ausente ni ofrecer cambios de instalación", async () => {
   const requests: string[] = [];
   vi.stubGlobal(
     "fetch",
@@ -56,7 +56,9 @@ test("consulta las configuraciones del vehículo y muestra el límite de confirm
           vehicleId: car.id,
           available: false,
           message:
-            "Las configuraciones del equipo estarán disponibles con la confirmación de servicios.",
+            "No hay configuraciones registradas; esto no implica ausencia de equipo.",
+          configurations: [],
+          currentConfigurationId: null,
         });
       throw new Error(`Petición inesperada: ${method} ${input}`);
     }),
@@ -71,7 +73,7 @@ test("consulta las configuraciones del vehículo y muestra el límite de confirm
   const history = screen.getByRole("region", { name: "Historia técnica" });
   expect(
     await within(history).findByText(
-      "Las configuraciones del equipo estarán disponibles con la confirmación de servicios.",
+      "No hay configuraciones registradas; esto no implica ausencia de equipo.",
     ),
   ).toBeInTheDocument();
   expect(within(history).getAllByRole("button")).toHaveLength(1);

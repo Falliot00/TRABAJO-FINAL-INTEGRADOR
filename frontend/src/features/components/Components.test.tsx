@@ -50,8 +50,11 @@ test("registra un cilindro con modelo seleccionado y mes de fabricación sin cre
       if (url.pathname === "/api/components/7/history")
         return Response.json({
           componentId: "7",
-          available: false,
-          message: "La historia estará disponible al confirmar servicios.",
+          available: true,
+          message: "No hay historia técnica registrada para este componente.",
+          movements: [],
+          activities: [],
+          revisions: [],
         });
       throw new Error(`Petición inesperada: ${input}`);
     }),
@@ -82,7 +85,7 @@ test("registra un cilindro con modelo seleccionado y mes de fabricación sin cre
   );
   expect(
     await screen.findByText(
-      "La historia estará disponible al confirmar servicios.",
+      "No hay historia técnica registrada para este componente.",
     ),
   ).toBeInTheDocument();
   expect(

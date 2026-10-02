@@ -45,3 +45,25 @@
 .service-editor .catalog-item > .text-button {
   margin-top: 1rem;
 }
+.snapshot-details {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+.snapshot-details > div {
+  border-left: 2px solid var(--line);
+  padding-left: 0.75rem;
+  min-width: 0;
+}
+.snapshot-details dt {
+  font-weight: 600;
+}
+.snapshot-details dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+}
+.snapshot-list {
+  display: grid;
+  gap: 1rem;
+  padding-left: 1.25rem;
+}

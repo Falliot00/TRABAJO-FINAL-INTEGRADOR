@@ -12,6 +12,26 @@ const actions: Record<string, string> = {
   USUARIO_CREADO: "Cuenta creada",
   USUARIO_ACTUALIZADO: "Cuenta actualizada",
   SESIONES_REVOCADAS: "Sesiones revocadas",
+  TALLER_ACTUALIZADO: "Datos del taller actualizados",
+  ACTOR_REGULATORIO_CREADO: "Actor regulatorio creado",
+  ACTOR_REGULATORIO_ACTUALIZADO: "Actor regulatorio actualizado",
+  MODELO_COMPONENTE_CREADO: "Modelo de componente creado",
+  MODELO_COMPONENTE_ACTUALIZADO: "Modelo de componente actualizado",
+  PERSONA_CREADA: "Persona registrada",
+  PERSONA_ACTUALIZADA: "Persona actualizada",
+  VEHICULO_CREADO: "Vehículo registrado",
+  VEHICULO_ACTUALIZADO: "Vehículo actualizado",
+  VINCULO_VEHICULO_CREADO: "Persona vinculada al vehículo",
+  VINCULO_VEHICULO_CERRADO: "Vigencia del vínculo cerrada",
+};
+const entities: Record<string, string> = {
+  usuarios: "Cuenta",
+  configuracion_taller: "Taller",
+  actores_regulatorios: "Actor regulatorio",
+  modelos_componentes: "Modelo de componente",
+  personas: "Persona",
+  vehiculos: "Vehículo",
+  vehiculo_personas: "Vínculo con vehículo",
 };
 const dateFormat = new Intl.DateTimeFormat("es-AR", {
   day: "2-digit",
@@ -80,7 +100,7 @@ export function Audit({
           <span className="eyebrow">Trazabilidad</span>
           <h1>Auditoría</h1>
           <p>
-            Consultá los accesos y los cambios registrados en las cuentas del
+            Consultá los accesos y los cambios registrados en los datos del
             taller.
           </p>
         </div>
@@ -131,7 +151,7 @@ export function Audit({
                         {actions[event.action] ?? event.action}
                       </div>
                       <div className="audit-detail">
-                        {event.entity === "usuarios" ? "Cuenta" : event.entity}
+                        {entities[event.entity] ?? event.entity}
                         {event.entityId ? ` #${event.entityId}` : ""}
                         {event.detail && (
                           <>

@@ -1,0 +1,38 @@
+.records-search {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.records-search > .field:first-child {
+  flex: 1 1 240px;
+}
+.records-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.records-matches {
+  margin-top: 1rem;
+}
+.records-matches ul {
+  list-style: none;
+  padding: 0;
+}
+.records-matches li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding: 0.65rem 0;
+}
+.records-section {
+  margin-top: 1.5rem;
+}
+.records-description {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}

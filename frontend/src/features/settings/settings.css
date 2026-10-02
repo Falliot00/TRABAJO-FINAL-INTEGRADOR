@@ -1,0 +1,36 @@
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+.settings-search {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding: 1.2rem 1.5rem;
+}
+.settings-search .field:first-child {
+  flex: 1 1 15rem;
+}
+.settings-description {
+  padding: 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.settings-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+.settings-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.settings-records td small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted);
+}

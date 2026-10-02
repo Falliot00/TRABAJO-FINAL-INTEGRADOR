@@ -4,12 +4,15 @@ import { Icon } from "../../shared/ui";
 
 interface HomeProps {
   user: SessionUser;
-  onNavigate: (page: "users" | "audit") => void;
+  onNavigate: (
+    page: "users" | "audit" | "people" | "vehicles" | "settings",
+  ) => void;
 }
 
 export function Home({ user, onNavigate }: HomeProps) {
   const canManage = user.permissions.includes("usuarios.administrar");
   const canAudit = user.permissions.includes("auditoria.consultar");
+  const canAttend = user.permissions.includes("personas.gestionar");
   return (
     <>
       <header className="page-heading">
@@ -62,16 +65,42 @@ export function Home({ user, onNavigate }: HomeProps) {
           aria-labelledby="actions-title"
         >
           <h2 id="actions-title">
-            {canManage || canAudit
+            {canManage || canAudit || canAttend
               ? "Accesos del taller"
               : "Trabajá con tu cuenta"}
           </h2>
           <p className="muted">
-            {canManage || canAudit
-              ? "Administrá quién ingresa y consultá la actividad registrada."
+            {canManage || canAudit || canAttend
+              ? "Buscá datos del taller y accedé a las acciones de tu rol."
               : "Cada persona del equipo utiliza su propio acceso para conservar la autoría de sus acciones."}
           </p>
           <div className="quick-actions">
+            {canAttend && (
+              <>
+                <button
+                  className="action-card"
+                  onClick={() => onNavigate("people")}
+                >
+                  <Icon name="users" />
+                  <span>
+                    <strong>Buscar personas</strong>
+                    <small>Datos de contacto y vehículos relacionados</small>
+                  </span>
+                  <Icon name="arrow" />
+                </button>
+                <button
+                  className="action-card"
+                  onClick={() => onNavigate("vehicles")}
+                >
+                  <Icon name="workshop" />
+                  <span>
+                    <strong>Buscar vehículos</strong>
+                    <small>Dominios, titulares e historia de vínculos</small>
+                  </span>
+                  <Icon name="arrow" />
+                </button>
+              </>
+            )}
             {canManage && (
               <button
                 className="action-card"
@@ -98,7 +127,7 @@ export function Home({ user, onNavigate }: HomeProps) {
                 <Icon name="arrow" />
               </button>
             )}
-            {!canManage && !canAudit && (
+            {!canManage && !canAudit && !canAttend && (
               <div className="notice notice-info">
                 Al terminar de trabajar, cerrá tu sesión si compartís este
                 dispositivo.

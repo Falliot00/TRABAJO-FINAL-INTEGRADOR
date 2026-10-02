@@ -1,14 +1,35 @@
 import { useState, type ReactNode } from "react";
-import type { SessionUser } from "@cilgas/contracts";
+import type { Person, SessionUser } from "@cilgas/contracts";
 import { Brand, Icon } from "../shared/ui";
 import { initials, roleName } from "../shared/format";
 import { Logout } from "../features/auth/Logout";
 import { Home } from "../features/home/Home";
 import { Users } from "../features/users/Users";
 import { Audit } from "../features/audit/Audit";
+import { Settings } from "../features/settings/Settings";
+import { People } from "../features/people/People";
+import { Vehicles } from "../features/vehicles/Vehicles";
 
 const navigation = [
   { id: "home", label: "Inicio", icon: "home", permission: null },
+  {
+    id: "people",
+    label: "Personas",
+    icon: "users",
+    permission: "personas.gestionar",
+  },
+  {
+    id: "vehicles",
+    label: "Vehículos",
+    icon: "workshop",
+    permission: "personas.gestionar",
+  },
+  {
+    id: "settings",
+    label: "Configuración",
+    icon: "shield",
+    permission: "personas.gestionar",
+  },
   {
     id: "users",
     label: "Usuarios",
@@ -43,6 +64,8 @@ interface PageContentProps extends Pick<
 > {
   page: Page;
   onNavigate: (page: Page) => void;
+  vehiclePerson?: Person;
+  onOpenVehicles: (person: Person) => void;
 }
 
 function PageContent({
@@ -51,7 +74,25 @@ function PageContent({
   onNavigate,
   onSessionLost,
   onUserUpdated,
+  vehiclePerson,
+  onOpenVehicles,
 }: PageContentProps) {
+  if (user.permissions.includes("personas.gestionar")) {
+    if (page === "people")
+      return (
+        <People onSessionLost={onSessionLost} onOpenVehicles={onOpenVehicles} />
+      );
+    if (page === "vehicles")
+      return (
+        <Vehicles
+          key={vehiclePerson?.id ?? "all"}
+          person={vehiclePerson}
+          onSessionLost={onSessionLost}
+        />
+      );
+    if (page === "settings")
+      return <Settings user={user} onSessionLost={onSessionLost} />;
+  }
   if (page === "users" && user.permissions.includes("usuarios.administrar"))
     return (
       <Users
@@ -73,6 +114,11 @@ export function Workspace({
   onLogout,
 }: WorkspaceProps) {
   const [page, setPage] = useState<Page>("home");
+  const [vehiclePerson, setVehiclePerson] = useState<Person>();
+  function navigate(next: Page) {
+    setVehiclePerson(undefined);
+    setPage(next);
+  }
   const availablePages = navigation.filter(
     (entry) =>
       entry.permission === null || user.permissions.includes(entry.permission),
@@ -91,7 +137,7 @@ export function Workspace({
               key={entry.id}
               className="nav-button"
               aria-current={page === entry.id ? "page" : undefined}
-              onClick={() => setPage(entry.id)}
+              onClick={() => navigate(entry.id)}
             >
               <Icon name={entry.icon} />
               {entry.label}
@@ -126,7 +172,12 @@ export function Workspace({
           <PageContent
             page={page}
             user={user}
-            onNavigate={setPage}
+            onNavigate={navigate}
+            vehiclePerson={vehiclePerson}
+            onOpenVehicles={(person) => {
+              setVehiclePerson(person);
+              setPage("vehicles");
+            }}
             onSessionLost={onSessionLost}
             onUserUpdated={onUserUpdated}
           />

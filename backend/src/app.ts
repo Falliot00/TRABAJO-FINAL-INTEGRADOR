@@ -21,6 +21,16 @@ import { UsersController } from "./modules/identity/users.controller";
 import { UsersService } from "./modules/identity/users.service";
 import { AuditController } from "./modules/audit/audit.controller";
 import { AuditService } from "./modules/audit/audit.service";
+import { ReferencesService } from "./modules/references/references.service";
+import { PeopleService } from "./modules/people/people.service";
+import { PeopleController } from "./modules/people/people.controller";
+import { VehiclesService } from "./modules/people/vehicles.service";
+import { VehiclesController } from "./modules/people/vehicles.controller";
+import {
+  ComponentModelsController,
+  RegulatoryActorsController,
+  WorkshopController,
+} from "./modules/references/references.controller";
 
 @Controller("health")
 class HealthController {
@@ -59,12 +69,23 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       UsersController,
       AuditController,
       HealthController,
+      WorkshopController,
+      RegulatoryActorsController,
+      ComponentModelsController,
+      PeopleController,
+      VehiclesController,
     ],
     providers: [
       { provide: IdentityService, useValue: identity },
       { provide: UsersService, useValue: new UsersService(identity, audit) },
       { provide: AuditService, useValue: audit },
       { provide: Security, useValue: security },
+      {
+        provide: ReferencesService,
+        useValue: new ReferencesService(db, audit),
+      },
+      { provide: PeopleService, useValue: new PeopleService(db, audit) },
+      { provide: VehiclesService, useValue: new VehiclesService(db, audit) },
       {
         provide: "DatabaseLifecycle",
         useValue: { onModuleDestroy: () => db.$disconnect() },

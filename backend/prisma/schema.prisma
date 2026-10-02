@@ -76,3 +76,101 @@ model Audit {
   @@index([entity, entityId, occurredAt], map: "ix_auditoria_entidad")
   @@map("auditoria")
 }
+
+model Workshop {
+  id       BigInt @id @default(1)
+  name     String @map("nombre") @db.VarChar(180)
+  cuit     String? @db.VarChar(20)
+  address  String? @map("domicilio") @db.VarChar(220)
+  locality String? @map("localidad") @db.VarChar(100)
+  province String? @map("provincia") @db.VarChar(100)
+  phone    String? @map("telefono") @db.VarChar(40)
+  email    String? @db.VarChar(254)
+  tdmId    BigInt? @map("tdm_id")
+  tdmType  String @default("TDM") @map("tdm_tipo") @db.VarChar(5)
+  tdm      RegulatoryActor? @relation(fields: [tdmId, tdmType], references: [id, type])
+  @@map("configuracion_taller")
+}
+
+model RegulatoryActor {
+  id                   BigInt @id @default(autoincrement())
+  type                 String @map("tipo") @db.VarChar(5)
+  code                 String @map("codigo") @db.VarChar(40)
+  name                 String @map("nombre") @db.VarChar(180)
+  cuit                 String? @db.VarChar(20)
+  address              String? @map("domicilio") @db.VarChar(220)
+  locality             String? @map("localidad") @db.VarChar(100)
+  phone                String? @map("telefono") @db.VarChar(40)
+  technicalResponsible String? @map("responsable_tecnico") @db.VarChar(140)
+  responsibleLicense   String? @map("matricula_responsable") @db.VarChar(40)
+  active               Boolean @default(true) @map("activo")
+  workshops            Workshop[]
+  @@unique([type, code])
+  @@unique([id, type])
+  @@map("actores_regulatorios")
+}
+
+model ComponentModel {
+  id               BigInt @id @default(autoincrement())
+  type             String @map("tipo") @db.VarChar(15)
+  homologationCode String @map("codigo_homologacion") @db.VarChar(50)
+  brand            String? @map("marca") @db.VarChar(100)
+  model            String? @map("modelo") @db.VarChar(100)
+  capacityLiters   Decimal? @map("capacidad_litros") @db.Decimal(7, 2)
+  active           Boolean @default(true) @map("activo")
+  @@unique([type, homologationCode])
+  @@unique([id, type])
+  @@map("modelos_componentes")
+}
+
+model Person {
+  id             BigInt @id @default(autoincrement())
+  type           String @map("tipo") @db.VarChar(10)
+  name           String @map("nombre_razon_social") @db.VarChar(180)
+  documentType   String @map("documento_tipo") @db.VarChar(20)
+  documentNumber String @map("documento_numero") @db.VarChar(30)
+  street         String? @map("calle") @db.VarChar(180)
+  streetNumber   String? @map("numero") @db.VarChar(20)
+  floorApartment String? @map("piso_depto") @db.VarChar(40)
+  locality       String? @map("localidad") @db.VarChar(100)
+  province       String? @map("provincia") @db.VarChar(100)
+  postalCode     String? @map("codigo_postal") @db.VarChar(15)
+  phone          String? @map("telefono") @db.VarChar(40)
+  email          String? @db.VarChar(254)
+  active         Boolean @default(true) @map("activo")
+  createdAt      DateTime @default(now()) @map("creado_en") @db.Timestamptz
+  relationships  VehicleRelationship[]
+  @@unique([documentType, documentNumber])
+  @@index([name], map: "ix_personas_nombre")
+  @@map("personas")
+}
+
+model Vehicle {
+  id              BigInt @id @default(autoincrement())
+  plate           String @unique @map("dominio") @db.VarChar(15)
+  brand           String @map("marca") @db.VarChar(80)
+  model           String @map("modelo") @db.VarChar(100)
+  year            Int @map("anio") @db.SmallInt
+  engineNumber    String? @map("motor_numero") @db.VarChar(80)
+  chassisNumber   String? @map("chasis_numero") @db.VarChar(80)
+  type            String? @map("tipo") @db.VarChar(15)
+  otherTypeDetail String? @map("tipo_otro_detalle") @db.VarChar(100)
+  usage           String? @map("uso") @db.VarChar(60)
+  injection       Boolean? @map("inyeccion")
+  active          Boolean @default(true) @map("activo")
+  relationships   VehicleRelationship[]
+  @@map("vehiculos")
+}
+
+model VehicleRelationship {
+  id        BigInt @id @default(autoincrement())
+  vehicleId BigInt @map("vehiculo_id")
+  personId  BigInt @map("persona_id")
+  role      String @map("rol") @db.VarChar(15)
+  from      DateTime @map("desde") @db.Date
+  until     DateTime? @map("hasta") @db.Date
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+  person    Person @relation(fields: [personId], references: [id])
+  @@index([personId, vehicleId], map: "ix_vehiculo_personas_persona")
+  @@map("vehiculo_personas")
+}

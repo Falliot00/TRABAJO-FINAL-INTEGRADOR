@@ -109,5 +109,30 @@ describe("Servidor de desarrollo", () => {
     expect(
       spec.paths["/api/users/{id}/revoke-sessions"].post.responses["204"],
     ).not.toHaveProperty("content");
+    expect(
+      spec.components.schemas.WorkshopResponseDto.properties.tdmId,
+    ).toMatchObject({ type: "string", nullable: true });
+    expect(
+      spec.components.schemas.ComponentModelResponseDto.properties
+        .capacityLiters,
+    ).toMatchObject({ type: "string", nullable: true });
+    expect(
+      spec.components.schemas.PersonResponseDto.properties.documentNumber.type,
+    ).toBe("string");
+    expect(
+      spec.components.schemas.VehicleResponseDto.properties.injection,
+    ).toMatchObject({ type: "boolean", nullable: true });
+    expect(
+      spec.components.schemas.VehicleRelationshipResponseDto.properties.from,
+    ).toMatchObject({ type: "string", format: "date" });
+    expect(
+      spec.paths["/api/people"].get.responses["200"].content["application/json"]
+        .schema.$ref,
+    ).toBe("#/components/schemas/PeoplePageDto");
+    expect(
+      spec.paths["/api/vehicles/{id}"].get.responses["200"].content[
+        "application/json"
+      ].schema.$ref,
+    ).toBe("#/components/schemas/VehicleDetailResponseDto");
   });
 });

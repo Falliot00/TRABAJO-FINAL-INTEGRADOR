@@ -9,12 +9,30 @@ type AuditAction =
   | "ACCESO_DENEGADO"
   | "USUARIO_CREADO"
   | "USUARIO_ACTUALIZADO"
-  | "SESIONES_REVOCADAS";
+  | "SESIONES_REVOCADAS"
+  | "TALLER_ACTUALIZADO"
+  | "ACTOR_REGULATORIO_CREADO"
+  | "ACTOR_REGULATORIO_ACTUALIZADO"
+  | "MODELO_COMPONENTE_CREADO"
+  | "MODELO_COMPONENTE_ACTUALIZADO"
+  | "PERSONA_CREADA"
+  | "PERSONA_ACTUALIZADA"
+  | "VEHICULO_CREADO"
+  | "VEHICULO_ACTUALIZADO"
+  | "VINCULO_VEHICULO_CREADO"
+  | "VINCULO_VEHICULO_CERRADO";
 
 interface AuditRecord {
   actorId?: string;
   action: AuditAction;
-  entity: "usuarios";
+  entity:
+    | "usuarios"
+    | "configuracion_taller"
+    | "actores_regulatorios"
+    | "modelos_componentes"
+    | "personas"
+    | "vehiculos"
+    | "vehiculo_personas";
   entityId?: string;
   result: "EXITO" | "RECHAZADO";
   detail?: string;

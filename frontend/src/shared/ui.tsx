@@ -116,7 +116,7 @@ export function RetryNotice({
   return (
     <div className="page-notice">
       <ErrorNotice>{message}</ErrorNotice>
-      <button className="text-button" onClick={onRetry}>
+      <button type="button" className="text-button" onClick={onRetry}>
         Intentar nuevamente
       </button>
     </div>

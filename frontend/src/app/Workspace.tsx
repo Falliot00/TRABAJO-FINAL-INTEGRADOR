@@ -12,9 +12,16 @@ import { Vehicles } from "../features/vehicles/Vehicles";
 import { Components } from "../features/components/Components";
 import { Catalog } from "../features/catalog/Catalog";
 import { Suppliers } from "../features/suppliers/Suppliers";
+import { Services } from "../features/services/Services";
 
 const navigation = [
   { id: "home", label: "Inicio", icon: "home", permission: null },
+  {
+    id: "services",
+    label: "Servicios",
+    icon: "workshop",
+    permission: "servicios.gestionar",
+  },
   {
     id: "people",
     label: "Personas",
@@ -98,6 +105,13 @@ function PageContent({
   vehiclePerson,
   onOpenVehicles,
 }: PageContentProps) {
+  if (page === "services" && user.permissions.includes("servicios.gestionar"))
+    return (
+      <Services
+        canViewCosts={user.permissions.includes("finanzas.consultar")}
+        onSessionLost={onSessionLost}
+      />
+    );
   if (user.permissions.includes("personas.gestionar")) {
     if (page === "people")
       return (

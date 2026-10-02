@@ -37,6 +37,9 @@ import { CatalogController } from "./modules/catalog/catalog.controller";
 import { CatalogService } from "./modules/catalog/catalog.service";
 import { ServiceDraftsController } from "./modules/services/service-drafts.controller";
 import { ServiceDraftsService } from "./modules/services/service-drafts.service";
+import { ServiceConfirmationService } from "./modules/services/service-confirmation.service";
+import type { RegulatoryValidation } from "./modules/services/regulatory-validation";
+import { ConfirmedServicesController } from "./modules/services/confirmed-services.controller";
 import {
   ComponentModelsController,
   RegulatoryActorsController,
@@ -68,12 +71,16 @@ class HealthController {
   }
 }
 
-export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
+export async function createApplication(
+  env: NodeJS.ProcessEnv = process.env,
+  dependencies: { regulatoryValidation?: RegulatoryValidation } = {},
+) {
   const config = readConfig(env);
   const db = createDatabase(config.databaseUrl);
   const audit = new AuditService(db);
   const identity = new IdentityService(db, config, audit);
   const security = new Security(config);
+  const drafts = new ServiceDraftsService(db, audit);
   @Module({
     controllers: [
       AuthController,
@@ -90,6 +97,7 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       SuppliersController,
       CatalogController,
       ServiceDraftsController,
+      ConfirmedServicesController,
     ],
     providers: [
       { provide: IdentityService, useValue: identity },
@@ -110,7 +118,15 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       { provide: CatalogService, useValue: new CatalogService(db, audit) },
       {
         provide: ServiceDraftsService,
-        useValue: new ServiceDraftsService(db, audit),
+        useValue: drafts,
+      },
+      {
+        provide: ServiceConfirmationService,
+        useValue: new ServiceConfirmationService(
+          db,
+          audit,
+          dependencies.regulatoryValidation,
+        ),
       },
       {
         provide: "DatabaseLifecycle",

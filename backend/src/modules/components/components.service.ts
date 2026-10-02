@@ -14,6 +14,7 @@ import {
 } from "../../common/master-data";
 import { parseId } from "../identity/dto";
 import { AuditService } from "../audit/audit.service";
+import { ComponentServiceEffects } from "./service-effects";
 import type {
   ComponentDto,
   ComponentDuplicatesQueryDto,
@@ -105,11 +106,39 @@ export class ComponentsService {
 
   async history(id: bigint): Promise<ComponentHistory> {
     await this.get(id);
+    const activities = await this.db.$queryRaw<
+      (Omit<ComponentHistory["activities"][number], "occurredAt"> & {
+        occurredAt: Date;
+      })[]
+    >`SELECT i.id::text, i.servicio_id::text AS "serviceId", i.accion AS action, i.descripcion AS description, s.confirmado_en AS "occurredAt", s.confirmado_por::text AS "recordedBy" FROM servicio_items i JOIN servicios s ON s.id = i.servicio_id WHERE i.componente_id = ${id} AND i.accion IN ('INSPECCIONAR', 'ENSAYAR', 'MANTENER') AND s.estado = 'CONFIRMADO' ORDER BY s.confirmado_en, i.id`;
+    const movements = await this.db.$queryRaw<
+      (Omit<ComponentHistory["movements"][number], "occurredAt"> & {
+        occurredAt: Date;
+      })[]
+    >`SELECT id::text, servicio_id::text AS "serviceId", accion AS action, origen AS origin, destino AS destination, ocurrido_en AS "occurredAt" FROM movimientos_componentes WHERE componente_id = ${id} ORDER BY ocurrido_en, id`;
+    const revisions = await this.db.$queryRaw<
+      (Omit<ComponentHistory["revisions"][number], "testDate" | "expiresOn"> & {
+        testDate: Date;
+        expiresOn: Date | null;
+      })[]
+    >`SELECT id::text, servicio_id::text AS "serviceId", crpc_id::text AS "crpcId", fecha_ensayo AS "testDate", vence_el AS "expiresOn", resultado AS result, numero_certificado AS "certificateNumber" FROM revisiones_cilindros WHERE componente_id = ${id} ORDER BY fecha_ensayo, id`;
     return {
       componentId: String(id),
-      available: false,
-      message:
-        "La historia técnica estará disponible con la confirmación de servicios.",
+      available: true,
+      activities: activities.map((row) => ({
+        ...row,
+        occurredAt: row.occurredAt.toISOString(),
+      })),
+      movements: movements.map((row) => ({
+        ...row,
+        occurredAt: row.occurredAt.toISOString(),
+      })),
+      revisions: revisions.map((row) => ({
+        ...row,
+        testDate: row.testDate.toISOString().slice(0, 10),
+        expiresOn: row.expiresOn?.toISOString().slice(0, 10) ?? null,
+      })),
+      message: "Historia técnica de servicios confirmados.",
     };
   }
 
@@ -119,12 +148,7 @@ export class ComponentsService {
       select: { id: true },
     });
     if (!vehicle) throw new NotFoundException("Vehículo no encontrado.");
-    return {
-      vehicleId: String(vehicleId),
-      available: false,
-      message:
-        "Las configuraciones del equipo estarán disponibles con la confirmación de servicios.",
-    };
+    return new ComponentServiceEffects().configurations(this.db, vehicleId);
   }
 
   async create(input: ComponentDto, actor: SessionUser): Promise<Component> {

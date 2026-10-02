@@ -13,15 +13,52 @@ export interface Component extends Required<ComponentInput> {
   model: ComponentModel;
 }
 
-/** La historia técnica requiere la confirmación de servicios de M06. */
 export interface ComponentHistory {
   componentId: string;
-  available: false;
+  available: boolean;
   message: string;
+  activities: {
+    /** Identificador del ítem histórico del servicio. */
+    id: string;
+    serviceId: string;
+    action: "INSPECCIONAR" | "ENSAYAR" | "MANTENER";
+    description: string;
+    occurredAt: string;
+    recordedBy: string;
+  }[];
+  movements: {
+    id: string;
+    serviceId: string;
+    action: string;
+    origin: string;
+    destination: string;
+    occurredAt: string;
+  }[];
+  revisions: {
+    id: string;
+    serviceId: string;
+    crpcId: string;
+    testDate: string;
+    expiresOn: string | null;
+    result: "APROBADO" | "RECHAZADO";
+    certificateNumber: string | null;
+  }[];
 }
 
 export interface VehicleConfigurations {
   vehicleId: string;
-  available: false;
+  available: boolean;
   message: string;
+  currentConfigurationId: string | null;
+  configurations: {
+    id: string;
+    serviceId: string | null;
+    validFrom: string;
+    validUntil: string | null;
+    components: {
+      componentId: string;
+      type: ComponentType;
+      position: number;
+    }[];
+  }[];
 }

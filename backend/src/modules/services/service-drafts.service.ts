@@ -22,7 +22,7 @@ import {
   type InterventionDto,
 } from "./dto";
 
-const includeDraft = {
+export const includeDraft = {
   vehicle: true,
   creator: true,
   people: { include: { person: true }, orderBy: { role: "asc" as const } },
@@ -35,7 +35,9 @@ const includeDraft = {
     orderBy: [{ type: "asc" as const }, { row: "asc" as const }],
   },
 };
-type DraftRow = Prisma.ServiceDraftGetPayload<{ include: typeof includeDraft }>;
+export type DraftRow = Prisma.ServiceDraftGetPayload<{
+  include: typeof includeDraft;
+}>;
 const stringId = (value: bigint | null) =>
   value === null ? null : String(value);
 const dateText = (value: Date | null) =>
@@ -133,7 +135,7 @@ async function componentReference(
     );
 }
 
-function response(row: DraftRow, actor: SessionUser): ServiceDraft {
+export function draftResponse(row: DraftRow, actor: SessionUser): ServiceDraft {
   return {
     id: String(row.id),
     version: row.version,
@@ -267,7 +269,7 @@ export class ServiceDraftsService {
       include: includeDraft,
     });
     return pageOf(
-      rows.map((row) => response(row, actor)),
+      rows.map((row) => draftResponse(row, actor)),
       query.limit,
     );
   }
@@ -277,7 +279,7 @@ export class ServiceDraftsService {
       include: includeDraft,
     });
     if (!row) throw new NotFoundException("Borrador no encontrado.");
-    return response(row, actor);
+    return draftResponse(row, actor);
   }
   async create(input: CreateServiceDraftDto, actor: SessionUser) {
     const vehicleId = parseId(input.vehicleId);
@@ -366,7 +368,7 @@ export class ServiceDraftsService {
           },
           tx,
         );
-        return response(
+        return draftResponse(
           await tx.serviceDraft.findUniqueOrThrow({
             where: { id: row.id },
             include: includeDraft,
@@ -642,7 +644,7 @@ export class ServiceDraftsService {
             },
             tx,
           );
-          return response(row, actor);
+          return draftResponse(row, actor);
         },
         { timeout: 15000 },
       )

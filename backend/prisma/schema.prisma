@@ -249,6 +249,9 @@ model ServiceDraft {
   notes String? @map("observaciones")
   createdBy BigInt @map("creado_por")
   createdAt DateTime @default(now()) @map("creado_en") @db.Timestamptz
+  confirmedBy BigInt? @map("confirmado_por")
+  confirmedAt DateTime? @map("confirmado_en") @db.Timestamptz
+  configurationBaseId BigInt? @map("configuracion_base_id")
   vehicle Vehicle @relation(fields: [vehicleId], references: [id])
   catalogOffer CatalogOffer @relation(fields: [catalogOfferId], references: [id])
   creator User @relation(fields: [createdBy], references: [id])

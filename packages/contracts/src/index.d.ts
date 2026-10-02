@@ -2,6 +2,7 @@
 export * from "./catalog";
 export * from "./components";
 export * from "./service-drafts";
+export * from "./service-confirmation";
 export type RoleCode = "ADMINISTRADOR" | "OPERADOR";
 
 export type PermissionCode =

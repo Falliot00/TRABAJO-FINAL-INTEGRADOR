@@ -448,8 +448,11 @@ describe("Identidad individual de componentes", () => {
     ).body;
     expect(history).toEqual({
       componentId: component.id,
-      available: false,
-      message: expect.stringMatching(/confirmación/i),
+      available: true,
+      message: expect.stringMatching(/Historia técnica/i),
+      activities: [],
+      movements: [],
+      revisions: [],
     });
     const configurations = (
       await operator.agent
@@ -458,8 +461,10 @@ describe("Identidad individual de componentes", () => {
     ).body;
     expect(configurations).toEqual({
       vehicleId: vehicle.id,
-      available: false,
-      message: expect.stringMatching(/confirmación/i),
+      available: true,
+      message: expect.stringMatching(/no hay configuraciones confirmadas/i),
+      currentConfigurationId: null,
+      configurations: [],
     });
     await request(app.getHttpServer())
       .get(`/api/components/${component.id}/history`)

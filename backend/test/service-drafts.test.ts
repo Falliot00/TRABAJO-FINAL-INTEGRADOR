@@ -142,7 +142,7 @@ describe("Borradores compartidos de servicios", () => {
           .get(`/api/vehicles/${vehicle.id}/configurations`)
           .expect(200)
       ).body.available,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       (await admin.agent.get("/api/audit?limit=100").expect(200)).body.items,
     ).toContainEqual(
@@ -329,7 +329,7 @@ describe("Borradores compartidos de servicios", () => {
           .get(`/api/components/${component.id}/history`)
           .expect(200)
       ).body.available,
-    ).toBe(false);
+    ).toBe(true);
     await operator.agent
       .patch(`/api/service-drafts/${created.id}`)
       .set(operator.headers)
@@ -550,7 +550,7 @@ describe("Borradores compartidos de servicios", () => {
       .post(`/api/service-drafts/${draft.id}/confirm`)
       .set(admin.headers)
       .send({})
-      .expect(404);
+      .expect(400);
   });
   it("ajusta costos autorizados e ítems con redondeo decimal, conserva referencias dadas de baja y permite quitar lo descartado", async () => {
     const admin = await signedIn(app);

@@ -23,6 +23,7 @@ type AuditAction =
   | "OFERTA_ACTUALIZADA"
   | "BORRADOR_SERVICIO_CREADO"
   | "BORRADOR_SERVICIO_ACTUALIZADO"
+  | "SERVICIO_CONFIRMADO"
   | "PERSONA_CREADA"
   | "PERSONA_ACTUALIZADA"
   | "VEHICULO_CREADO"
@@ -48,6 +49,7 @@ interface AuditRecord {
   entityId?: string;
   result: "EXITO" | "RECHAZADO";
   detail?: string;
+  correlationId?: string;
 }
 
 export class AuditService {
@@ -67,6 +69,7 @@ export class AuditService {
         entityId: event.entityId,
         result: event.result,
         detail: event.detail,
+        correlationId: event.correlationId,
       },
     });
   }

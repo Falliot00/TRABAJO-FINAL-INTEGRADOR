@@ -27,6 +27,12 @@ import { parseId } from "../identity/dto";
 import { ServiceDraftsService } from "./service-drafts.service";
 import { CreateServiceDraftDto, UpdateServiceDraftDto } from "./dto";
 import { ServiceDraftPageDto, ServiceDraftResponseDto } from "./responses";
+import { ServiceConfirmationService } from "./service-confirmation.service";
+import { ConfirmServiceDto } from "./confirmation-dto";
+import {
+  ConfirmedServiceDto,
+  ServiceConfirmationCheckDto,
+} from "./confirmation-responses";
 
 @ApiTags("Borradores de servicios")
 @ApiCookieAuth()
@@ -36,7 +42,41 @@ export class ServiceDraftsController {
     @Inject(ServiceDraftsService) private readonly drafts: ServiceDraftsService,
     @Inject(IdentityService) private readonly identity: IdentityService,
     @Inject(Security) private readonly security: Security,
+    @Inject(ServiceConfirmationService)
+    private readonly confirmation: ServiceConfirmationService,
   ) {}
+  @Get(":id/confirmation-check")
+  @ApiOkResponse({ type: ServiceConfirmationCheckDto })
+  @ApiParam({ name: "id", type: String })
+  async check(@Req() req: Request, @Param("id") id: string) {
+    const actor = await this.identity.authorize(
+      this.security.token(req),
+      "servicios.gestionar",
+    );
+    return this.confirmation.check(parseId(id), actor);
+  }
+  @Post(":id/confirm")
+  @ApiBody({ type: ConfirmServiceDto })
+  @ApiCreatedResponse({ type: ConfirmedServiceDto })
+  @ApiParam({ name: "id", type: String })
+  @ApiHeader({ name: "X-CSRF-Token", required: true })
+  async confirm(
+    @Req() req: Request,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    this.security.checkCsrf(req);
+    const actor = await this.identity.authorize(
+      this.security.token(req),
+      "servicios.gestionar",
+    );
+    return this.confirmation.confirm(
+      parseId(id),
+      parseMasterBody(ConfirmServiceDto, body),
+      actor,
+      this.security.token(req),
+    );
+  }
   @Get()
   @ApiOkResponse({ type: ServiceDraftPageDto })
   @ApiQuery({ name: "q", required: false, type: String })

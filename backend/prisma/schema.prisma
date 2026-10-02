@@ -46,6 +46,7 @@ model User {
   role         Role @relation(fields: [roleId], references: [id])
   sessions     Session[]
   events       Audit[]
+  drafts       ServiceDraft[]
   @@map("usuarios")
 }
 
@@ -158,6 +159,7 @@ model CatalogOffer {
   suggestedPrice Decimal @map("precio_sugerido") @db.Decimal(14, 2)
   active         Boolean @default(true) @map("activo")
   items          CatalogItem[]
+  drafts         ServiceDraft[]
   @@map("catalogo_servicios")
 }
 
@@ -173,6 +175,7 @@ model CatalogItem {
   unitCost     Decimal @default(0) @map("costo_unitario") @db.Decimal(14, 2)
   offer        CatalogOffer @relation(fields: [offerId], references: [id], onUpdate: Restrict, onDelete: Restrict)
   supplier     Supplier? @relation(fields: [supplierId], references: [id], onUpdate: Restrict, onDelete: Restrict)
+  draftItems   ServiceDraftItem[]
   @@unique([offerId, order])
   @@map("catalogo_items")
 }
@@ -194,6 +197,7 @@ model Person {
   active         Boolean @default(true) @map("activo")
   createdAt      DateTime @default(now()) @map("creado_en") @db.Timestamptz
   relationships  VehicleRelationship[]
+  serviceRoles   ServiceDraftPerson[]
   @@unique([documentType, documentNumber])
   @@index([name], map: "ix_personas_nombre")
   @@map("personas")
@@ -213,6 +217,7 @@ model Vehicle {
   injection       Boolean? @map("inyeccion")
   active          Boolean @default(true) @map("activo")
   relationships   VehicleRelationship[]
+  drafts          ServiceDraft[]
   @@map("vehiculos")
 }
 
@@ -227,4 +232,113 @@ model VehicleRelationship {
   person    Person @relation(fields: [personId], references: [id])
   @@index([personId, vehicleId], map: "ix_vehiculo_personas_persona")
   @@map("vehiculo_personas")
+}
+
+model ServiceDraft {
+  id BigInt @id @default(autoincrement())
+  vehicleId BigInt @map("vehiculo_id")
+  catalogOfferId BigInt @map("catalogo_servicio_id")
+  version Int @default(1)
+  status String @map("estado") @db.VarChar(15)
+  serviceDate DateTime @map("fecha_servicio") @db.Date
+  description String @map("descripcion") @db.VarChar(180)
+  type String @map("tipo") @db.VarChar(25)
+  sheetOperation String? @map("operacion_ficha") @db.Char(1)
+  includesPh Boolean @default(false) @map("incluye_ph")
+  totalAmount Decimal @map("importe_total") @db.Decimal(14, 2)
+  notes String? @map("observaciones")
+  createdBy BigInt @map("creado_por")
+  createdAt DateTime @default(now()) @map("creado_en") @db.Timestamptz
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  catalogOffer CatalogOffer @relation(fields: [catalogOfferId], references: [id])
+  creator User @relation(fields: [createdBy], references: [id])
+  people ServiceDraftPerson[]
+  items ServiceDraftItem[]
+  costs ServiceDraftCost[]
+  preparation ServicePreparation?
+  interventions ServiceIntervention[]
+  @@unique([id, vehicleId])
+  @@index([vehicleId, serviceDate], map: "ix_servicios_vehiculo_fecha")
+  @@index([status, serviceDate], map: "ix_servicios_estado_fecha")
+  @@map("servicios")
+}
+model ServiceDraftPerson {
+  serviceId BigInt @map("servicio_id")
+  personId BigInt @map("persona_id")
+  role String @map("rol") @db.VarChar(15)
+  service ServiceDraft @relation(fields: [serviceId], references: [id])
+  person Person @relation(fields: [personId], references: [id])
+  @@id([serviceId, role])
+  @@index([personId, serviceId], map: "ix_servicio_personas_persona")
+  @@map("servicio_personas")
+}
+model ServiceDraftItem {
+  id BigInt @id @default(autoincrement())
+  serviceId BigInt @map("servicio_id")
+  order Int @map("orden") @db.SmallInt
+  catalogItemId BigInt? @map("catalogo_item_id")
+  description String @map("descripcion") @db.VarChar(180)
+  type String @map("tipo") @db.VarChar(20)
+  componentId BigInt? @map("componente_id")
+  action String? @map("accion") @db.VarChar(15)
+  quantity Decimal @map("cantidad") @db.Decimal(10, 2)
+  unitPrice Decimal @map("precio_unitario") @db.Decimal(14, 2)
+  discount Decimal @default(0) @map("descuento") @db.Decimal(14, 2)
+  amount Decimal @map("importe") @db.Decimal(14, 2)
+  service ServiceDraft @relation(fields: [serviceId], references: [id])
+  catalogItem CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: SetNull)
+  costs ServiceDraftCost[]
+  @@unique([serviceId, order])
+  @@unique([id, serviceId])
+  @@map("servicio_items")
+}
+model ServiceDraftCost {
+  id BigInt @id @default(autoincrement())
+  serviceId BigInt @map("servicio_id")
+  itemId BigInt? @map("servicio_item_id")
+  supplierId BigInt? @map("proveedor_id")
+  concept String @map("concepto") @db.VarChar(180)
+  treatment String @map("tratamiento") @db.VarChar(15)
+  amount Decimal @map("importe") @db.Decimal(14, 2)
+  service ServiceDraft @relation(fields: [serviceId], references: [id])
+  item ServiceDraftItem? @relation(fields: [itemId, serviceId], references: [id, serviceId])
+  @@unique([id, serviceId, supplierId, amount])
+  @@index([serviceId], map: "ix_servicio_costos_servicio")
+  @@map("servicio_costos")
+}
+model ServicePreparation {
+  serviceId BigInt @id @map("servicio_id")
+  pecId BigInt? @map("pec_id")
+  tdmId BigInt? @map("tdm_id")
+  previousSticker String? @map("oblea_anterior") @db.VarChar(40)
+  newSticker String? @map("oblea_nueva") @db.VarChar(40)
+  enabledOn DateTime? @map("habilitada_el") @db.Date
+  expiresOn DateTime? @map("vence_el") @db.Date
+  notes String? @map("observaciones_ficha")
+  service ServiceDraft @relation(fields: [serviceId], references: [id])
+  @@map("servicio_preparacion")
+}
+model ServiceIntervention {
+  id BigInt @id @default(autoincrement())
+  serviceId BigInt @map("servicio_id")
+  type String @map("tipo") @db.VarChar(15)
+  row Int @map("renglon") @db.SmallInt
+  componentId BigInt? @map("componente_id")
+  homologationCode String? @map("codigo_homologacion") @db.VarChar(50)
+  serialNumber String? @map("numero_serie") @db.VarChar(80)
+  condition String? @map("condicion") @db.VarChar(30)
+  action String? @map("accion") @db.Char(1)
+  finalPosition Int? @map("posicion_final") @db.SmallInt
+  manufactureMonth DateTime? @map("fabricacion_mes") @db.Date
+  revisionMonth DateTime? @map("revision_mes") @db.Date
+  crpcId BigInt? @map("crpc_id")
+  performsPh Boolean @default(false) @map("realiza_ph")
+  testDate DateTime? @map("fecha_ensayo") @db.Date
+  revisionExpiresOn DateTime? @map("vence_revision_el") @db.Date
+  phResult String? @map("resultado_ph") @db.VarChar(15)
+  certificateNumber String? @map("numero_certificado") @db.VarChar(80)
+  description String? @map("descripcion") @db.VarChar(180)
+  service ServiceDraft @relation(fields: [serviceId], references: [id])
+  @@unique([serviceId, type, row])
+  @@map("servicio_intervenciones")
 }

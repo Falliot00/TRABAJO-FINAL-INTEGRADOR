@@ -35,6 +35,8 @@ import { SuppliersController } from "./modules/suppliers/suppliers.controller";
 import { SuppliersService } from "./modules/suppliers/suppliers.service";
 import { CatalogController } from "./modules/catalog/catalog.controller";
 import { CatalogService } from "./modules/catalog/catalog.service";
+import { ServiceDraftsController } from "./modules/services/service-drafts.controller";
+import { ServiceDraftsService } from "./modules/services/service-drafts.service";
 import {
   ComponentModelsController,
   RegulatoryActorsController,
@@ -87,6 +89,7 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       VehicleConfigurationsController,
       SuppliersController,
       CatalogController,
+      ServiceDraftsController,
     ],
     providers: [
       { provide: IdentityService, useValue: identity },
@@ -105,6 +108,10 @@ export async function createApplication(env: NodeJS.ProcessEnv = process.env) {
       },
       { provide: SuppliersService, useValue: new SuppliersService(db, audit) },
       { provide: CatalogService, useValue: new CatalogService(db, audit) },
+      {
+        provide: ServiceDraftsService,
+        useValue: new ServiceDraftsService(db, audit),
+      },
       {
         provide: "DatabaseLifecycle",
         useValue: { onModuleDestroy: () => db.$disconnect() },

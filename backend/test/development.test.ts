@@ -134,5 +134,34 @@ describe("Servidor de desarrollo", () => {
         "application/json"
       ].schema.$ref,
     ).toBe("#/components/schemas/VehicleDetailResponseDto");
+    expect(
+      spec.paths["/api/service-drafts"].post.responses["201"].content[
+        "application/json"
+      ].schema.$ref,
+    ).toBe("#/components/schemas/ServiceDraftResponseDto");
+    expect(
+      spec.paths["/api/service-drafts"].get.responses["200"].content[
+        "application/json"
+      ].schema.$ref,
+    ).toBe("#/components/schemas/ServiceDraftPageDto");
+    expect(
+      spec.paths["/api/service-drafts/{id}"].patch.parameters,
+    ).toContainEqual(
+      expect.objectContaining({
+        name: "X-CSRF-Token",
+        in: "header",
+        required: true,
+      }),
+    );
+    expect(
+      spec.components.schemas.ServiceDraftResponseDto.properties.totalAmount
+        .type,
+    ).toBe("string");
+    expect(spec.components.schemas.UpdateServiceDraftDto.required).toContain(
+      "version",
+    );
+    expect(
+      spec.components.schemas.DraftItemResponseDto.properties.costs.type,
+    ).toBe("array");
   });
 });

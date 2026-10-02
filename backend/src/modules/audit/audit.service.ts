@@ -21,6 +21,8 @@ type AuditAction =
   | "PROVEEDOR_ACTUALIZADO"
   | "OFERTA_CREADA"
   | "OFERTA_ACTUALIZADA"
+  | "BORRADOR_SERVICIO_CREADO"
+  | "BORRADOR_SERVICIO_ACTUALIZADO"
   | "PERSONA_CREADA"
   | "PERSONA_ACTUALIZADA"
   | "VEHICULO_CREADO"
@@ -39,6 +41,7 @@ interface AuditRecord {
     | "componentes"
     | "proveedores"
     | "catalogo_servicios"
+    | "servicios"
     | "personas"
     | "vehiculos"
     | "vehiculo_personas";

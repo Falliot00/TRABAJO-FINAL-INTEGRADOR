@@ -6,7 +6,7 @@
 
 **Fecha:** 27/09/2026
 
-**Estado:** diseño del equipo para revisión y aprobación explícita de la tutora y posterior evaluación del comité. No acredita aprobación ni implementación.
+**Estado:** etapa 2 aprobada según la devolución registrada en [APROBACION.md](APROBACION.md); precisiones del equipo confirmadas el 02/10/2026. Los módulos todavía no están implementados.
 
 ## 1. Alcance y prioridades
 
@@ -20,18 +20,20 @@ El [relevamiento de fichas](RELEVAMIENTO_FICHAS.md), la [referencia funcional de
 | P1 — Completa el MVP | Capacidades comprometidas que utilizan el núcleo. | También obligatorio para el MVP; la prioridad indica orden, no que sea opcional. |
 | Posterior | Mejoras expresamente fuera del MVP. | No condicionan la entrega final del alcance acordado. |
 
-Esta segunda entrega presenta el diseño. Las descripciones y criterios siguientes son compromisos de implementación futura, no funcionalidades ya disponibles. La codificación comienza después de la aprobación correspondiente.
+Esta segunda entrega presenta el diseño. Las descripciones y criterios siguientes son compromisos de implementación futura, no funcionalidades ya disponibles. La devolución de la tutora habilita avanzar a la implementación.
 
 ## 2. Usuarios y permisos
 
-Se proponen dos roles iniciales: **administrador** y **operador**. El propietario y su hijo tienen cuentas individuales con rol administrador y las mismas facultades. El operador es un usuario futuro limitado; sus restricciones se diseñan desde el inicio. Ser titular, contacto, pagador, proveedor o representante de una entidad no concede acceso a la aplicación.
+Se definen dos roles iniciales: **administrador** y **operador**. El propietario y su hijo tienen cuentas individuales con rol administrador y las mismas facultades. El operador es un usuario futuro limitado; sus restricciones se diseñan desde el inicio. Ser titular, contacto, pagador, proveedor o representante de una entidad no concede acceso a la aplicación.
+
+El 02/10/2026 el equipo confirmó que la información técnica y los borradores del taller se comparten entre usuarios autorizados: un operador puede continuar un borrador iniciado por el propietario o por otro usuario y consultar las fichas del vehículo. La autoría del registro no limita ese acceso técnico ni se reemplaza por quien lo continúa; cada acción conserva su autor. Compartir el trabajo no habilita rectificaciones al operador ni amplía su acceso a movimientos financieros ajenos, costos o saldos globales.
 
 | Capacidad | Administrador — propietario e hijo | Operador |
 | --- | --- | --- |
 | Administrar cuentas, permisos y parámetros sensibles | Sí | No |
 | Registrar y consultar personas, vehículos y equipos necesarios para atenderlos | Sí | Sí |
-| Registrar borradores, confirmar servicios y cargar resultados técnicos | Sí | Sí, según capacidades asignadas |
-| Consultar, generar y descargar fichas de la operación autorizada | Sí | Sí |
+| Registrar y continuar borradores del taller, confirmar servicios y cargar resultados técnicos | Sí | Sí, según capacidades asignadas, aunque los haya iniciado otro usuario |
+| Consultar, generar y descargar fichas de los vehículos atendidos por el taller | Sí | Sí, con acceso técnico compartido |
 | Rectificar fichas confirmadas | Sí, con motivo y vínculo a la anterior | No |
 | Registrar cobros de servicios y consultar movimientos originados por su operación | Sí | Sí |
 | Anular cobros o movimientos efectivos | Sí, con motivo y auditoría | No |
@@ -39,12 +41,12 @@ Se proponen dos roles iniciales: **administrador** y **operador**. El propietari
 | Consultar ofertas y precios de venta necesarios para registrar servicios | Sí | Sí, sin acceso a costos o administración del catálogo |
 | Registrar cupones de convenios existentes vinculados a un servicio | Sí | Sí, sin crear ni operar liquidaciones |
 | Consultar costos y perspectivas financieras globales, incluida Caja Real | Sí | No |
-| Registrar obligaciones, pagos a proveedores y gastos generales | Sí | No |
+| Registrar obligaciones, pagos a proveedores, gastos generales y devoluciones | Sí | No |
 | Crear, presentar o cobrar liquidaciones | Sí | No |
-| Consultar alertas | Técnicas y financieras | Técnicas de su ámbito autorizado |
+| Consultar alertas | Técnicas y financieras | Técnicas del taller, sin importes financieros restringidos |
 | Consultar auditoría global y administrar continuidad | Sí | No |
 
-Esta matriz concreta la separación general de la propuesta y queda sujeta a aprobación. La autorización se verifica en el backend, tanto por acción como por registro y campos sensibles. Una pantalla oculta o una ruta protegida sólo en el navegador no satisfacen el requisito. Los cambios de permisos y la baja de una cuenta no eliminan la autoría histórica.
+Esta matriz concreta la separación general de la propuesta y la colaboración técnica confirmada por el equipo. La autorización se verifica en el backend, tanto por acción como por registro y campos sensibles. Una pantalla oculta o una ruta protegida sólo en el navegador no satisfacen el requisito. Los cambios de permisos y la baja de una cuenta no eliminan la autoría histórica.
 
 ## 3. Módulos comprometidos
 
@@ -72,13 +74,13 @@ Las dependencias expresan colaboración y orden de construcción. M01 y M14 comp
 
 | ID | Evidencia esperada al implementar |
 | --- | --- |
-| M01 | Una cuenta desactivada no inicia nuevas sesiones y se revocan sus sesiones vigentes. Una petición directa de operador a Caja Real o anulación de cobros es rechazada aunque se fabrique fuera de la interfaz. Cada acción conserva su usuario real. |
+| M01 | Una cuenta desactivada no inicia nuevas sesiones y se revocan sus sesiones vigentes. Una petición directa de operador a Caja Real o anulación de cobros es rechazada aunque se fabrique fuera de la interfaz. Puede continuar un borrador ajeno y consultar la historia técnica del vehículo, sin recibir costos ni movimientos financieros ajenos en esas respuestas. Cada acción conserva su usuario real. |
 | M02 | Se configura el taller y sus sujetos relacionados sin convertir automáticamente un PEC/CRPC en proveedor. Modificar una referencia no altera la ficha ya confirmada; la próxima ficha toma los valores vigentes. |
 | M03 | Se recupera una persona y su vehículo sin volver a ingresar datos existentes. Se puede documentar titular, contacto y pagador diferentes. Los identificadores presentes se validan y los posibles duplicados se muestran antes de crear nuevos registros. |
 | M04 | Un vehículo no conserva dos configuraciones vigentes. Un componente individual no figura instalado simultáneamente en dos vehículos. Se reconstruye la configuración utilizada en un servicio anterior y se representan hasta cuatro cilindros. |
 | M05 | Cambiar el precio o la composición de una oferta no modifica los servicios ya confirmados. Un servicio puede registrar cantidades o componentes reales diferentes a la propuesta comercial y conserva su descripción e importes históricos. |
 | M06 | Guardar y recuperar un borrador conserva su preparación técnica/documental editable, pero no emite oblea, confirma una revisión, modifica la configuración ni crea obligación con proveedor. Una confirmación exitosa crea todos sus hechos dependientes una sola vez; un error antes del commit los revierte juntos y dos solicitudes concurrentes no duplican el trabajo. |
-| M07 | Se distingue una PH realizada sobre un cilindro existente de un reemplazo de cilindro. Una revisión quinquenal conserva la revisión anual y la oblea relacionadas cuando correspondan; el recambio de válvulas se identifica como política de CILGAS. No se asigna un resultado aprobado a un ensayo sin resultado registrado. |
+| M07 | Se distingue una PH realizada sobre un cilindro existente de un reemplazo de cilindro. Una revisión quinquenal conserva la revisión anual y la oblea relacionadas cuando correspondan; el recambio de válvulas viene propuesto y puede ajustarse por cilindro. Si se conserva una válvula, no se generan retiro, instalación, cargo ni costo de recambio ficticios. No se asigna un resultado aprobado a un ensayo sin resultado registrado. |
 | M08 | El PDF conserva todos los grupos del formulario aplicables, admite hasta cuatro cilindros y se imprime sin cortes. Una edición posterior de datos maestros no cambia el snapshot ni el PDF archivado. Rectificar genera una nueva versión con motivo y vínculo. Un fallo del generador permite reintentar sin duplicar el servicio. |
 | M09 | Para un servicio de ARS 100.000, un cobro de ARS 30.000 deja ARS 70.000 pendientes. Un cobro combinado conserva el importe de cada medio y suma el total registrado. Cada anticipo referencia un servicio concreto. La anulación conserva el movimiento original y sólo la realiza un administrador. |
 | M10 | Un costo de proveedor de ARS 20.000 genera una obligación al confirmar el servicio. Pagar ARS 8.000 deja ARS 12.000 pendientes. Si se paga ARS 3.000 en efectivo y ARS 5.000 por transferencia, ambas fracciones integran una operación atómica y se descuentan una sola vez; su cabecera y asignaciones no agregan otros egresos. Un costo absorbido no produce un pago ficticio. Un gasto general efectivo conserva concepto, fecha y autor. |
@@ -96,7 +98,7 @@ La propuesta compromete anticipos por servicio y establece que guardar un borrad
 
 El anticipo requiere total acordado, pagador, medio, fecha e importe. Los cobros netos no pueden superar el total acordado; una edición del borrador no puede dejarlo por debajo de lo ya cobrado sin resolver explícitamente la diferencia.
 
-Un borrador con cobros vinculados no puede eliminarse silenciosamente. Si el registro de cobro era erróneo, el administrador puede anularlo con trazabilidad. Si hubo dinero recibido y luego devuelto, se conserva el ingreso y se registra la devolución como egreso: anular un registro no representa una devolución real. No se traslada el importe a un saldo general del cliente. Esta resolución de la ambigüedad es una propuesta del equipo para aprobación, no una regla previamente validada con el cliente.
+Un borrador con cobros vinculados no puede eliminarse silenciosamente. Si el registro de cobro era erróneo, el administrador puede anularlo con trazabilidad. Si hubo dinero recibido y luego devuelto, se conserva el ingreso y se registra la devolución como egreso: anular un registro no representa una devolución real. No se traslada el importe a un saldo general del cliente. El equipo ratificó esta regla el 02/10/2026 y pidió resolver el caso excepcional mediante los egresos existentes, sin desarrollar un módulo independiente. El egreso conserva el vínculo al cobro; una vez resuelto el anticipo se cancela el borrador, preservando su motivo, autoría e historia y retirándolo de los pendientes operativos. Los permisos de devolución y anulación siguen reservados al administrador.
 
 ### 5.2 Confirmación y documentos
 
@@ -110,6 +112,10 @@ Los medios de pago describen cobros o egresos efectivos. Un cupón, una liquidac
 
 El formulario aportado sirve como fuente de requisitos y como referencia visual. El sistema asiste el registro y la impresión; no aprueba ensayos, habilita vehículos ni reemplaza SICGNC. El significado final del identificador externo y las excepciones admitidas para rectificar documentos se validarán con la tutora y los responsables del circuito antes de implementar esas reglas.
 
+### 5.5 Interfaz operativa
+
+El equipo confirmó el 02/10/2026 una interfaz con temas oscuro y claro, acento amarillo, menú lateral adaptable y tablas de consulta. Los formularios pueden reorganizarse para el flujo aprobado, priorizando búsqueda rápida, recuperación de datos y claridad al confirmar un servicio. La colaboración técnica debe permitir retomar un borrador sin duplicar personas, vehículos ni trabajos.
+
 ## 6. Orden de construcción posterior a la aprobación
 
 | Incremento | Módulos involucrados | Recorrido completo que debe quedar verificable |
@@ -120,7 +126,7 @@ El formulario aportado sirve como fuente de requisitos y como referencia visual.
 | 4. Convenios y vencimientos | M12, M13 | Liquidar cupones de forma básica y consultar alertas derivadas. |
 | 5. Validación final y continuidad | Todos, con M15 completo | Recorridos críticos, permisos, PDF impreso y restauración documentada. |
 
-Las pruebas, la auditoría y la documentación acompañan cada incremento. El orden no autoriza omitir módulos P1 ni ampliar el alcance. Los calendarios concretos se ajustarán a la fecha de aprobación.
+Las pruebas, la auditoría y la documentación acompañan cada incremento. El orden no autoriza omitir módulos P1 ni ampliar el alcance. El equipo confirmó el 02/10/2026 la entrega final del 14/11/2026 y 40 horas semanales combinadas, con la última semana reservada para estabilización, informe, manuales y video. Los pendientes de interpretación de fichas se revisarán con el propietario y el responsable técnico antes de cerrar los servicios y la emisión de PDF afectados; no impiden construir la base y el acceso.
 
 ## 7. Capacidades posteriores y exclusiones
 
@@ -138,4 +144,4 @@ Continúan fuera de alcance la facturación fiscal/ARCA, contabilidad formal, au
 
 ## 8. Aprobación
 
-El listado debe revisarse junto con el [diseño de datos](MODELO_DATOS.md) y la [arquitectura](ARQUITECTURA.md). La aprobación se registrará en [APROBACION.md](APROBACION.md) con fecha, persona que aprueba, evidencia y cambios solicitados. La inclusión del documento en GitHub no sustituye la aprobación explícita de la tutora ni la evaluación posterior del comité.
+El listado se interpreta junto con el [diseño de datos](MODELO_DATOS.md) y la [arquitectura](ARQUITECTURA.md). La devolución de la tutora y la distinción entre aprobación académica, precisiones del equipo y validaciones técnicas pendientes están registradas en [APROBACION.md](APROBACION.md).

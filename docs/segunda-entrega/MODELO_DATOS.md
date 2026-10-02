@@ -2,7 +2,7 @@
 
 Segunda entrega · Diseño propuesto · 27/09/2026.
 
-Este modelo desarrolla los conceptos acordados en [CONTEXT.md](../../CONTEXT.md), los [ADR 0002–0004](../adr/) y los campos observados en el [relevamiento de las cinco fichas](RELEVAMIENTO_FICHAS.md). Conserva la operación útil del [sistema original](REFERENCIA_FUNCIONAL.md) y mejora su trazabilidad. Está **pendiente de revisión y aprobación explícita de la tutora y del comité**.
+Este modelo desarrolla los conceptos acordados en [CONTEXT.md](../../CONTEXT.md), los [ADR 0002–0004](../adr/) y los campos observados en el [relevamiento de las cinco fichas](RELEVAMIENTO_FICHAS.md). La etapa 2 está aprobada según la devolución registrada en [APROBACION.md](APROBACION.md); las reglas regulatorias pendientes mantienen su validación específica.
 
 ## Documentos que componen el esquema
 
@@ -156,7 +156,7 @@ Los filtros por período muestran flujos del período. Para un saldo acumulado a
 | Cobro del convenio único y repartido correctamente | Máximo una operación de cobro activa por liquidación. | Liquidación ENTREGADA, total completo, distribución exactamente a sus cupones/servicios, sin nuevo ingreso por estado COBRADA. |
 | Alerta apunta a un solo objeto real | Cuatro FK alternativas + CHECK exactamente una + índices únicos. | Corresponder tipo de regla y FK, sólo resultados vigentes y vencimientos todavía aplicables; limitar ámbito por rol. |
 | Renovación conserva el antecedente | FK al servicio previo e índice único parcial de sucesor no cancelado. | Mismo vehículo, anterior confirmado e impedir ciclos. Cancelar un borrador conserva su relación histórica y permite preparar otra renovación; reactivarlo exige que no exista otro sucesor activo. |
-| Acceso mínimo e historia protegida | FK a usuarios, roles y capacidades. | Hash seguro/sesiones, ámbito propio del operador, permisos de anulación/rectificación, auditoría y restricciones de escritura. |
+| Acceso mínimo e historia protegida | FK a usuarios, roles y capacidades. | Hash seguro/sesiones, acceso técnico compartido y movimientos financieros propios del operador, permisos de anulación/rectificación, auditoría y restricciones de escritura. |
 
 No se incluyen triggers ni funciones de negocio en esta entrega. La inmutabilidad no se promete por un `CHECK`: deberá implementarse con rutas autorizadas, transacciones, permisos y pruebas de integración. La cuenta cotidiana de la aplicación no tendrá permisos administrativos sobre el esquema.
 

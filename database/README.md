@@ -1,6 +1,6 @@
 # Base de datos — segunda entrega
 
-Diseño relacional propuesto para CILGAS. PostgreSQL es la única fuente persistente; JSONB se utiliza exclusivamente para el contenido histórico de las fichas confirmadas. **No hay aprobación registrada de tutora/comité ni migración productiva.**
+Diseño relacional de CILGAS incluido en la etapa 2 aprobada, según el [registro de devolución de la tutora](../docs/segunda-entrega/APROBACION.md). PostgreSQL es la única fuente persistente; JSONB se utiliza exclusivamente para el contenido histórico de las fichas confirmadas. **El SQL sigue siendo diseño declarativo; no es una migración productiva.**
 
 | Archivo | Contenido |
 | --- | --- |

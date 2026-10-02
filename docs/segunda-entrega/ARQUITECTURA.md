@@ -6,7 +6,7 @@
 
 **Fecha:** 27/09/2026
 
-**Estado:** diseño del equipo para revisión; aprobación explícita de tutora y posterior evaluación del comité pendientes de registrar. No se presenta implementación.
+**Estado:** diseño de etapa 2 aprobado según la devolución registrada en [APROBACION.md](APROBACION.md). No se presenta implementación.
 
 ## 1. Decisión arquitectónica
 
@@ -172,6 +172,8 @@ La autenticación local empleará Argon2id con parámetros calibrados para el en
 
 Toda operación comprobará autorización en el backend. Las consultas aplicarán el alcance del usuario también a filtros, exportaciones futuras, PDF, alertas y detalle de registros. Los costos, pagos a proveedores y saldos globales no se incluirán en respuestas del operador para luego ocultarlos visualmente.
 
+El alcance técnico compartido, confirmado por el equipo el 02/10/2026, permite al operador continuar borradores de otros usuarios y consultar fichas e historia técnica del taller. Ese acceso no depende de haber creado el registro; cada acción conserva su autor y sigue sujeta a las capacidades del rol. Los movimientos financieros del operador mantienen el alcance propio definido en [la matriz de permisos](MODULOS.md), y compartir un borrador no expone los costos ni los movimientos ajenos asociados.
+
 La API validará tipos, límites, formatos y relaciones entre datos. Las consultas SQL explícitas usarán parámetros. El registro de errores y auditoría omitirá contraseñas, tokens y cookies; la auditoría conservará sólo los datos necesarios para explicar la acción y estará restringida a administradores.
 
 El despliegue expondrá únicamente HTTPS y el acceso administrativo del servidor según su configuración. PostgreSQL, el proceso Node y los archivos PDF no se publicarán directamente. Las credenciales se inyectarán por configuración fuera de Git y se usarán permisos mínimos en aplicación, base y respaldos. El repositorio público contendrá ejemplos sintéticos; las fichas reales y los datos de clientes no se publicarán.
@@ -224,8 +226,9 @@ Antes de codificar las reglas afectadas deben revisarse con la tutora y los resp
 
 1. Identidad y responsabilidades de CILGAS frente a TdM, PEC y CRPC, sin deducirlas sólo de una ficha.
 2. Significado y formato del identificador externo de SICGNC y reglas aceptadas de rectificación.
-3. Tratamiento del anticipo registrado contra un servicio todavía en borrador y su cancelación.
-4. Reglas excepcionales de retiro/disponibilidad de cilindros usados, manteniendo fuera el inventario integral.
-5. Correspondencia final entre los campos de la ficha real, el modelo y la plantilla propuesta, incluidos resultados no satisfactorios y fechas regulatorias.
+3. Reglas excepcionales de retiro/disponibilidad de cilindros usados, manteniendo fuera el inventario integral.
+4. Correspondencia final entre los campos de la ficha real, el modelo y la plantilla propuesta, incluidos resultados no satisfactorios y fechas regulatorias.
 
-La selección de Nginx y Playwright/Chromium queda definida por el equipo para esta entrega. La [validación del diseño](VALIDACION.md) diferencia las comprobaciones realizadas de las pruebas futuras. La aprobación de la arquitectura, el modelo y los módulos requiere evidencia explícita en el [registro de revisión](APROBACION.md); no se deduce de publicar estos documentos.
+El tratamiento de anticipos quedó ratificado por el equipo el 02/10/2026: devolución como egreso vinculado y cancelación del borrador conservando la historia, con la simplicidad operativa descrita en [las reglas de negocio](REGLAS_NEGOCIO.md).
+
+La selección de Nginx y Playwright/Chromium forma parte del diseño de etapa 2 aprobado. La [validación del diseño](VALIDACION.md) diferencia las comprobaciones realizadas de las pruebas futuras. El [registro de revisión](APROBACION.md) conserva la devolución de la tutora y el alcance de su evidencia.

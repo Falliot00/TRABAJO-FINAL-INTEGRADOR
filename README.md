@@ -17,18 +17,18 @@ El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan
 
 ## Segunda entrega — Diseño y módulos
 
-**Fecha de preparación y publicación: 27/09/2026. Estado: publicada para revisión; aprobación de la tutora y del comité pendiente.**
+**Fecha de preparación y publicación: 27/09/2026. Estado: etapa 2 aprobada, según la devolución de la tutora comunicada por el equipo el 02/10/2026.**
 
 El [índice de la segunda entrega](docs/segunda-entrega/README.md) reúne el diseño relacional, las fichas relevadas, los módulos priorizados, la arquitectura y el registro de validación. El [modelo de datos](docs/segunda-entrega/MODELO_DATOS.md), el [diccionario completo](database/DICCIONARIO_DATOS.md) y el [DDL](database/01-esquema.sql) se complementan para mostrar tablas, campos, tipos, claves, relaciones e índices.
 
 - [Listado de módulos y permisos](docs/segunda-entrega/MODULOS.md).
-- [Arquitectura y tecnologías definitivas propuestas](docs/segunda-entrega/ARQUITECTURA.md).
+- [Arquitectura y tecnologías definidas](docs/segunda-entrega/ARQUITECTURA.md).
 - [Reglas de negocio y ejemplos financieros](docs/segunda-entrega/REGLAS_NEGOCIO.md).
 - [Relevamiento de las cinco fichas](docs/segunda-entrega/RELEVAMIENTO_FICHAS.md).
 - [Continuidad funcional con el sistema original](docs/segunda-entrega/REFERENCIA_FUNCIONAL.md).
 - [Checklist y registro de aprobación](docs/segunda-entrega/APROBACION.md).
 
-`/frontend`, `/backend` y `/packages/contracts` contienen solamente carpetas con marcadores vacíos. `/database` contiene diseño SQL declarativo y `/docs` contiene documentación y diagramas. **No se incorpora código de aplicación en esta entrega.** El contenido está publicado en el repositorio único, con evidencia en el registro de aprobación; la implementación comenzará luego de las aprobaciones exigidas por la cátedra.
+`/frontend`, `/backend` y `/packages/contracts` contienen solamente carpetas con marcadores vacíos. `/database` contiene diseño SQL declarativo y `/docs` contiene documentación y diagramas. **No se incorpora código de aplicación en esta entrega.** La devolución de la tutora informa que el aprobado está asentado en la plataforma e indica avanzar al código y a la entrega final; la evidencia y su alcance están en el registro de aprobación.
 
 ## Cliente
 
@@ -58,7 +58,7 @@ En el flujo habitual de una revisión quinquenal:
 2. se solicitan nuevamente sus datos y los del vehículo, aunque ya haya sido atendida anteriormente;
 3. se realiza el trabajo técnico sobre uno o más cilindros y componentes;
 4. se efectúa también la revisión anual y se asigna una nueva oblea;
-5. el propietario decide los reemplazos técnicos y CILGAS reemplaza las válvulas por política operativa propia;
+5. el propietario decide los reemplazos técnicos; el cambio de válvulas se propone habitualmente y puede ajustarse por cilindro según lo realizado;
 6. el cliente paga en efectivo, transferencia o mediante las condiciones comerciales acordadas;
 7. el hijo del propietario completa la ficha técnica en papel;
 8. el hijo y el propietario controlan la documentación;
@@ -284,6 +284,8 @@ Se realizarán copias automáticas diarias, almacenadas fuera del VPS y conserva
 
 El equipo dispone de aproximadamente 40 horas semanales combinadas.
 
+El 02/10/2026 el equipo confirmó esa dedicación y la fecha de entrega final del 14/11/2026. No informó una consigna final adicional a los entregables previstos: aplicación desplegada, informe, manuales y video.
+
 | Período | Objetivo | Resultado esperado |
 | --- | --- | --- |
 | Hasta 30/08 | Propuesta y repositorio | Problema, valor, alcance, stack, riesgos, viabilidad y repositorio único. |
@@ -347,7 +349,7 @@ El producto se considerará exitoso si:
 - cobros parciales y combinados;
 - nacimiento de obligaciones al realizar servicios;
 - saldos derivados desde hechos financieros;
-- reemplazo de válvulas como política operativa de CILGAS;
+- reemplazo habitual de válvulas, precisado por el equipo el 02/10/2026 como propuesta ajustable por cilindro;
 - infraestructura disponible y administración posterior.
 
 ### Hipótesis de diseño aceptadas
@@ -364,5 +366,5 @@ El producto se considerará exitoso si:
 - ciclo posterior de los cilindros usados que quedan en poder de CILGAS;
 - significado y formato definitivo del identificador devuelto por SICGNC;
 - reglas excepcionales de rectificación aceptadas por el circuito regulatorio;
-- revisión académica de las decisiones de segunda entrega: Nginx y PDF con Playwright/Chromium;
+- validación durante la implementación de Nginx y del PDF con Playwright/Chromium;
 - validaciones específicas de las fichas y el diseño indicadas en [APROBACION.md](docs/segunda-entrega/APROBACION.md).

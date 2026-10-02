@@ -4,7 +4,7 @@
 
 **Fecha de análisis:** 27/09/2026.
 
-**Estado:** evidencia relevada y decisiones de diseño propuestas; pendiente de validación del propietario, responsables técnicos y tutora según su competencia.
+**Estado:** evidencia relevada; etapa 2 aprobada según [APROBACION.md](APROBACION.md). Los pendientes técnicos y regulatorios mantienen su validación con el propietario y los responsables correspondientes.
 
 ## Objetivo y tratamiento de las fuentes
 
@@ -21,6 +21,8 @@ Las fotografías contienen datos personales, dominios, documentos, firmas y sell
 | F05 | WhatsApp Image 2026-09-15 at 15.22.56.jpeg | Ficha parcialmente recortada en el borde inferior. Permite reconocer los campos de oblea anterior y nueva con valores cargados. |
 
 La fecha del nombre de archivo identifica la fotografía; **no se utiliza como fecha del servicio**. Una casilla vacía no demuestra que el dato sea opcional para confirmar una operación: puede tratarse de una ficha incompleta. Tampoco las marcas manuscritas establecen por sí solas una regla normativa.
+
+El 02/10/2026 el equipo volvió a aportar estas mismas cinco fotografías. Su contraste visual confirma el relevamiento existente: ninguna muestra cómo documentar cuatro recambios de válvula y F03 no resuelve por sí sola la matriz de operación y PH. RF-02 y RF-03 siguen pendientes; el equipo aceptó revisarlos con el propietario y el responsable técnico antes de cerrar la emisión de los casos afectados.
 
 ## Campos observados y trazabilidad al modelo
 
@@ -70,7 +72,7 @@ En F03 la combinación de marcas parece distinta y necesita confirmación. No se
 5. la oblea y demás resultados del servicio;
 6. la ficha confirmada con la versión de plantilla correspondiente.
 
-El [glosario](../../CONTEXT.md) ya distingue prueba hidráulica de revisión quinquenal. La inclusión de revisión anual, oblea y reemplazo de válvulas en la revisión quinquenal proviene del relevamiento operativo previo del proyecto; **las fotografías no prueban por sí solas una obligación normativa general**. Tampoco prueban que realizar PH obligue a cambiar el cilindro.
+El [glosario](../../CONTEXT.md) distingue prueba hidráulica de revisión quinquenal. La revisión anual y la oblea incluidas en la revisión quinquenal provienen del relevamiento operativo. El equipo precisó el 02/10/2026 que el reemplazo de válvulas se propone por defecto y puede ajustarse por cilindro según el trabajo realizado; **las fotografías no prueban por sí solas una obligación normativa general**. Tampoco prueban que realizar PH obligue a cambiar el cilindro.
 
 ## Relaciones y cardinalidades propuestas
 
@@ -114,4 +116,4 @@ Los componentes retirados o dados de baja pueden figurar en una ficha aunque no 
 | RF-10 | ¿Cómo se corrige una ficha ya presentada y se vincula su oblea? | Confirmar el circuito externo de rectificación, preservando siempre la versión previa según ADR 0003. |
 | RF-11 | ¿Las categorías de vehículo son excluyentes y qué diferencia técnica hay entre tubería y caño de alta presión? | Cerrar catálogos y evitar fusionar conceptos diferentes de la plantilla. |
 
-Estos pendientes no equivalen a aprobaciones. El diseño presentado debe revisarse explícitamente con la tutora y, posteriormente, con el comité antes de iniciar la implementación. Los controles técnicos y regulatorios se validarán con quienes tienen competencia sobre ellos.
+La aprobación académica registrada habilita avanzar al desarrollo. Estos pendientes técnicos y regulatorios se validarán con quienes tienen competencia sobre ellos antes de implementar las reglas y la emisión afectadas; las fotografías y la devolución académica no sustituyen esa validación.

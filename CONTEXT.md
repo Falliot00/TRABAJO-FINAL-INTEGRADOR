@@ -13,7 +13,7 @@ Ensayo técnico realizado sobre uno o más cilindros como parte de su revisión 
 _Evitar_: Revisión quinquenal, cambio de cilindro
 
 **Revisión quinquenal**:
-Servicio realizado cada cinco años para revisar uno o más cilindros y renovar la habilitación correspondiente. En CILGAS incluye la revisión anual, una oblea nueva y, por política operativa del propietario, el reemplazo de las válvulas involucradas.
+Servicio realizado cada cinco años para revisar uno o más cilindros y renovar la habilitación correspondiente. En CILGAS incluye la revisión anual y una oblea nueva; el reemplazo de válvulas es una propuesta habitual ajustable por cilindro según el trabajo efectivamente realizado.
 _Evitar_: Prueba hidráulica, revisión anual
 
 **Ficha técnica**:
@@ -35,6 +35,10 @@ _Evitar_: Servicio del catálogo, prestación
 **Borrador de servicio**:
 Registro preparatorio cuyo guardado no produce efectos técnicos, documentales ni financieros. Puede recibir un anticipo mediante una acción explícita de cobro independiente; si existen cobros vinculados, su edición y descarte deben respetarlos.
 _Evitar_: Servicio realizado
+
+**Borrador cancelado**:
+Registro de un trabajo que finalmente no se realizó, conservado con su motivo y la historia de los anticipos recibidos y resueltos, si los hubo.
+_Evitar_: Servicio realizado, servicio eliminado
 
 **Configuración del equipo**:
 Conjunto de componentes que integran el equipo de GNC de un vehículo durante un período de su historia; sólo una configuración puede estar vigente a la vez.
@@ -65,6 +69,10 @@ _Evitar_: Cobro, cierre de caja
 **Cobro**:
 Ingreso de dinero efectivamente recibido y aplicado a un trabajo concreto.
 _Evitar_: Venta, importe facturado
+
+**Devolución al cliente**:
+Salida de dinero que reintegra total o parcialmente un cobro recibido por un servicio concreto. Conserva la historia del ingreso y de su devolución.
+_Evitar_: Anulación del cobro, eliminación del servicio
 
 **Obligación con proveedor**:
 Deuda que nace al realizarse un trabajo por un costo atribuible a un proveedor, aunque todavía no haya sido pagada.

@@ -6,7 +6,7 @@
 
 **Tutora:** Sofía Carnevale · **Fecha de preparación:** 27/09/2026
 
-**Estado:** propuesta de diseño publicada para revisión el 27/09/2026; aprobación académica pendiente.
+**Estado:** diseño publicado el 27/09/2026; etapa 2 aprobada según la devolución de Sofía Carnevale aportada por el equipo el 02/10/2026. La tutora indicó avanzar al código y preparar la entrega final.
 
 ## Objetivo de la entrega
 
@@ -50,6 +50,8 @@ Las carpetas de aplicación sólo contienen marcadores vacíos. No se generan ap
 
 ## Alcance de la aprobación
 
-La publicación en el repositorio único de GitHub fue comprobada el 27/09/2026 y quedó asentada en el registro de revisión y aprobación. Esto acredita disponibilidad del contenido, no aprobación académica. La tutora debe aprobar explícitamente el diseño y el listado de módulos, y luego debe intervenir el comité conforme a la consigna. Las observaciones recibidas se registrarán y resolverán antes de iniciar la etapa de implementación.
+La publicación en el repositorio único de GitHub fue comprobada el 27/09/2026. El equipo aportó el 02/10/2026 la devolución de Sofía: «ya esta asentado el aprobado de la etapa 2 en la plataforma», junto con su indicación de trasladar el análisis al código. La aprobación de esta etapa permite continuar la implementación del diseño y los módulos acordados, sin solicitar una nueva aprobación de etapa 2.
 
-La tarea del campus se utilizará para asentar la devolución y deberá marcarse como finalizada según el procedimiento de la cátedra. El contenido se revisa en GitHub.
+El [registro de aprobación](APROBACION.md) conserva la publicación y la evidencia aportada. El 02/10/2026 es la fecha de registro de la devolución, no la fecha exacta de envío del mensaje, que se desconoce. No se accedió al campus ni se identificó el SHA revisado por la tutora o una constancia independiente del comité.
+
+Las validaciones operativas y regulatorias de las fichas continúan con CILGAS y sus responsables técnicos antes de emitir documentación real de los casos afectados. La aprobación académica no sustituye esas verificaciones ni las pruebas de implementación.

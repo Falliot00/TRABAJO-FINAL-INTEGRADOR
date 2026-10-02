@@ -88,4 +88,4 @@ Los escenarios de [MODULOS.md](MODULOS.md) y [ARQUITECTURA.md](ARQUITECTURA.md) 
 
 Las invariantes entre filas —sumas, límites acumulados, transiciones, correspondencia técnica, permisos e inmutabilidad— deberán implementarse y probarse en las transacciones del backend. El modelo identifica el control responsable y no presume que el DDL por sí solo resuelve todas esas reglas.
 
-Los resultados de esta revisión se presentan a la tutora junto con [los puntos pendientes de aprobación](APROBACION.md). Una comprobación técnica exitosa no constituye aprobación académica ni valida por sí misma requisitos regulatorios.
+Los resultados anteriores conservan la evidencia de la revisión del 27/09/2026. La devolución académica posterior y los pendientes operativos actuales se consultan en el [registro de aprobación](APROBACION.md). Una comprobación técnica exitosa no valida por sí misma requisitos regulatorios.

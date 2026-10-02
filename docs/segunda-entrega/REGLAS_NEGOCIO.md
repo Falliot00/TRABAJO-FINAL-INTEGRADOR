@@ -1,6 +1,6 @@
 # Reglas de negocio e invariantes del diseño
 
-Fecha: 27/09/2026. Documento derivado de la propuesta del repositorio, sus ADRs y las fichas relevadas. Las precisiones nuevas se presentan a revisión del equipo y la tutora; no se atribuyen a una aprobación que aún no consta.
+Fecha de diseño: 27/09/2026. Documento derivado de la propuesta del repositorio, sus ADRs y las fichas relevadas. La aprobación académica de la etapa 2 se registra en [APROBACION.md](APROBACION.md). El 02/10/2026 el equipo confirmó el reemplazo de válvulas propuesto por defecto y ajustable por cilindro, el trabajo técnico compartido y el tratamiento trazable de anticipos; los pendientes regulatorios mantienen su validación específica.
 
 ## Operación y documentación
 
@@ -16,7 +16,7 @@ Fecha: 27/09/2026. Documento derivado de la propuesta del repositorio, sus ADRs 
 | RN-08 | PH es un ensayo de una revisión de cilindro; no implica cambiarlo. | Resultado de revisión por cilindro separado de operación de ficha y de reemplazo. |
 | RN-09 | F01 muestra PH junto con revisión anual; la posible variante de operación y anotación de F03 requiere confirmación. | Se registra PH por separado: no se deduce exclusivamente de la letra R ni se inventa un código oficial de operación. |
 | RN-10 | Los renglones pueden registrar montajes, desmontajes, bajas o continuidad según el código validado. | La lista documental de intervenciones no equivale a la configuración final del vehículo. |
-| RN-11 | El reemplazo de válvulas es política operativa indicada en la propuesta de CILGAS. | El servicio registra las válvulas concretas retiradas y colocadas; no se presenta como obligación normativa general. |
+| RN-11 | El reemplazo de válvulas se propone por defecto en la revisión quinquenal y puede ajustarse por cilindro. | El servicio registra únicamente los retiros e instalaciones efectivamente realizados. Conservar una válvula no crea un recambio, un cargo ni un costo ficticios; no se presenta el reemplazo como obligación normativa general. |
 | RN-12 | Una ficha confirmada es inmutable. | Snapshot autocontenido versionado, plantilla identificada y rectificación enlazada con motivo, usuario y fecha. |
 | RN-13 | Corregir una ficha no autoriza a modificar silenciosamente cobros, deudas ni historia técnica. | La rectificación documental y los ajustes económicos tienen acciones explícitas, permisos y auditoría propios. |
 | RN-14 | La generación de PDF usa exclusivamente el snapshot confirmado. | Un error de generación permite reintentar sin reconfirmar el servicio ni duplicar sus efectos. |
@@ -28,6 +28,8 @@ Fecha: 27/09/2026. Documento derivado de la propuesta del repositorio, sus ADRs 
 Todo cobro representa dinero recibido y se aplica desde su registro a un servicio identificado. No existen saldos a favor generales ni cuentas corrientes de clientes en el MVP. Los pagos combinados se descomponen por medio y se registran de forma atómica, evitando que una parte quede guardada si la otra falla.
 
 **Precisión de diseño para los anticipos:** se puede registrar un cobro explícito contra un servicio en borrador. Esto no es un efecto de guardar el borrador y no produce efectos técnicos. El borrador con cobros no puede borrarse físicamente. Si el trabajo no se realiza, el administrador debe resolver el cobro: anular un registro erróneo o registrar una devolución efectiva, según corresponda. Una devolución real es un egreso trazable; no se borra el ingreso que efectivamente ocurrió.
+
+El equipo ratificó esta regla el 02/10/2026 y pidió mantener sencilla su operación, por considerarla excepcional. La devolución reutiliza el registro de egresos con vínculo al cobro de origen; no requiere un módulo independiente. Una vez resuelto el anticipo, se cancela el borrador con motivo y auditoría, conservando servicio, cobro y egreso para explicar el movimiento. Por ejemplo, un anticipo de ARS 30.000 devuelto íntegramente conserva un ingreso de ARS 30.000 y un egreso de ARS 30.000: el flujo neto es cero. La cancelación lo retira de los pendientes operativos, pero no borra su historia económica. Se mantienen los permisos administrativos de egresos y anulaciones.
 
 El backend deberá impedir que los cobros netos superen el total acordado del servicio y modificaciones del borrador que dejen cobros netos por encima de ese total. Para este control, cobros netos = cobros efectivos vigentes − devoluciones efectivas vigentes vinculadas al servicio. La devolución nunca puede superar el importe neto previamente recibido. Un anticipo requiere un total acordado, pagador, medio, fecha e importe. El servicio puede estar confirmado con saldo pendiente.
 

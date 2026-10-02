@@ -1,6 +1,6 @@
 # Desarrollo de CILGAS
 
-La aplicación implementa identidad, acceso, permisos, auditoría, M02 (configuración y referencias), M03 (personas y vehículos), la base de identidad de componentes de M04, el catálogo de M05 y los proveedores comerciales necesarios de M10. La confirmación de servicios, su historia técnica, las fichas y las finanzas se implementarán en incrementos posteriores según el [diseño aprobado](segunda-entrega/README.md). El DDL de `database/` sigue siendo referencia del modelo completo; no se ejecuta sobre la aplicación para adelantar módulos.
+La aplicación implementa identidad, acceso, permisos, auditoría, M02 (configuración y referencias), M03 (personas y vehículos), la base de identidad de componentes de M04, el catálogo de M05, los proveedores comerciales necesarios de M10 y los borradores de servicios de M06. La confirmación de servicios, su historia técnica, las fichas y las finanzas se implementarán en incrementos posteriores según el [diseño aprobado](segunda-entrega/README.md). El DDL de `database/` sigue siendo referencia del modelo completo; no se ejecuta sobre la aplicación para adelantar módulos.
 
 ## Herramientas y configuración
 
@@ -35,7 +35,7 @@ docker compose up -d --wait postgres
 pnpm db:migrate
 ```
 
-`db:migrate` aplica las migraciones versionadas de `backend/prisma/migrations/` mediante `prisma migrate deploy`. Puede repetirse; no reinicia ni vacía la base. Las migraciones crean identidad, permisos, sesiones y auditoría, junto con los maestros y relaciones de M02/M03, componentes individuales, proveedores y catálogo. Para actualizar una instalación existente, generar el cliente Prisma y aplicar las migraciones antes de iniciar el nuevo backend.
+`db:migrate` aplica las migraciones versionadas de `backend/prisma/migrations/` mediante `prisma migrate deploy`. Puede repetirse; no reinicia ni vacía la base. Las migraciones crean identidad, permisos, sesiones y auditoría, junto con los maestros y relaciones de M02/M03, componentes individuales, proveedores, catálogo y borradores con su preparación técnica. Para actualizar una instalación existente, generar el cliente Prisma y aplicar las migraciones antes de iniciar el nuevo backend.
 
 Definir nombre, email válido y una contraseña de entre 12 y 128 caracteres en las variables `BOOTSTRAP_ADMIN_*` de `.env`. No hay contraseña de acceso predeterminada. Luego ejecutar:
 
@@ -94,7 +94,7 @@ Desde **Personas**, buscar por documento o nombre antes de registrar. El formula
 
 Los documentos, dominios, códigos y matrículas se transportan como texto. La API normaliza identificadores y mantiene restricciones únicas para resolver también altas concurrentes. Los campos opcionales pueden vaciarse durante una edición y las bajas son lógicas.
 
-Las relaciones del vehículo distinguen **titular** y **contacto**, con inicio y fin de vigencia. Un cambio de titular cierra el vínculo anterior y conserva su historia; la fecha de fin es exclusiva y debe ser posterior al inicio. El **pagador** se asignará al servicio en M06: no se agrega como vínculo permanente del vehículo. Los maestros actuales no implementan ni alteran snapshots o PDF; la preservación documental completa se verificará con M08.
+Las relaciones del vehículo distinguen **titular** y **contacto**, con inicio y fin de vigencia. Un cambio de titular cierra el vínculo anterior y conserva su historia; la fecha de fin es exclusiva y debe ser posterior al inicio. El **pagador** se asigna al borrador de servicio en M06: no se agrega como vínculo permanente del vehículo. Los maestros actuales no implementan ni alteran snapshots o PDF; la preservación documental completa se verificará con M08.
 
 La tabla de configuración conserva la identidad comercial del taller y una referencia explícita al actor TdM. Los datos documentales del actor siguen siendo independientes. Las referencias de marcas/modelos de este tramo corresponden a los modelos técnicos de componentes; los vehículos conservan marca y modelo textuales según el diseño aprobado.
 
@@ -107,6 +107,18 @@ Desde **Proveedores**, el administrador registra nombre, CUIT opcional y contact
 Probar una oferta con precio y costos decimales, editar su composición y recuperarla. Luego ingresar como operador: puede consultar la oferta y sus precios de venta, pero no administrar el catálogo ni consultar proveedores o costos. La API aplica esas restricciones aunque se fabrique una petición fuera de la interfaz. Cada modificación autorizada conserva su auditoría transaccional.
 
 Este tramo no confirma servicios, no registra instalaciones, retiros ni bajas efectivas de componentes y no crea obligaciones, cobros, pagos o saldos. La preservación de valores propios de servicios confirmados y las invariantes de configuración se verificarán junto con M06; no quedan acreditadas por las pruebas de estos maestros.
+
+### Recorrido de borradores de servicios
+
+Desde **Servicios**, crear un **Nuevo borrador**, buscar el vehículo y seleccionar una oferta activa. La propuesta comercial se copia al servicio: los cambios posteriores del catálogo no reemplazan sus valores. La fecha y las personas por rol pertenecen al trabajo; una misma persona puede ser titular, contacto y pagador. Se pueden ajustar sin modificar las relaciones históricas del vehículo. El alta recupera los vínculos vigentes para la fecha indicada; si hay varios contactos, deja ese rol pendiente para elegirlo explícitamente.
+
+Editar la descripción, cantidades, precios, descuentos y total acordado. Asociar componentes individuales existentes con su acción comercial cuando corresponda; cada componente individual representa una unidad. El total acordado puede diferir de la suma de los ítems mientras el servicio está en borrador. Los costos copiados son propuestas, no obligaciones. El administrador puede revisarlos; el operador no los recibe ni puede introducirlos mediante una petición directa.
+
+Completar o dejar pendiente la preparación documental: actores regulatorios, obleas propuestas, fechas y observaciones. Los renglones técnicos conservan componentes, posición prevista y datos de revisión, incluso incompletos. La acción comercial sobre un componente y la marca documental son campos distintos. Los datos propuestos no certifican resultados ni resuelven los pendientes regulatorios del diseño.
+
+Guardar, buscar por vehículo o persona y recuperar el borrador. Ingresar con otra cuenta autorizada y continuar el mismo registro: se conserva el creador y cada guardado registra su actor en auditoría. Si dos personas parten de la misma versión, el segundo guardado informa el conflicto; debe recuperarse la versión actual antes de continuar, sin sobrescribirla silenciosamente.
+
+Este tramo no ofrece confirmación, cancelación, cobros ni pagos. Guardar un borrador no instala ni retira componentes, no modifica configuraciones, no emite obleas o documentos y no genera obligaciones o movimientos de dinero. La consulta de historia técnica sigue indicando que depende de la confirmación. Las migraciones de este tramo sólo agregan el almacenamiento preparatorio y su control de versión; deben aplicarse antes de iniciar el backend actualizado.
 
 ### Ejecutar las comprobaciones
 
@@ -125,7 +137,7 @@ pnpm test:e2e
 pnpm react-doctor
 ```
 
-Crear `cilgas_e2e_test` una sola vez por arranque de la instancia efímera; si ya existe, continuar con las verificaciones. Los tests backend usan esquemas aislados dentro de `TEST_DATABASE_URL`, aplican las migraciones y eliminan únicamente el esquema que crearon. Los E2E aplican las migraciones y el bootstrap sobre la base separada `cilgas_e2e_test`, sin reiniciar ni borrar otras bases. Levantan frontend en `127.0.0.1:4173` y backend en el puerto `43001`, preparan cuentas sintéticas y comprueban acceso, permisos, configuración, referencias y recuperación de personas y vehículos con duplicados. Requieren el backend compilado con `pnpm build`; los puertos de E2E deben estar libres.
+Crear `cilgas_e2e_test` una sola vez por arranque de la instancia efímera; si ya existe, continuar con las verificaciones. Los tests backend usan esquemas aislados dentro de `TEST_DATABASE_URL`, aplican las migraciones y eliminan únicamente el esquema que crearon. Los E2E aplican las migraciones y el bootstrap sobre la base separada `cilgas_e2e_test`, sin reiniciar ni borrar otras bases. Levantan frontend en `127.0.0.1:4173` y backend en el puerto `43001`, preparan cuentas sintéticas y comprueban acceso, permisos, maestros, componentes, catálogo y recuperación y edición compartida de borradores. Requieren el backend compilado con `pnpm build`; los puertos de E2E deben estar libres.
 
 Nunca apuntar las variables de pruebas a una base de operación: la integración exige un nombre que identifique una base de prueba y los E2E aceptan exclusivamente `cilgas_e2e_test` en un host local permitido. La instancia `postgres-test` no comparte el volumen de desarrollo y sus datos se pierden al detenerla. Los reportes y las capturas de escritorio/tablet se guardan en `playwright-report/` y `test-results/`, fuera de Git.
 

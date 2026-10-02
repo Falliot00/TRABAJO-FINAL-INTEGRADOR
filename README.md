@@ -15,9 +15,11 @@ Trabajo Final Integrador de la Tecnicatura Universitaria en Programación de la 
 
 El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan con acceso de escritura.
 
-## Desarrollo — primer incremento
+## Desarrollo — acceso, configuración, personas y vehículos
 
 La base de la aplicación incorpora el monorepo con React/Vite y NestJS, contratos compartidos y migraciones de PostgreSQL para identidad y auditoría. Permite iniciar y cerrar sesión, administrar cuentas y roles, desactivar usuarios, revocar sesiones y consultar la auditoría según permisos. La interfaz incluye temas oscuro y claro y navegación adaptable.
+
+El primer tramo del incremento 2 incorpora M02 y M03: configuración del taller, actores regulatorios y modelos de componentes, junto con alta, búsqueda y edición de personas y vehículos. Las coincidencias de identificadores permiten recuperar registros existentes; las relaciones de titularidad y contacto conservan su vigencia. Cada modificación queda auditada. La configuración se administra con una capacidad específica; el operador puede consultar las referencias técnicas y gestionar personas y vehículos.
 
 La [guía de desarrollo y operación local](docs/desarrollo.md) explica la instalación reproducible, las bases aisladas, el alta del primer administrador mediante configuración, las pruebas y los contenedores. Requiere Node.js 24.18.0, pnpm 11.17.0 y PostgreSQL; el perfil Docker de desarrollo utiliza PostgreSQL 16.14. No se incluyen usuarios ni contraseñas productivas.
 

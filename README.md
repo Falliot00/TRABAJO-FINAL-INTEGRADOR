@@ -15,6 +15,14 @@ Trabajo Final Integrador de la Tecnicatura Universitaria en Programación de la 
 
 El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan con acceso de escritura.
 
+## Desarrollo — primer incremento
+
+La base de la aplicación incorpora el monorepo con React/Vite y NestJS, contratos compartidos y migraciones de PostgreSQL para identidad y auditoría. Permite iniciar y cerrar sesión, administrar cuentas y roles, desactivar usuarios, revocar sesiones y consultar la auditoría según permisos. La interfaz incluye temas oscuro y claro y navegación adaptable.
+
+La [guía de desarrollo y operación local](docs/desarrollo.md) explica la instalación reproducible, las bases aisladas, el alta del primer administrador mediante configuración, las pruebas y los contenedores. Requiere Node.js 24.18.0, pnpm 11.17.0 y PostgreSQL; el perfil Docker de desarrollo utiliza PostgreSQL 16.14. No se incluyen usuarios ni contraseñas productivas.
+
+Los módulos de servicios, fichas/PDF, finanzas, convenios y alertas se implementarán en los siguientes incrementos de [MODULOS.md](docs/segunda-entrega/MODULOS.md). Los archivos de la segunda entrega conservan el diseño aprobado y sus criterios de aceptación; el SQL de `/database` sigue siendo referencia de diseño. Las migraciones ejecutables de cada incremento se encuentran en `/backend/prisma/migrations`.
+
 ## Segunda entrega — Diseño y módulos
 
 **Fecha de preparación y publicación: 27/09/2026. Estado: etapa 2 aprobada, según la devolución de la tutora comunicada por el equipo el 02/10/2026.**
@@ -28,7 +36,7 @@ El [índice de la segunda entrega](docs/segunda-entrega/README.md) reúne el dis
 - [Continuidad funcional con el sistema original](docs/segunda-entrega/REFERENCIA_FUNCIONAL.md).
 - [Checklist y registro de aprobación](docs/segunda-entrega/APROBACION.md).
 
-`/frontend`, `/backend` y `/packages/contracts` contienen solamente carpetas con marcadores vacíos. `/database` contiene diseño SQL declarativo y `/docs` contiene documentación y diagramas. **No se incorpora código de aplicación en esta entrega.** La devolución de la tutora informa que el aprobado está asentado en la plataforma e indica avanzar al código y a la entrega final; la evidencia y su alcance están en el registro de aprobación.
+Al publicar la segunda entrega, `/frontend`, `/backend` y `/packages/contracts` contenían solamente carpetas con marcadores vacíos; esa entrega presentó diseño SQL, documentación y diagramas sin código de aplicación. La implementación posterior se describe en el apartado de desarrollo. La devolución de la tutora informa que el aprobado está asentado en la plataforma e indica avanzar al código y a la entrega final; la evidencia y su alcance están en el registro de aprobación.
 
 ## Cliente
 

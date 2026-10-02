@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16.14-bookworm@sha256:64154d0babcb1741988719e703419af0382b19953706149f9872fbd0f438efa8
+        env:
+          POSTGRES_USER: cilgas_test
+          POSTGRES_PASSWORD: ci-only-synthetic-password
+          POSTGRES_DB: cilgas_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cilgas_test -d cilgas_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://cilgas_test:ci-only-synthetic-password@localhost:5432/cilgas_test
+      TEST_DATABASE_URL: postgresql://cilgas_test:ci-only-synthetic-password@localhost:5432/cilgas_test
+      E2E_DATABASE_URL: postgresql://cilgas_test:ci-only-synthetic-password@localhost:5432/cilgas_e2e_test
+      APP_ORIGIN: http://localhost:5173
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.18.0"
+          package-manager-cache: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: "11.17.0"
+      - name: Instalar dependencias bloqueadas
+        run: pnpm install --frozen-lockfile
+      - name: Generar cliente de persistencia
+        run: pnpm --filter @cilgas/backend db:generate
+      - name: Formato
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm lint
+      - name: Tipos
+        run: pnpm typecheck
+      - name: Pruebas de comportamiento e integración
+        run: pnpm test
+      - name: Compilar aplicaciones
+        run: pnpm build
+      - name: Instalar Chromium para las pruebas
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Crear la base separada de E2E
+        run: docker exec -e PGUSER=cilgas_test -e PGPASSWORD=ci-only-synthetic-password "${{ job.services.postgres.id }}" createdb cilgas_e2e_test
+      - name: Recorridos críticos de acceso y permisos
+        run: pnpm test:e2e
+      - name: Verificar migración y arranque de las imágenes
+        run: docker compose --env-file .env.example --profile app up -d --build --wait
+      - name: Comprobar API detrás de Nginx
+        run: curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://localhost:8080/api/health

@@ -9,8 +9,36 @@ Capacidad de reconstruir de manera confiable la relación entre clientes, vehíc
 _Evitar_: Digitalización, sistema informático
 
 **Prueba hidráulica**:
-Ensayo técnico realizado sobre uno o más cilindros como parte de su revisión periódica; no implica necesariamente reemplazarlos.
+Ensayo técnico realizado sobre uno o más cilindros; puede formar parte de una revisión o de una conversión y no implica necesariamente reemplazarlos.
 _Evitar_: Revisión quinquenal, cambio de cilindro
+
+**Servicio de PH**:
+Trabajo de CILGAS que incluye la prueba hidráulica y una oblea nueva; cuando se realiza por sí solo, se documenta como revisión anual con indicación de PH.
+_Evitar_: Ensayo aislado sin oblea, reemplazo de cilindro
+
+**Conversión**:
+Instalación de un equipo de GNC desde cero en un vehículo. En el circuito informado por CILGAS incluye una prueba hidráulica y se documenta con la operación C y la indicación de PH.
+_Evitar_: Componentes necesariamente nuevos, revisión anual
+
+**Renovación de oblea**:
+Trabajo que renueva la oblea del vehículo y se documenta como revisión anual, operación R; esa marca por sí sola no acredita una PH.
+_Evitar_: Prueba hidráulica, revisión quinquenal
+
+**Modificación**:
+Intervención documentada con la operación M sobre un equipo o sus datos mientras la oblea aún está vigente, como un cambio de válvula, dominio o una corrección del trabajo.
+_Evitar_: Montaje M de un componente, rectificación automática de una ficha confirmada
+
+**Desmontaje**:
+Retiro del equipo del vehículo, conservando la posibilidad de volver a montarlo.
+_Evitar_: Baja definitiva
+
+**Baja técnica**:
+Retiro definitivo de uso del equipo o componente afectado, que no queda disponible para volver a montarse.
+_Evitar_: Desmontaje reutilizable, desactivación de un usuario
+
+**Marca MSDB**:
+Indicación documental por componente: M se monta, S sigue instalado, D se desmonta y B se da de baja. Es distinta de la operación general de la ficha C/M/R/D/B.
+_Evitar_: M significa modificación del componente, estado completo del equipo
 
 **Revisión quinquenal**:
 Servicio realizado cada cinco años para revisar uno o más cilindros y renovar la habilitación correspondiente. En CILGAS incluye la revisión anual y una oblea nueva; el reemplazo de válvulas es una propuesta habitual ajustable por cilindro según el trabajo efectivamente realizado.
@@ -21,7 +49,7 @@ Documento que deja constancia de la operación realizada y de los componentes de
 _Evitar_: Ficha del cliente, estado actual del vehículo
 
 **Ficha confirmada**:
-Fotografía histórica inmutable de los datos técnicos y regulatorios de un servicio realizado; una corrección posterior se conserva como rectificación.
+Fotografía histórica inmutable de los datos técnicos y regulatorios de un servicio realizado; una corrección posterior se conserva como rectificación. La firma manuscrita se realiza sobre la ficha impresa después de generarla.
 _Evitar_: Formulario editable, estado actual del equipo
 
 **Servicio del catálogo**:

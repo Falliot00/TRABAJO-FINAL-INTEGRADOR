@@ -43,7 +43,7 @@ La fecha de preparación, la publicación y el registro de esta devolución son 
 | --- | --- | --- | --- |
 | PV-01 | Alcance y factibilidad | Módulos y prioridades del MVP incluidos en la etapa 2 aprobada; capacidades avanzadas postergadas | Sin nueva aprobación de alcance requerida |
 | PV-02 | Diseño relacional | Identidad de componentes, configuración histórica e intervenciones separadas incluidas en el diseño aprobado | Equipo: verificar su implementación |
-| PV-03 | Interpretación de las fichas | Pendientes códigos de operación y MSDB, posiciones y relación entre acciones; resolver la impresión de cuatro recambios de válvula (ocho acciones frente a cuatro casillas, RF-02) sin perder hechos técnicos | CILGAS / responsables técnicos, antes de emitir los casos afectados |
+| PV-03 | Interpretación de las fichas | MSDB y matriz R + PH / C + PH precisados por el equipo el 05/10/2026; quedan pendientes asociación de componentes y representación de cuatro recambios de válvula (ocho acciones frente a cuatro casillas, RF-02), sin perder hechos técnicos | Equipo: implementar definiciones; CILGAS / responsables técnicos: resolver los casos documentales aún abiertos |
 | PV-04 | Roles regulatorios | Identidades diferenciadas de TdM, PEC y CRPC; pendientes datos vigentes y responsabilidades concretas | CILGAS / responsables técnicos |
 | PV-05 | Confirmación y anticipos | Anticipo explícito vinculado a servicio, sin confirmación técnica automática; política ratificada por el equipo el 02/10/2026 | Equipo: implementar los controles acordados |
 | PV-06 | Rectificaciones | Nueva versión enlazada, sin sobrescritura ni ajuste económico implícito; pendiente el circuito externo aceptado | CILGAS / responsables técnicos |
@@ -53,6 +53,8 @@ La fecha de preparación, la publicación y el registro de esta devolución son 
 | PV-10 | Decisiones técnicas de segunda entrega | Nginx y PDF servidor con Playwright/Chromium aceptados dentro del diseño aprobado; estructura modular | Equipo: validar generación, impresión y operación |
 
 La aprobación académica permite avanzar con el diseño acordado. Los pendientes regulatorios no se completan por inferencia de las fotografías: el equipo confirmó que los revisará con los responsables antes de emitir documentación real de los casos afectados. Una decisión que cambie el alcance o la integridad del modelo se documentará antes de implementar la regla afectada.
+
+El 05/10/2026 el equipo aportó [precisiones operativas](RELEVAMIENTO_FICHAS.md#definiciones-operativas-confirmadas-el-05102026) sobre MSDB, PH/conversión, número de oblea nueva y firma en papel posterior a la impresión. Se registran como respuestas del equipo y se actualizan sólo los pendientes que resuelven; no constituyen una nueva devolución académica ni habilitan por sí solas el código actualmente bloqueado.
 
 ## Registro de devolución
 

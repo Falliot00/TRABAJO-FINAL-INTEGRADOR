@@ -2,6 +2,8 @@
 
 Fecha de diseño: 27/09/2026. Documento derivado de la propuesta del repositorio, sus ADRs y las fichas relevadas. La aprobación académica de la etapa 2 se registra en [APROBACION.md](APROBACION.md). El 02/10/2026 el equipo confirmó el reemplazo de válvulas propuesto por defecto y ajustable por cilindro, el trabajo técnico compartido y el tratamiento trazable de anticipos; los pendientes regulatorios mantienen su validación específica.
 
+Precisión operativa del 05/10/2026: el equipo confirmó MSDB, el número de oblea nueva conocido y registrado, el servicio de PH con R y oblea nueva, la conversión con C + PH y las firmas posteriores a imprimir. Ver evidencia, límites y preguntas aún abiertas en [el relevamiento](RELEVAMIENTO_FICHAS.md#definiciones-operativas-confirmadas-el-05102026). Estas precisiones no implican que el código ya aplique las nuevas validaciones.
+
 ## Operación y documentación
 
 | ID | Regla | Consecuencia en el diseño |
@@ -14,14 +16,16 @@ Fecha de diseño: 27/09/2026. Documento derivado de la propuesta del repositorio
 | RN-06 | Cilindros, válvulas y reguladores tienen identidad individual. | Se distingue identidad del componente, instalación y acción en una ficha. No se identifica un cilindro sólo por su renglón. |
 | RN-07 | Una ficha admite hasta cuatro cilindros; una oferta comercial habitual puede incluir menos. | Límite documental de posiciones y composición comercial independientes. |
 | RN-08 | PH es un ensayo de una revisión de cilindro; no implica cambiarlo. | Resultado de revisión por cilindro separado de operación de ficha y de reemplazo. |
-| RN-09 | F01 muestra PH junto con revisión anual; la posible variante de operación y anotación de F03 requiere confirmación. | Se registra PH por separado: no se deduce exclusivamente de la letra R ni se inventa un código oficial de operación. |
-| RN-10 | Los renglones pueden registrar montajes, desmontajes, bajas o continuidad según el código validado. | La lista documental de intervenciones no equivale a la configuración final del vehículo. |
+| RN-09 | El servicio de PH por sí solo o la revisión quinquenal se documentan con R e incluyen oblea nueva; la conversión se documenta con C e incluye siempre PH en el circuito informado por CILGAS. | Registrar PH y resultado por cilindro además de C/R. R por sí sola no acredita PH; conservar la interpretación C + PH de F03 confirmada el 05/10/2026. Las variantes combinadas con modificación siguen pendientes. |
+| RN-10 | MSDB: M se monta, S sigue instalado, D se desmonta, B se da de baja. | La M del renglón es montaje, no modificación general. S no crea una nueva instalación. D permite reutilización; B representa baja definitiva. La lista documental no equivale a la configuración final y debe contrastarse con los hechos. |
 | RN-11 | El reemplazo de válvulas se propone por defecto en la revisión quinquenal y puede ajustarse por cilindro. | El servicio registra únicamente los retiros e instalaciones efectivamente realizados. Conservar una válvula no crea un recambio, un cargo ni un costo ficticios; no se presenta el reemplazo como obligación normativa general. |
 | RN-12 | Una ficha confirmada es inmutable. | Snapshot autocontenido versionado, plantilla identificada y rectificación enlazada con motivo, usuario y fecha. |
 | RN-13 | Corregir una ficha no autoriza a modificar silenciosamente cobros, deudas ni historia técnica. | La rectificación documental y los ajustes económicos tienen acciones explícitas, permisos y auditoría propios. |
 | RN-14 | La generación de PDF usa exclusivamente el snapshot confirmado. | Un error de generación permite reintentar sin reconfirmar el servicio ni duplicar sus efectos. |
 | RN-15 | SICGNC se opera manualmente fuera de esta aplicación. | Se conserva la referencia externa cuando se conoce; sin integración, automatización ni presunción de habilitación oficial. |
 | RN-16 | PEC, TdM y CRPC tienen identidades y responsabilidades diferentes. | El modelo distingue funciones regulatorias y responsables; no infiere habilitaciones de un código o sello. |
+| RN-17 | Cuando el trabajo emite una oblea nueva, su número será conocido y se solicita y registra en el sistema. | Conservarlo en la preparación, el resultado y el snapshot; no interpretar los blancos de las fotografías como permiso para omitirlo al confirmar. |
+| RN-18 | Las firmas se realizan en papel después de generar e imprimir la ficha. | Generar los espacios sin exigir firma digital o imagen manuscrita; los datos de aclaración/matrícula que deben venir impresos se precisan por separado. |
 
 ## Cobros y anticipos
 

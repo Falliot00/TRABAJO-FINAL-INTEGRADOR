@@ -13,7 +13,7 @@ Ensayo técnico realizado sobre uno o más cilindros; puede formar parte de una 
 _Evitar_: Revisión quinquenal, cambio de cilindro
 
 **Servicio de PH**:
-Trabajo de CILGAS que incluye la prueba hidráulica y una oblea nueva; cuando se realiza por sí solo, se documenta como revisión anual con indicación de PH.
+Trabajo de CILGAS que incluye la prueba hidráulica y una oblea nueva, aunque la anterior siga vigente; cuando se realiza por sí solo, se documenta como revisión anual con indicación de PH.
 _Evitar_: Ensayo aislado sin oblea, reemplazo de cilindro
 
 **Conversión**:
@@ -41,12 +41,16 @@ Prueba hidráulica más reciente del cilindro, representada por mes y año en la
 _Evitar_: Fabricación del cilindro, PH realizada necesariamente en el servicio actual
 
 **Vencimiento de oblea**:
-Fin del período de un año de la oblea, según la duración informada por CILGAS; una nueva oblea tiene su propio vencimiento.
+Fin del período de un año de la oblea, vigente hasta el último día del mes indicado según el criterio informado por CILGAS; una nueva oblea tiene su propio vencimiento.
 _Evitar_: Vencimiento quinquenal de PH
 
 **Vencimiento de PH**:
-Fin del período de cinco años de la prueba hidráulica, según la duración informada por CILGAS.
+Fin del período de cinco años de la prueba hidráulica, vigente hasta el último día del mes indicado según el criterio informado por CILGAS.
 _Evitar_: Vencimiento anual de oblea, fecha de fabricación
+
+**Válvula del cilindro**:
+Componente del cilindro con identidad propia y una relación explícita con éste. Su reemplazo conserva la historia de la válvula retirada y la nueva, ambas vinculadas al cilindro correspondiente.
+_Evitar_: Accesorio sin cilindro asociado, número de fila como identidad
 
 **Desmontaje**:
 Retiro del equipo del vehículo, conservando la posibilidad de volver a montarlo.

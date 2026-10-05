@@ -4,7 +4,7 @@ Fecha de diseño: 27/09/2026. Documento derivado de la propuesta del repositorio
 
 Precisión operativa del 05/10/2026: el equipo confirmó MSDB, el número de oblea nueva conocido y registrado, el servicio de PH con R y oblea nueva, la conversión con C + PH y las firmas posteriores a imprimir. Ver evidencia, límites y preguntas aún abiertas en [el relevamiento](RELEVAMIENTO_FICHAS.md#definiciones-operativas-confirmadas-el-05102026). Estas precisiones no implican que el código ya aplique las nuevas validaciones.
 
-La segunda ronda de esa conversación agrega teléfono obligatorio, opcionales explícitos, habilitación como fecha del trabajo, duración anual de oblea y quinquenal de PH, «Revisado» como última PH, firmas y sellos manuales, pareja cilindro–válvula por fila y oblea nueva también en modificación. Se conservan abiertos sólo los detalles Q8–Q11 del relevamiento.
+La segunda ronda de esa conversación agrega teléfono obligatorio, opcionales explícitos, habilitación como fecha del trabajo, duración anual de oblea y quinquenal de PH, «Revisado» como última PH, firmas y sellos manuales, pareja cilindro–válvula por fila y oblea nueva también en modificación. La aceptación posterior exige resultado real para confirmar PH, permite certificado ausente, conserva la precisión conocida de fechas y fija la pareja resultante en la fila con historia de ambas válvulas. Sólo Q9–Q11 conservan las selecciones pendientes del relevamiento.
 
 ## Operación y documentación
 
@@ -29,10 +29,11 @@ La segunda ronda de esa conversación agrega teléfono obligatorio, opcionales e
 | RN-17 | Cuando el trabajo emite una oblea nueva, su número será conocido y se solicita y registra en el sistema. | Conservarlo en la preparación, el resultado y el snapshot; no interpretar los blancos de las fotografías como permiso para omitirlo al confirmar. |
 | RN-18 | Las firmas y sellos se completan manualmente después de generar e imprimir la ficha. | Conservar los espacios sin exigir firma digital, imagen ni aclaraciones del sello previamente completadas. La identificación del encabezado sigue proviniendo de los maestros correspondientes. |
 | RN-19 | Al confirmar se exigen los datos base de vehículo y titular/domicilio acordados en Q1, incluido teléfono; piso/depto y observaciones son opcionales y se admite domicilio sin número. | El borrador puede estar incompleto. No inventar teléfono ni altura para satisfacer una validación; representar explícitamente el domicilio sin número. |
-| RN-20 | Habilitación coincide con fecha del trabajo. La oblea dura un año y la PH cinco años; «Revisado mes/año» muestra la última PH. | Fabricación y ensayo son fechas distintas. Conservar precisión real; Q8/Q9 precisan el día del ensayo y el límite de vigencia, sin reabrir las duraciones. |
-| RN-21 | Una fila documental representa un cilindro y su respectiva válvula. | Registrar la pareja explícita sin alterar identidades ni reinterpretar snapshots anteriores. En recambio, conservar saliente y entrante; su representación impresa restante se resuelve en Q10. |
+| RN-20 | Habilitación coincide con fecha del trabajo. La oblea dura un año y la PH cinco años; «Revisado mes/año» muestra la última PH. | Fabricación y ensayo son fechas distintas. Conservar mes/año o día conocido, sin inventar días. Q9 precisa el límite de vigencia, sin reabrir las duraciones. |
+| RN-21 | Una fila documental representa un cilindro y su respectiva válvula; en recambio se imprime la pareja resultante. | Registrar la pareja explícita sin alterar identidades ni reinterpretar snapshots anteriores. Conservar saliente y entrante en la historia; la ubicación impresa de la saliente se resuelve en Q10. |
 | RN-22 | Una modificación coloca una oblea nueva con nuevo vencimiento. | Registrar nuevo número y período; no conservar automáticamente la oblea o el plazo anterior, aunque todavía estuvieran vigentes. |
 | RN-23 | Código/serie de accesorios se exige cuando corresponda documentarlos; un espacio vacío no representa inexistencia física. | Aplicar el criterio de opcionalidad adoptado por el equipo en Q3, con prioridad para los requisitos explícitos del trabajo. No inventar componentes ni datos de accesorios. |
+| RN-24 | Confirmar una PH exige su resultado real conocido; el número de certificado es opcional si no está disponible. | Sin resultado, conservar el borrador. No deducir aprobado del tipo de servicio ni inventar certificados. Se mantiene el requisito de identificar al CRPC del modelo vigente. |
 
 ## Cobros y anticipos
 

@@ -25,8 +25,28 @@ Trabajo que renueva la oblea del vehículo y se documenta como revisión anual, 
 _Evitar_: Prueba hidráulica, revisión quinquenal
 
 **Modificación**:
-Intervención documentada con la operación M sobre un equipo o sus datos mientras la oblea aún está vigente, como un cambio de válvula, dominio o una corrección del trabajo.
+Intervención documentada con la operación M sobre un equipo o sus datos mientras la oblea aún está vigente, como un cambio de válvula, dominio o una corrección del trabajo. En el circuito informado por CILGAS se coloca una oblea nueva con nuevo vencimiento.
 _Evitar_: Montaje M de un componente, rectificación automática de una ficha confirmada
+
+**Fecha de habilitación**:
+Fecha del trabajo realizado, utilizada como fecha de habilitación en la ficha.
+_Evitar_: Fecha de fotografía, fecha de fabricación del cilindro
+
+**Fabricación del cilindro**:
+Mes y año en que se fabricó el cilindro; no identifica cuándo se hizo su última prueba hidráulica.
+_Evitar_: Fecha de ensayo, última PH
+
+**Última PH**:
+Prueba hidráulica más reciente del cilindro, representada por mes y año en la casilla «Revisado». Puede ser un antecedente de un servicio que no realiza una nueva PH.
+_Evitar_: Fabricación del cilindro, PH realizada necesariamente en el servicio actual
+
+**Vencimiento de oblea**:
+Fin del período de un año de la oblea, según la duración informada por CILGAS; una nueva oblea tiene su propio vencimiento.
+_Evitar_: Vencimiento quinquenal de PH
+
+**Vencimiento de PH**:
+Fin del período de cinco años de la prueba hidráulica, según la duración informada por CILGAS.
+_Evitar_: Vencimiento anual de oblea, fecha de fabricación
 
 **Desmontaje**:
 Retiro del equipo del vehículo, conservando la posibilidad de volver a montarlo.
@@ -49,7 +69,7 @@ Documento que deja constancia de la operación realizada y de los componentes de
 _Evitar_: Ficha del cliente, estado actual del vehículo
 
 **Ficha confirmada**:
-Fotografía histórica inmutable de los datos técnicos y regulatorios de un servicio realizado; una corrección posterior se conserva como rectificación. La firma manuscrita se realiza sobre la ficha impresa después de generarla.
+Fotografía histórica inmutable de los datos técnicos y regulatorios de un servicio realizado; una corrección posterior se conserva como rectificación. Las firmas y sellos se completan manualmente sobre la ficha impresa después de generarla.
 _Evitar_: Formulario editable, estado actual del equipo
 
 **Servicio del catálogo**:

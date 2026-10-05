@@ -22,9 +22,9 @@ Las fotografías contienen datos personales, dominios, documentos, firmas y sell
 | F04 | WhatsApp Image 2026-09-15 at 14.22.26.jpeg | Ficha completa fotografiada con inclinación y parte del encabezado tapada. Se distingue revisión anual. Se analizó solamente la hoja principal. |
 | F05 | WhatsApp Image 2026-09-15 at 15.22.56.jpeg | Ficha parcialmente recortada en el borde inferior. Permite reconocer los campos de oblea anterior y nueva con valores cargados. |
 
-La fecha del nombre de archivo identifica la fotografía; **no se utiliza como fecha del servicio**. Una casilla vacía no demuestra que el dato sea opcional para confirmar una operación: puede tratarse de una ficha incompleta. Tampoco las marcas manuscritas establecen por sí solas una regla normativa.
+La fecha del nombre de archivo identifica la fotografía; **no se utiliza como fecha del servicio**. Por sí sola, una casilla vacía no demuestra opcionalidad: puede tratarse de una ficha incompleta. En la segunda ronda del 05/10/2026 el equipo adoptó expresamente como criterio del proyecto exigir los campos completados en todas las imágenes y permitir opcionales los restantes, con prioridad para sus requisitos explícitos —por ejemplo, teléfono y oblea nueva— y para las condiciones del trabajo realizado. Las marcas manuscritas no establecen por sí solas una regla normativa.
 
-El 02/10/2026 el equipo volvió a aportar estas mismas cinco fotografías. En ese momento ninguna resolvía cómo documentar cuatro recambios de válvula ni la matriz de operación y PH de F03. RF-02 y RF-03 quedaron pendientes. Las respuestas del 05/10/2026 resuelven la matriz de los casos descritos a continuación; RF-02 conserva su pendiente de asociación e impresión.
+El 02/10/2026 el equipo volvió a aportar estas mismas cinco fotografías. En ese momento ninguna resolvía cómo documentar cuatro recambios de válvula ni la matriz de operación y PH de F03. RF-02 y RF-03 quedaron pendientes. Las respuestas del 05/10/2026 resuelven la matriz de los casos descritos a continuación y la asociación de una fila con un cilindro y su respectiva válvula; queda precisar la representación de la válvula saliente en un recambio.
 
 ## Definiciones operativas confirmadas el 05/10/2026
 
@@ -33,38 +33,49 @@ La fuente de estas precisiones es la explicación explícita del equipo, acompa�
 | Tema | Definición confirmada | Alcance |
 | --- | --- | --- |
 | MSDB por componente | M = se monta; S = sigue instalado; D = se desmonta; B = se da de baja. | M no significa modificación: esa es la operación general de la ficha. Una S no debe producir una instalación nueva ficticia. |
-| Número de oblea nueva | Se conocerá y debe pedirse en el sistema y registrarse en la base de datos. | Cuando el trabajo emite una oblea nueva, el dato pertenece a la preparación y al resultado histórico; los blancos de las fotos no autorizan omitirlo. No establece que desmontaje, baja o toda modificación emitan otra oblea. |
+| Número de oblea nueva | Se conocerá y debe pedirse en el sistema y registrarse en la base de datos. En modificación también se coloca una nueva con nuevo vencimiento. | El dato pertenece a la preparación y al resultado histórico; los blancos de las fotos no autorizan omitirlo. No se extrapola emisión a desmontaje o baja. |
 | PH | La anotación PH significa que se realizó una prueba hidráulica. | Se conserva el ensayo por cilindro además de la operación de la ficha; no se infiere un resultado aprobado ni un recambio de cilindro. |
-| Firmas | La ficha se genera, se imprime y luego se firma en papel. | Se conservan los espacios de firma. La ausencia de firma manuscrita no impide generar el PDF; no se requiere firma digital ni carga de su imagen. Queda por precisar qué aclaraciones y matrículas deben venir impresas. |
+| Firmas y sellos | Se conservan los espacios y se completan manualmente después de generar e imprimir. | No se exige firma digital, imagen de firma ni sello o aclaración manuscrita ya completados para generar el PDF. Esto no elimina los datos de identificación del taller y PEC en el encabezado. |
 | Desmontaje y baja | En desmontaje se retira el equipo y puede volver a montarse; en baja deja de ser reutilizable. | Debe distinguirse el retiro físico de la baja definitiva. |
 | Válvula reemplazada | La captura ilustra una válvula anterior marcada B y el montaje de una nueva. | No transforma todo recambio en baja ni convierte el recambio en obligatorio para toda PH. Sigue vigente la composición ajustable acordada el 02/10/2026. |
+| Fila cilindro–válvula | Una fila representa un cilindro y su respectiva válvula. | Se documenta la pareja explícita y se conserva la identidad de ambas piezas. Queda por precisar qué válvula se imprime cuando hay una saliente y otra entrante. |
+| Fechas y duración | Habilitación es la fecha del trabajo; la oblea dura un año y la PH cinco años; «Revisado mes/año» muestra la última PH. | Fabricación y PH son hechos distintos. La duración está definida; falta acordar precisión de la fecha del ensayo y límite de vigencia cuando sólo se conoce mes/año. |
 
 | Trabajo | Operación general de ficha | PH | Oblea nueva |
 | --- | --- | --- | --- |
 | Renovación de oblea sin PH | R — revisión anual | No por el solo hecho de renovar | Sí |
 | Servicio de PH por sí solo o revisión quinquenal del circuito documentado | R — revisión anual | Sí, con indicación PH y ensayos individuales | Sí, incluida en el servicio |
-| Conversión: instalación del equipo desde cero en el vehículo | C — conversión | Sí: el equipo confirmó que se realiza siempre en este circuito | Registrar el número cuando se emite; falta precisar sus fechas |
-| Modificación con oblea aún vigente: cambio de válvula, dominio o corrección del trabajo | M — modificación | Registrar sólo si efectivamente se realizó; variantes no descritas pendientes | Pendiente precisar qué se conserva o reemplaza en las casillas anterior/nueva y vencimiento |
+| Conversión: instalación del equipo desde cero en el vehículo | C — conversión | Sí: el equipo confirmó que se realiza siempre en este circuito | Registrar el número cuando se emite; habilitación = fecha del trabajo y duración de oblea = un año |
+| Modificación con oblea aún vigente: cambio de válvula, dominio o corrección del trabajo | M — modificación | Si se hace PH junto con un cambio antes del vencimiento, el equipo indicó M; PH motivada por vencimiento usa R. Falta precisar a qué vencimiento refiere la condición. | Sí, oblea nueva con nuevo vencimiento; no se conserva automáticamente el plazo anterior |
 | Desmontaje reutilizable | D — desmontaje | No se presume un ensayo | No se presume una emisión |
 | Baja definitiva | B — baja | No se presume un ensayo | No se presume una emisión |
 
 La inclusión de revisión anual y oblea nueva en la revisión quinquenal **ya estaba documentada** en el glosario y en las reglas del 02/10/2026. Las respuestas actuales precisan la leyenda MSDB y hacen explícita la correspondencia R + PH para el servicio de PH y C + PH para la conversión. No hace falta volver a preguntar esas definiciones.
 
-### Campos propuestos y preguntas de la ronda documental
+### Respuestas a la ronda documental Q1–Q7
 
-La propuesta previa del asistente de exigir datos base de vehículo, titular y domicilio, y permitir teléfono, piso/depto y observaciones vacíos **todavía no fue confirmada campo por campo**. Los accesorios vacíos en las fotografías tampoco prueban su opcionalidad. Se distingue esa propuesta de las respuestas ya recibidas.
+El equipo respondió la ronda y corrigió la propuesta de teléfono opcional: **teléfono es obligatorio**. Se registran las respuestas sin mantener abiertas las decisiones ya tomadas. Los datos pueden seguir incompletos en borrador; estos requisitos se refieren a confirmar y generar la ficha del trabajo.
 
-| Pregunta pendiente | Casilla o decisión concreta | Propuesta para discutir, no regla aprobada |
+| Pregunta | Respuesta del equipo | Consecuencia y límite |
 | --- | --- | --- |
-| Q1 — Datos base | Vehículo: marca, modelo, año, dominio, inyección y tipo. Titular: nombre, tipo/número de documento, calle, altura, CPA, localidad y provincia. Teléfono, piso/depto y observaciones. | Exigir los datos base y permitir vacíos en los últimos tres; identificar excepciones concretas como domicilio sin número. |
-| Q2 — Fechas | Habilitación y vencimiento de oblea; fabricación y revisión del cilindro. Precisar si «Revisado» muestra la última PH, aunque sea anterior al servicio. | Conservar día/mes/año de habilitación y la precisión mes/año observada en las otras casillas; no fabricar días ni calcular vencimientos hasta conocer su criterio. |
-| Q3 — Accesorios | Manómetro, tuberías, sujeción, electroválvulas, mezclador, venteo, llave, válvulas de carga y manguera. | Permitir la omisión documental sólo cuando corresponda, sin afirmar ausencia física; precisar cuándo se exige código/serie. |
-| Q4 — Aclaraciones de firma | Nombres, documentos y matrículas de los firmantes, antes de firmar en papel. | Imprimir los datos conocidos desde maestros y conservar espacios de firma; precisar qué datos pueden completarse con sello o a mano. |
-| Q5 — Resultado PH | Fecha, CRPC, aprobado/rechazado, próxima revisión y número de certificado. | Registrar hechos y resultado real por cilindro; precisar los datos que el taller recibe antes de confirmar, sin inventar mediciones ni certificados. |
-| Q6 — Recambio de válvulas | Asociación explícita con cada cilindro; cuatro válvulas salientes y cuatro entrantes frente a cuatro casillas. | Conservar todas las identidades y acciones, con continuación/anexo si se acepta; no descartar filas para hacerlas caber. |
-| Q7 — Modificación | Número de oblea anterior/nueva y vencimiento cuando la oblea todavía está vigente. Operación documental si la modificación incluye una PH. | Registrar si se conserva o se sustituye; no asignar otra oblea ni recalcular vencimiento automáticamente. No extender R + PH a una combinación aún no descrita. |
+| Q1 — Datos base | Exigir marca, modelo, año, dominio, inyección y tipo de vehículo; nombre, tipo/número de documento, calle, altura, CPA, localidad, provincia y teléfono del titular. Piso/depto y observaciones opcionales; contemplar domicilio sin número. | Definición resuelta. Domicilio sin número es una condición explícita, no un número ficticio ni un dato olvidado. |
+| Q2 — Fechas | Habilitación = fecha del trabajo; oblea un año; PH cinco años; «Revisado mes/año» = última PH. | Definidos significado y duración. Falta precisión/límite de vigencia de la PH y distinguir su fecha de ensayo de fabricación. |
+| Q3 — Accesorios | Exigir código/serie cuando corresponda documentarlos. Campos escritos en todas las fotos obligatorios; restantes pueden ser opcionales. Un blanco no significa que el accesorio no exista. | Criterio de opcionalidad adoptado por el equipo para el proyecto, con prioridad de requisitos expresos como teléfono y oblea nueva. No exigir accesorios no informados en la plantilla como si fueran inexistentes. |
+| Q4 — Firmas y sellos | Conservar los espacios y completarlos a mano. | Resuelto el circuito: no exigir aclaraciones/matrículas impresas en los espacios que se completarán con firmas/sellos. Los maestros y el encabezado conservan su identificación propia. |
+| Q5 — Resultado PH | Registrar valores del servicio y el resultado real disponible; algunos datos pueden ser opcionales. Nunca asumir aprobado porque el servicio diga PH. El equipo preguntó si fecha de ensayo era fabricación. | Se aclara que son fechas distintas. Queda identificar los datos opcionales del ensayo y el tratamiento de un resultado todavía no conocido. |
+| Q6 — Fila | Una fila representa un cilindro y su respectiva válvula. | Asociación resuelta. Falta qué identidad ocupa la fila al reemplazar una válvula y dónde se documenta la saliente. No se da por aprobado un anexo. |
+| Q7 — Modificación | Se coloca oblea nueva con nuevo vencimiento. Con PH y cambio antes de vencer se marca M; si el servicio de PH es por vencimiento se marca R. | No conservar la oblea/plazo anterior por defecto. Precisar si «no venció» refiere a oblea o a PH para expresar la condición sin ambigüedad. |
 
-Las decisiones que dependen de estas respuestas se discutirán después. El circuito externo de rectificación y el formato SICGNC mantienen su alcance previo; no se reabre su relevamiento ni se usan como bloqueo general para estos casos.
+### Siguiente ronda: precisiones restantes
+
+| ID | Pregunta concreta | Recomendación de diseño pendiente de respuesta |
+| --- | --- | --- |
+| Q8 — Fecha y datos del ensayo | Fabricación es cuándo se hizo el cilindro; ensayo es cuándo se realizó la PH. ¿Se conoce el día del ensayo o sólo mes/año? ¿CRPC, resultado y número de certificado pueden faltar al confirmar? | Conservar la precisión real; no fabricar días. Exigir resultado conocido para confirmar una PH y no exigir un certificado inexistente; falta la selección explícita de opcionales. |
+| Q9 — Vencimiento | Conocidas las duraciones de un año y cinco años, ¿la vigencia termina al finalizar el mes impreso o en el aniversario exacto? | Si se trabaja por mes/año, representar ese período sin inventar un día; el límite usado por alertas y validaciones debe coincidir con el criterio del taller. |
+| Q10 — Válvula reemplazada | En la fila del cilindro, ¿se imprime la válvula nueva? ¿Dónde se consigna la saliente y su D/B? | Conservar ambas identidades y acciones en la historia; imprimir la pareja resultante y la saliente sólo en el lugar que el equipo indique. |
+| Q11 — M/R con PH | En la regla de PH con cambio antes de vencer, ¿la vigencia es la de la oblea, la de la última PH o ambas? | Determinar la operación según motivo y vigencia pertinente, no sólo por la presencia de una PH. |
+
+El circuito externo de rectificación y el formato SICGNC mantienen su alcance previo; no se reabre su relevamiento ni se usan como bloqueo general para estos casos.
 
 ## Campos observados y trazabilidad al modelo
 
@@ -74,7 +85,7 @@ Los nombres de la columna «Destino conceptual» designan conceptos del dominio.
 | --- | --- | --- |
 | Taller de Montaje: razón social, domicilio, N.º CUIT y código | Actor regulatorio — TdM | Identificar la organización y el rol que cumple; conservar sus datos históricos en la ficha. El sello no determina por sí solo las responsabilidades jurídicas. |
 | Código de PEC y datos del encabezado | Actor regulatorio — PEC | Mantener identidad y código separados del proveedor comercial. No suponer que todo PEC es proveedor o que CILGAS cumple todos los roles. |
-| Fecha: habilitación y vencimiento | Servicio realizado / oblea / ficha técnica | La fecha de servicio y las fechas documentales son conceptos distintos. Confirmar significado y precisión antes de fijar validaciones. |
+| Fecha: habilitación y vencimiento | Servicio realizado / oblea / ficha técnica | Habilitación coincide con fecha del trabajo. Duraciones informadas: oblea un año y PH cinco años; pendiente concretar precisión y límite de vigencia (Q8/Q9). |
 | N.º oblea: anterior / nueva | Oblea y antecedente documental | Guardar identificadores como texto. El número nuevo será conocido y se solicita cuando se emite otra oblea, según respuesta del 05/10/2026. La oblea previa puede existir antes de la fecha de corte sin cargar un servicio histórico ficticio. |
 | Tipo de operación: conversión C, modificación M, revisión anual R, desmontaje D, baja B | Servicio realizado / ficha técnica | Distinguir la operación documental del servicio del catálogo y de los ensayos efectuados. Conservar el código y su significado histórico. |
 | Vehículo: marca, modelo, año y dominio | Vehículo | Recuperar datos actuales para preparar la ficha, sin que cambios posteriores alteren las fichas confirmadas. El dominio no debe ser la PK técnica. |
@@ -82,20 +93,20 @@ Los nombres de la columna «Destino conceptual» designan conceptos del dominio.
 | Tipo vehículo: taxi, pick-up, particular, bus, oficial, otros | Vehículo / ficha técnica | Usar clasificación controlada y conservar la descripción para Otros cuando corresponda. Confirmar si las opciones son excluyentes. |
 | Propietario: apellido y nombres; tipo y N.º documento | Persona relacionada con el servicio, en rol de titular | Una persona relacionada no es un usuario del sistema. Conservar tipo y número documental por separado, como identificadores textuales. |
 | Calle, N.º, piso/depto, CPA, localidad y provincia | Persona / domicilio histórico de la ficha | Mantener componentes independientes del domicilio. Altura, piso/depto y CPA no son cantidades para cálculos. |
-| Teléfono | Persona / contacto histórico de la ficha | Texto para conservar prefijos y formato; no inventar un número cuando está vacío. |
+| Teléfono | Persona / contacto histórico de la ficha | Obligatorio por decisión del equipo en Q1; texto para conservar prefijos y formato. Si falta, completarlo antes de confirmar, sin inventarlo. |
 | Regulador: montaje, desmontaje, baja; código y N.º serie | Componente individual e intervención del servicio | El papel prevé registrar el componente según su intervención. No reducirlo a un único regulador sobrescrito en el vehículo. |
 | Regulador: nuevo / usado | Intervención del servicio y snapshot | La condición se registra en el contexto del trabajo. No representa necesariamente el estado actual de disponibilidad. |
 | Cilindros: código, N.º serie, nuevo / usado | Componente individual — cilindro / intervención | Una fila identifica un componente involucrado. No usar columnas `cilindro1` a `cilindro4`. |
 | Cilindros: fabricado mes/año | Componente individual — cilindro | Preservar la precisión mes/año; no inventar día. La ficha no aporta por sí sola todos los atributos técnicos del cilindro. |
-| Cilindros: revisado mes/año y CRPC | Revisión de cilindro / actor regulatorio — CRPC | Separar el cilindro de sus revisiones sucesivas. Una fecha anotada puede ser un antecedente; no asumir que acredita un ensayo realizado en el servicio actual. |
+| Cilindros: revisado mes/año y CRPC | Revisión de cilindro / actor regulatorio — CRPC | «Revisado» muestra la última PH; puede ser un antecedente y no acredita por sí solo una PH del servicio actual. Fabricación y ensayo se conservan separados. |
 | Cilindros y válvulas: indicar MSDB | Intervención del componente / ficha técnica | Leyenda confirmada: M se monta, S sigue instalado, D se desmonta, B se da de baja. Contrastar cada marca con las acciones reales; no deducir posiciones ni asociaciones a partir de la letra. |
-| Válvula del cilindro: código y N.º serie | Componente individual — válvula / intervención / configuración del equipo | Conservar identidad e historial propios. Confirmar la relación de cada válvula con su cilindro; la ubicación del renglón no prueba la asociación. |
+| Válvula del cilindro: código y N.º serie | Componente individual — válvula / intervención / configuración del equipo | Una fila representa el cilindro y su válvula, según Q6. Conservar ambas identidades y su asociación; el recambio requiere resolver qué se imprime de la saliente (Q10). |
 | Manómetro; accesorio para tubería; tubería de alta presión | Componente / intervención y ficha técnica | Cada sector contiene código y N.º serie. Registrar los componentes efectivamente involucrados según su tipo. |
 | Dispositivo de sujeción del cilindro; electroválvula de nafta; electroválvula GNC; dosificador/mezclador; sistema de venteo; llave conmutadora | Componente / intervención y ficha técnica | La plantilla contempla código y N.º serie por sector. Una casilla en blanco no equivale a componente retirado ni a inexistencia confirmada. |
 | Válvula de carga interna; válvula de carga externa; manguera de baja presión; caño de alta presión | Componente / intervención y ficha técnica | La ficha diferencia tubería y caño de alta presión; no fusionarlos sin consultar al responsable técnico. |
 | Observaciones | Servicio realizado / ficha técnica | Texto libre complementario. No reemplaza campos estructurados como PH, resultado, fecha o intervención. |
 | Firma y aclaración del titular del TdM | Ficha técnica / datos del firmante | Preparar el espacio correspondiente y los datos conocidos. La generación del PDF no constituye una firma. |
-| Firma, aclaración y matrícula del responsable técnico del TdM y del PEC | Actor / responsable técnico y snapshot documental | Conservar rol y matrícula según corresponda. No generar firmas ni convertir un sello fotografiado en firma digital. |
+| Firma, aclaración y matrícula del responsable técnico del TdM y del PEC | Actor / responsable técnico y snapshot documental | Conservar los espacios para firmas y sellos manuales. Los datos conocidos del actor pueden conservarse históricamente sin exigir que el sello ya esté completado al generar. |
 | Firma, aclaración y documento del propietario | Persona titular / snapshot documental | Preparar los datos y espacio de firma. El archivo firmado digitalizado permanece fuera del MVP, conforme al alcance previo. |
 | Leyendas preimpresas, declaraciones y advertencia de habilitación | Plantilla documental versionada | Reproducir únicamente la plantilla validada por el taller. La ficha no debe presentarse como autorización autónoma para cargar GNC. |
 
@@ -127,7 +138,7 @@ El [glosario](../../CONTEXT.md) distingue prueba hidráulica de revisión quinqu
 | Componente — intervenciones históricas | 1 a muchas | Identidad estable del componente, con participación sucesiva en trabajos distintos. |
 | Cilindro — revisiones | 1 a muchas | La identidad del cilindro se conserva entre ensayos. Un servicio puede revisar varios cilindros. |
 | Servicio / ficha — renglones de cilindro | Hasta cuatro renglones en la plantilla relevada | El máximo visible coincide con el alcance previo de hasta cuatro cilindros por revisión quinquenal. No se extrapola como máximo universal de cualquier vehículo o formato. |
-| Cilindro — válvula | Asociación explícita en la configuración; cambios por intervención | F01 tiene una fila de cilindro y dos filas de válvulas ocupadas. No se deduce una pareja por posición de fila ni que ambas válvulas permanezcan instaladas. |
+| Cilindro — válvula | Asociación explícita en la configuración; una pareja por fila según Q6 | F01 tiene una fila de cilindro y dos filas de válvulas ocupadas. La asociación ya fue explicada por el equipo; queda precisar esa representación de saliente/entrante (Q10), sin asumir dos válvulas finales. |
 | Servicio — ficha y rectificaciones | Una ficha inicial y versiones posteriores enlazadas | ADR 0003: cada confirmación documental conserva un snapshot inmutable; la rectificación no sobrescribe la versión anterior. |
 | Servicio — oblea / ensayo / otros resultados | Registros diferenciados según corresponda | No todo campo de salida está completado en las fotografías. La obligatoriedad final depende del tipo de trabajo validado. |
 
@@ -144,18 +155,18 @@ Los componentes retirados o dados de baja pueden figurar en una ficha aunque no 
 
 ## Estado de las validaciones
 
-Se conservan los identificadores originales para mantener trazabilidad. Un cierre de definición no acredita que su regla ya esté implementada. Q1–Q7 identifican las preguntas puntuales de la ronda actual.
+Se conservan los identificadores originales para mantener trazabilidad. Un cierre de definición no acredita que su regla ya esté implementada. Q1–Q7 registran las respuestas recibidas y Q8–Q11 las precisiones restantes.
 
 | ID | Pregunta | Efecto en el diseño / criterio de cierre |
 | --- | --- | --- |
 | RF-01 | Leyenda MSDB confirmada el 05/10/2026. | **Definición resuelta:** M monta, S sigue instalado, D desmonta, B baja. Pendiente implementar coherencia con acciones, configuración y baja irreversible; eso es trabajo técnico, no una duda sobre la leyenda. |
-| RF-02 | ¿Cómo se relaciona cada válvula retirada o montada con el cilindro intervenido y qué debe imprimirse al reemplazar cuatro válvulas? | Validar asociación y ocho acciones (cuatro retiros y cuatro instalaciones) frente a cuatro casillas. Conservar todas las acciones en ítems/movimientos, sin emparejamientos automáticos ni omisiones documentales no autorizadas. Resolver el formato antes de emitir ese caso. |
-| RF-03 | Operación para servicio de PH, revisión quinquenal y conversión confirmada el 05/10/2026. | **Definición resuelta para esos casos:** R + PH con oblea nueva para servicio de PH/quinquenal; C + PH para conversión. Registrar los ensayos por separado; no volver a pedir la interpretación de F03. Variantes de modificación se tratan en Q7. |
-| RF-04 | ¿Cuáles son la precisión y el significado de habilitación, vencimiento, fabricación y revisión? | Determinar qué campos usan fecha completa y cuáles mes/año; confirmar cálculo de vencimientos. |
-| RF-05 | ¿Qué datos debe contener el resultado/certificado de PH y quién los emite? | Contrastar con certificado o modelo en blanco del CRPC antes de implementar esos campos. |
+| RF-02 | Asociación por fila resuelta; representación del recambio todavía parcial. | Cada fila representa cilindro y válvula. Conservar todas las acciones reales; Q10 precisa qué se imprime de la saliente/entrante, especialmente con cuatro recambios. No reiterar la pregunta de asociación ya respondida. |
+| RF-03 | Operación para servicio de PH, revisión quinquenal y conversión confirmada el 05/10/2026; modificación con PH precisada en Q7. | R + PH con oblea nueva para servicio de PH/quinquenal; C + PH para conversión. Q7 indica M ante cambio con vigencia previa y R si PH es por vencimiento; Q11 precisa qué vigencia distingue esos casos. Registrar los ensayos por separado sin volver a preguntar F03. |
+| RF-04 | Habilitación = fecha del trabajo; oblea un año; PH cinco años; «Revisado» = última PH. | Definidos significado y duración. Q8/Q9 cierran precisión de la fecha del ensayo y fin de vigencia; no confundir fabricación con ensayo ni repetir los plazos ya informados. |
+| RF-05 | Datos y resultado real del ensayo conservados como valores del servicio; puede haber datos opcionales. | No deducir aprobado. Q8 identifica cuáles pueden faltar y cómo tratar un resultado desconocido; no inventar mediciones ni certificados. |
 | RF-06 | ¿Qué combinación identifica inequívocamente un componente y cómo se tratan piezas sin serie? | Validar restricciones de unicidad y manejo de faltantes; nunca fabricar números de serie. |
-| RF-07 | Datos obligatorios y circuito de firmas. | **Parcialmente resuelto:** oblea nueva conocida y registrada cuando se emite; firmas posteriores a imprimir, sin bloquear generación por firma manuscrita ausente. Pendientes matriz de datos y excepciones concretas Q1–Q5/Q7; no dar por aprobada la propuesta visual de opcionalidad. |
-| RF-08 | ¿Cuáles son los datos legales y responsables vigentes del TdM, PEC y CRPC? | Validar maestros y firmantes; conservarlos en cada snapshot para no reescribir documentos históricos. |
+| RF-07 | Matriz base, teléfono obligatorio, piso/depto y observaciones opcionales, domicilio sin número, accesorios condicionales y firmas/sellos manuales definidos. | Q1/Q3/Q4 resueltos. Oblea nueva también en modificación. Los pendientes se reducen a datos de PH, precisión de vencimientos y representación del recambio (Q8–Q11), sin exigir firmas o sellos previos a generar. |
+| RF-08 | Identidad de TdM, PEC y CRPC separada de firma/sello manual. | La identificación del encabezado y los actores se conserva desde maestros. El circuito de firmas/sellos ya está resuelto; la vigencia de valores reales se verifica al configurarlos, no se infiere de las fotos ni obliga a digitalizar sellos. |
 | RF-09 | ¿Qué representa y qué formato tiene el identificador devuelto por SICGNC? | Definir referencia externa y trazabilidad sin automatizar el sistema externo. |
 | RF-10 | ¿Cómo se corrige una ficha ya presentada y se vincula su oblea? | Confirmar el circuito externo de rectificación, preservando siempre la versión previa según ADR 0003. |
 | RF-11 | ¿Las categorías de vehículo son excluyentes y qué diferencia técnica hay entre tubería y caño de alta presión? | Cerrar catálogos y evitar fusionar conceptos diferentes de la plantilla. |

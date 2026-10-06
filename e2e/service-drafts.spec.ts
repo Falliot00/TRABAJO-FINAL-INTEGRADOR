@@ -44,7 +44,7 @@ test("accede a los borradores compartidos del taller sin cobros ni pagos", async
   ).toHaveCount(0);
 });
 
-test("explica los bloqueos regulatorios y conserva el borrador editable sin confirmar", async ({
+test("explica los datos pendientes y conserva el borrador editable sin confirmar", async ({
   page,
 }, testInfo) => {
   await login(page, administrator.email, administrator.password);
@@ -62,7 +62,7 @@ test("explica los bloqueos regulatorios y conserva el borrador editable sin conf
   const offer = await createFixture(page, "catalog-services", {
     code: `CONF-${suffix}`,
     name: `Confirmación ${suffix}`,
-    description: "Revisión pendiente de validación regulatoria",
+    description: "Revisión con preparación incompleta",
     type: "REVISION_ANUAL",
     suggestedPrice: "100.00",
     items: [
@@ -99,8 +99,11 @@ test("explica los bloqueos regulatorios y conserva el borrador editable sin conf
     name: `Revisar confirmación del servicio ${draft.id}`,
     exact: true,
   });
-  await expect(review).toContainText("RF-07");
-  await expect(review).toContainText("RF-08");
+  await expect(review).toContainText("VEHICULO_INCOMPLETO");
+  await expect(review).toContainText("TITULAR_REQUERIDO");
+  await expect(review).toContainText("BASE_CONFIGURACION_DESCONOCIDA");
+  await expect(review).not.toContainText("RF-07");
+  await expect(review).not.toContainText("RF-08");
   await expect(
     review.getByRole("button", { name: "Confirmar servicio", exact: true }),
   ).toHaveCount(0);

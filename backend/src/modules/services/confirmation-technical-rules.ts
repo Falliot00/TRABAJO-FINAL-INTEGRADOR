@@ -16,6 +16,7 @@ export async function technicalRules(
   const prep = row.preparation;
   const operation = row.sheetOperation;
   const serviceDay = day(row.serviceDate);
+  let expiredPhAntecedents = 0;
   const emits = ["C", "M", "R"].includes(operation ?? "") || row.includesPh;
   if (prep?.enabledOn && day(prep.enabledOn) !== serviceDay)
     block(
@@ -132,9 +133,18 @@ export async function technicalRules(
             result: string;
             expires: Date | null;
             crpcId: bigint;
+            serviceDate: Date;
           }[]
-        >`SELECT fecha_ensayo AS date, resultado AS result, vence_el AS expires, crpc_id AS "crpcId" FROM revisiones_cilindros WHERE componente_id = ${item.componentId} ORDER BY fecha_ensayo DESC, id DESC LIMIT 1`
+        >`SELECT r.fecha_ensayo AS date, r.resultado AS result, r.vence_el AS expires, r.crpc_id AS "crpcId", s.fecha_servicio AS "serviceDate" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id = ${item.componentId} ORDER BY left(r.fecha_ensayo, 7) DESC, s.fecha_servicio DESC, s.confirmado_en DESC, r.id DESC LIMIT 1`
       : [];
+    // Sólo completa la representación de confirmación desde historia inmutable;
+    // no modifica el borrador guardado ni reemplaza datos explícitos contradictorios.
+    if (!item.performsPh && prior) {
+      item.revisionMonth ??= new Date(
+        `${prior.date.slice(0, 7)}-01T00:00:00.000Z`,
+      );
+      item.crpcId ??= prior.crpcId;
+    }
     const providedMonth = item.revisionMonth
       ? day(item.revisionMonth).slice(0, 7)
       : null;
@@ -148,13 +158,25 @@ export async function technicalRules(
         "ANTECEDENTE_PH_INCONSISTENTE",
         "El mes de última PH contradice la revisión registrada del cilindro.",
       );
-    if (prior && prior.date > serviceDay.slice(0, prior.date.length))
+    if (
+      prior &&
+      (prior.date > serviceDay.slice(0, prior.date.length) ||
+        prior.serviceDate > row.serviceDate ||
+        (item.performsPh &&
+          item.testDate &&
+          (prior.date.slice(0, 7) > item.testDate.slice(0, 7) ||
+            (prior.date.length === 10 &&
+              item.testDate.length === 10 &&
+              prior.date > item.testDate))))
+    )
       block(
         "ANTECEDENTE_PH_INCONSISTENTE",
         "La PH registrada del cilindro es posterior a este trabajo.",
       );
     const previousExpiry =
       prior?.expires ?? (antecedentMonth ? monthEnd(antecedentMonth, 5) : null);
+    if (item.performsPh && previousExpiry && previousExpiry < row.serviceDate)
+      expiredPhAntecedents += 1;
     if (
       item.performsPh &&
       ["VENCIMIENTO", "MODIFICACION"].includes(row.phReason ?? "")
@@ -165,8 +187,8 @@ export async function technicalRules(
           "El motivo de la PH requiere conocer la última prueba y su CRPC.",
         );
       else if (
-        (row.phReason === "VENCIMIENTO" && previousExpiry >= row.serviceDate) ||
-        (row.phReason === "MODIFICACION" && previousExpiry < row.serviceDate)
+        row.phReason === "MODIFICACION" &&
+        previousExpiry < row.serviceDate
       )
         block(
           "MOTIVO_PH_INCONSISTENTE",
@@ -174,6 +196,16 @@ export async function technicalRules(
         );
     }
     if (!item.performsPh && item.finalPosition !== null) {
+      if (!item.revisionMonth || !item.crpcId)
+        block(
+          "PH_DOCUMENTACION_INCOMPLETA",
+          "Complete el mes y CRPC de la última PH para conservarlos en la ficha; puede consultar el antecedente registrado.",
+        );
+      if (prior && item.crpcId && prior.crpcId !== item.crpcId)
+        block(
+          "ANTECEDENTE_PH_INCONSISTENTE",
+          "El CRPC de la última PH no coincide con el antecedente registrado.",
+        );
       if (!previousExpiry || (!prior && !item.crpcId))
         block(
           "PH_ANTECEDENTE_REQUERIDO",
@@ -194,5 +226,10 @@ export async function technicalRules(
         "La conversión incluye la PH de cada cilindro instalado.",
       );
   }
+  if (row.includesPh && row.phReason === "VENCIMIENTO" && !expiredPhAntecedents)
+    block(
+      "MOTIVO_PH_INCONSISTENTE",
+      "La PH por vencimiento requiere al menos un cilindro cuya prueba anterior esté vencida.",
+    );
   return blockers;
 }

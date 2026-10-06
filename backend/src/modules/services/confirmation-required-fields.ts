@@ -62,9 +62,7 @@ export async function requiredFields(
   const actorRefs = [
     { id: row.preparation?.tdmId, type: "TDM" },
     { id: row.preparation?.pecId, type: "PEC" },
-    ...row.interventions
-      .filter((item) => item.performsPh)
-      .map((item) => ({ id: item.crpcId, type: "CRPC" })),
+    ...row.interventions.map((item) => ({ id: item.crpcId, type: "CRPC" })),
   ].filter((actor): actor is { id: bigint; type: string } => actor.id != null);
   const actors = await tx.regulatoryActor.findMany({
     where: { id: { in: actorRefs.map((ref) => ref.id) } },

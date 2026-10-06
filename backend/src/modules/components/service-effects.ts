@@ -70,6 +70,17 @@ export class ComponentServiceEffects {
       throw new ConflictException(
         "Cada componente documentado requiere identidad única, código y serie.",
       );
+    if (
+      documentary.some(
+        (row) =>
+          (row.type === "CILINDRO" &&
+            (!row.manufactureMonth || !row.condition)) ||
+          (row.type === "REGULADOR" && !row.condition),
+      )
+    )
+      throw new ConflictException(
+        "Complete condición de regulador y cilindros, y fabricación mes/año de cada cilindro.",
+      );
     const desired = new Map(
       members.map((member) => [String(member.componentId), member]),
     );
@@ -227,6 +238,28 @@ export class ComponentServiceEffects {
           "Cada cilindro debe tener exactamente una válvula en su pareja resultante.",
         );
     }
+    if (
+      ["D", "B"].includes(draft.sheetOperation ?? "") &&
+      (desired.size !== 0 ||
+        !members.length ||
+        documentary.some((row) => row.action !== draft.sheetOperation))
+    )
+      throw new ConflictException(
+        "Desmontaje y baja requieren retirar el equipo completo con la marca D o B correspondiente.",
+      );
+    if (draft.sheetOperation === "C" && members.length)
+      throw new ConflictException(
+        "La conversión requiere un vehículo sin equipo vigente; documente una modificación del equipo existente.",
+      );
+    if (
+      ["C", "M", "R"].includes(draft.sheetOperation ?? "") &&
+      ([...desired.values()].filter((member) => member.type === "REGULADOR")
+        .length !== 1 ||
+        ![...desired.values()].some((member) => member.type === "CILINDRO"))
+    )
+      throw new ConflictException(
+        "La habilitación requiere regulador y al menos una pareja cilindro–válvula en la configuración resultante.",
+      );
     if (
       new Set(
         [...desired.values()].map(

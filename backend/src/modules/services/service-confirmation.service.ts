@@ -91,12 +91,18 @@ export class ServiceConfirmationService {
         Prisma.sql`SELECT id FROM modelos_componentes WHERE id IN (SELECT modelo_id FROM componentes WHERE id IN (${Prisma.join(ids)})) ORDER BY id FOR SHARE`,
       );
     }
+    const priorActors = ids.length
+      ? await tx.$queryRaw<{ crpcId: bigint }[]>(
+          Prisma.sql`SELECT DISTINCT ON (r.componente_id) r.crpc_id AS "crpcId" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id IN (${Prisma.join(ids)}) ORDER BY r.componente_id, left(r.fecha_ensayo, 7) DESC, s.fecha_servicio DESC, s.confirmado_en DESC, r.id DESC`,
+        )
+      : [];
     const actors = [
       ...new Set(
         [
           row.preparation?.pecId,
           row.preparation?.tdmId,
           ...row.interventions.map((item) => item.crpcId),
+          ...priorActors.map((item) => item.crpcId),
         ].filter((id): id is bigint => id != null),
       ),
     ];
@@ -207,6 +213,10 @@ export class ServiceConfirmationService {
           !component ||
           component.type !== item.type ||
           (item.serialNumber && item.serialNumber !== component.serialNumber) ||
+          (item.manufactureMonth &&
+            component.manufactureMonth &&
+            item.manufactureMonth.getTime() !==
+              component.manufactureMonth.getTime()) ||
           (item.homologationCode &&
             item.homologationCode !== component.model.homologationCode)
         )
@@ -433,7 +443,7 @@ export class ServiceConfirmationService {
               entityId: String(id),
               result: "EXITO",
               correlationId: input.idempotencyKey,
-              detail: `Ficha ${sheetId}; snapshot 1; PDF pendiente.`,
+              detail: `Ficha ${sheetId}; snapshot 2; plantilla ficha-v2; PDF pendiente.`,
             },
             tx,
           );

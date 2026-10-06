@@ -161,6 +161,14 @@ describe("M06: confirmación con reglas operativas reales por HTTP", () => {
         ),
         code: "FECHA_PH",
       },
+      {
+        interventions: fixture.draft.interventions.map((row) =>
+          row.type === "CILINDRO"
+            ? { ...row, manufactureMonth: "2020-02" }
+            : row,
+        ),
+        code: "IDENTIDAD_COMPONENTE",
+      },
     ];
     for (const { code, ...input } of cases) {
       draft = (
@@ -185,6 +193,39 @@ describe("M06: confirmación con reglas operativas reales por HTTP", () => {
       ).body;
       expect(check.blockers).toEqual(
         expect.arrayContaining([expect.objectContaining({ code })]),
+      );
+    }
+  });
+  it("no habilita equipo incompleto ni fabricación desconocida", async () => {
+    const fixture = await prepareComplete(app, 304);
+    const { admin } = fixture;
+    let draft = fixture.draft;
+    const cases = [
+      fixture.draft.interventions.map((row) =>
+        row.type === "CILINDRO" ? { ...row, manufactureMonth: null } : row,
+      ),
+      fixture.draft.interventions.map((row) =>
+        row.type === "CILINDRO" ? { ...row, condition: null } : row,
+      ),
+    ];
+    for (const interventions of cases) {
+      draft = (
+        await admin.agent
+          .patch(`/api/service-drafts/${draft.id}`)
+          .set(admin.headers)
+          .send({ version: draft.version, interventions })
+          .expect(200)
+      ).body;
+      expect(
+        (
+          await admin.agent
+            .get(`/api/service-drafts/${draft.id}/confirmation-check`)
+            .expect(200)
+        ).body.blockers,
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ code: "CONFIGURACION_INCONSISTENTE" }),
+        ]),
       );
     }
   });

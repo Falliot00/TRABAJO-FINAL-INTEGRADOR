@@ -92,7 +92,10 @@ async function prepareConversion(page: Page) {
     catalogOfferId: offer.id,
     serviceDate: "2026-10-05",
   });
-  const cylinder = components[1];
+  const cylinder = components.find(
+    (component) => component.type === "CILINDRO",
+  );
+  if (!cylinder) throw new Error("La preparación requiere un cilindro.");
   const draft: ServiceDraft = await writeFixture(
     page,
     `service-drafts/${created.id}`,

@@ -2,7 +2,7 @@ import type { ServiceInterventionInput } from "@cilgas/contracts";
 import type { EditableIntervention } from "./ServiceInterventions";
 import { ServiceActorPicker } from "./ServiceReferences";
 import { useState } from "react";
-import { expirationAtMonthEnd } from "./service-dates";
+import { phExpiration } from "./service-dates";
 
 export function ServiceInterventionPh({
   intervention,
@@ -68,16 +68,7 @@ export function ServiceInterventionPh({
           Vencimiento de revisión preparado
           <input
             type="date"
-            value={
-              intervention.performsPh && intervention.phResult === "RECHAZADO"
-                ? ""
-                : (expirationAtMonthEnd(
-                    intervention.performsPh
-                      ? intervention.testDate
-                      : intervention.revisionMonth,
-                    5,
-                  ) ?? "")
-            }
+            value={phExpiration(intervention) ?? ""}
             readOnly
           />
         </label>

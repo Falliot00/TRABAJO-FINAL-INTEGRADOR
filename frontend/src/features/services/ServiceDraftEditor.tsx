@@ -15,7 +15,7 @@ import { decimal } from "../catalog/catalog-fields";
 import type { EditableItem } from "./ServiceItemEditor";
 import { ServicePeople } from "./ServicePeople";
 import { ServicePreparation } from "./ServicePreparation";
-import { expirationAtMonthEnd } from "./service-dates";
+import { expirationAtMonthEnd, phExpiration } from "./service-dates";
 import {
   ServiceInterventions,
   type EditableIntervention,
@@ -121,13 +121,7 @@ export function ServiceDraftEditor({
           row: Number(entry.row),
           ...(entry.type === "CILINDRO"
             ? {
-                revisionExpiresOn:
-                  entry.performsPh && entry.phResult === "RECHAZADO"
-                    ? null
-                    : expirationAtMonthEnd(
-                        entry.performsPh ? entry.testDate : entry.revisionMonth,
-                        5,
-                      ),
+                revisionExpiresOn: phExpiration(entry),
               }
             : {}),
         };

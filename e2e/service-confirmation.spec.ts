@@ -341,9 +341,11 @@ test("releva un equipo existente y confirma una revisi√≥n sin crear una PH hist√
   await page
     .getByRole("button", { name: "Guardar relevamiento inicial", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
-    "Relevamiento inicial guardado",
-  );
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "Relevamiento inicial guardado" }),
+  ).toBeVisible();
   const equipment = await (
     await page.request.get(`/api/vehicles/${vehicle.id}/configurations`)
   ).json();

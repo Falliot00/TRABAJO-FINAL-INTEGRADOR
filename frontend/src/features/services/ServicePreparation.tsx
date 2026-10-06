@@ -20,8 +20,10 @@ export function ServicePreparation({
       <h3>Preparación de la ficha</h3>
       <p className="records-description">
         Podés dejar datos pendientes y completarlos en otra edición. La
-        habilitación toma la fecha del trabajo. La oblea vence al último día del
-        mismo mes del año siguiente. Las firmas y sellos se completan a mano.
+        habilitación toma la fecha del trabajo. Cuando se coloca oblea nueva,
+        vence al último día del mismo mes del año siguiente. Desmontaje y baja
+        pueden prepararse sin oblea nueva. Las firmas y sellos se completan a
+        mano.
       </p>
       <div className="form-grid">
         <label className="field">

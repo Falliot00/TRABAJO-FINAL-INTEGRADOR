@@ -69,12 +69,14 @@ export function ServiceInterventionPh({
           <input
             type="date"
             value={
-              expirationAtMonthEnd(
-                intervention.performsPh
-                  ? intervention.testDate
-                  : intervention.revisionMonth,
-                5,
-              ) ?? ""
+              intervention.performsPh && intervention.phResult === "RECHAZADO"
+                ? ""
+                : (expirationAtMonthEnd(
+                    intervention.performsPh
+                      ? intervention.testDate
+                      : intervention.revisionMonth,
+                    5,
+                  ) ?? "")
             }
             readOnly
           />
@@ -111,10 +113,15 @@ export function ServiceInterventionPh({
           />
         </label>
       </div>
+      {intervention.performsPh && intervention.phResult === "RECHAZADO" && (
+        <p className="notice notice-info">
+          Una PH rechazada no genera un nuevo vencimiento de revisión.
+        </p>
+      )}
       <p className="records-description">
         Fabricación y ensayo son fechas distintas. Conservá la precisión
-        conocida; la PH vence al cierre del mismo mes, cinco años después. El
-        resultado real y el CRPC son obligatorios al confirmar PH.
+        conocida; una PH aprobada vence al cierre del mismo mes, cinco años
+        después. El resultado real y el CRPC son obligatorios al confirmar PH.
       </p>
       <ServiceActorPicker
         actorId={intervention.crpcId ?? null}

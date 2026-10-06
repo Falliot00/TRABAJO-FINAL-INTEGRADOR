@@ -121,10 +121,13 @@ export function ServiceDraftEditor({
           row: Number(entry.row),
           ...(entry.type === "CILINDRO"
             ? {
-                revisionExpiresOn: expirationAtMonthEnd(
-                  entry.performsPh ? entry.testDate : entry.revisionMonth,
-                  5,
-                ),
+                revisionExpiresOn:
+                  entry.performsPh && entry.phResult === "RECHAZADO"
+                    ? null
+                    : expirationAtMonthEnd(
+                        entry.performsPh ? entry.testDate : entry.revisionMonth,
+                        5,
+                      ),
               }
             : {}),
         };

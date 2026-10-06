@@ -43,6 +43,143 @@ const draft: ServiceDraft = {
 
 afterEach(() => vi.unstubAllGlobals());
 
+test.each(["D", "B"] as const)(
+  "guarda la operación %s con la fecha del trabajo y sin oblea nueva ni vencimiento",
+  async (sheetOperation) => {
+    const stored = {
+      ...draft,
+      type: "DESMONTAJE",
+      sheetOperation,
+      includesPh: false,
+      phReason: null,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string, init?: RequestInit) => {
+        const url = new URL(input, "http://localhost");
+        if (url.pathname === "/api/auth/csrf")
+          return Response.json({ csrfToken: "csrf" });
+        if (
+          url.pathname === "/api/service-drafts/31" &&
+          init?.method === "PATCH"
+        ) {
+          const body = JSON.parse(String(init.body));
+          expect(body).toMatchObject({
+            sheetOperation,
+            includesPh: false,
+            preparation: {
+              enabledOn: "2026-09-14",
+              newSticker: null,
+              expiresOn: null,
+            },
+          });
+          return Response.json({ ...stored, ...body, version: 2 });
+        }
+        if (url.pathname === "/api/service-drafts/31")
+          return Response.json(stored);
+        if (url.pathname === "/api/service-drafts")
+          return Response.json({ items: [stored], nextCursor: null });
+        throw new Error(`Petición inesperada: ${input}`);
+      }),
+    );
+    const user = userEvent.setup();
+    render(<Services canViewCosts={false} onSessionLost={vi.fn()} />);
+    await user.click(
+      await screen.findByRole("button", { name: "Editar borrador 31" }),
+    );
+    expect(
+      await screen.findByLabelText("Fecha de habilitación preparada"),
+    ).toHaveValue("2026-09-14");
+    expect(screen.getByLabelText("Vencimiento de oblea preparado")).toHaveValue(
+      "",
+    );
+    expect(
+      screen.getByText(/Desmontaje y baja pueden prepararse sin oblea nueva/),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Guardar borrador" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Borrador guardado",
+    );
+  },
+);
+
+test("guarda una PH rechazada con su fecha real sin vencimiento habilitante ni certificado inventado", async () => {
+  let stored: ServiceDraft = {
+    ...draft,
+    interventions: [
+      {
+        type: "CILINDRO",
+        row: 1,
+        performsPh: true,
+        phResult: "APROBADO",
+        testDate: "2026-09",
+        revisionExpiresOn: "2031-09-30",
+        certificateNumber: null,
+      },
+    ],
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string, init?: RequestInit) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/auth/csrf")
+        return Response.json({ csrfToken: "csrf" });
+      if (
+        url.pathname === "/api/service-drafts/31" &&
+        init?.method === "PATCH"
+      ) {
+        const body = JSON.parse(String(init.body));
+        expect(body.interventions).toEqual([
+          expect.objectContaining({
+            testDate: "2026-09",
+            phResult: "RECHAZADO",
+            revisionExpiresOn: null,
+            certificateNumber: null,
+          }),
+        ]);
+        stored = { ...stored, ...body, version: 2 };
+        return Response.json(stored);
+      }
+      if (url.pathname === "/api/service-drafts/31")
+        return Response.json(stored);
+      if (url.pathname === "/api/service-drafts")
+        return Response.json({ items: [stored], nextCursor: null });
+      throw new Error(`Petición inesperada: ${input}`);
+    }),
+  );
+  const user = userEvent.setup();
+  render(<Services canViewCosts={false} onSessionLost={vi.fn()} />);
+  await user.click(
+    await screen.findByRole("button", { name: "Editar borrador 31" }),
+  );
+  await user.selectOptions(
+    await screen.findByLabelText("Resultado PH preparado"),
+    "RECHAZADO",
+  );
+  expect(
+    screen.getByLabelText("Vencimiento de revisión preparado"),
+  ).toHaveValue("");
+  expect(
+    screen.getByText(
+      "Una PH rechazada no genera un nuevo vencimiento de revisión.",
+    ),
+  ).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Guardar borrador" }));
+  expect(await screen.findByRole("status")).toHaveTextContent(
+    "Borrador guardado",
+  );
+  await user.click(screen.getByRole("button", { name: "Editar borrador 31" }));
+  expect(
+    await screen.findByLabelText("Fecha del ensayo preparada"),
+  ).toHaveValue("2026-09");
+  expect(screen.getByLabelText("Resultado PH preparado")).toHaveValue(
+    "RECHAZADO",
+  );
+  expect(
+    screen.getByLabelText("Vencimiento de revisión preparado"),
+  ).toHaveValue("");
+});
+
 test("conserva cuatro recambios y permite elegir explícitamente el cilindro de la válvula saliente", async () => {
   let stored = {
     ...draft,

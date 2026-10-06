@@ -26,6 +26,7 @@ import {
   jsonText,
 } from "../documents/service-sheets.service";
 import { sheetSnapshot } from "../documents/sheet-snapshot";
+import { requiredFields } from "./confirmation-required-fields";
 import { SupplierObligationsService } from "../suppliers/obligations.service";
 import { digest, sessionUser, userInclude } from "../identity/identity.service";
 import { parseId } from "../identity/dto";
@@ -116,6 +117,7 @@ export class ServiceConfirmationService {
     actor: SessionUser,
   ) {
     const blockers: ConfirmationBlocker[] = [];
+    blockers.push(...(await requiredFields(tx, row)));
     const block = (code: string, message: string) =>
       blockers.push({ code, message });
     const total = row.items.reduce(

@@ -2,6 +2,8 @@ import type {
   Component,
   ComponentHistory,
   ComponentInput,
+  InitialEquipmentSurvey,
+  InitialEquipmentSurveyInput,
   Page,
   VehicleConfigurations,
 } from "@cilgas/contracts";
@@ -38,5 +40,16 @@ export const componentsApi = {
     request<VehicleConfigurations>(
       `/vehicles/${encodeURIComponent(id)}/configurations`,
       { signal },
+    ),
+  registerInitialSurvey: (
+    id: string,
+    body: InitialEquipmentSurveyInput,
+    signal?: AbortSignal,
+  ) =>
+    mutate<InitialEquipmentSurvey>(
+      `/vehicles/${encodeURIComponent(id)}/configurations/initial-survey`,
+      "POST",
+      body,
+      signal,
     ),
 };

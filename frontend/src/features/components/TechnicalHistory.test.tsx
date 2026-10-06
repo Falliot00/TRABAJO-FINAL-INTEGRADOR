@@ -4,6 +4,118 @@ import { TechnicalHistory } from "./TechnicalHistory";
 
 afterEach(() => vi.unstubAllGlobals());
 
+test.each(["vehicle", "component"] as const)(
+  "distingue los antecedentes conocidos del relevamiento de servicios y ensayos al consultar %s",
+  async (kind) => {
+    const ph = {
+      testDate: "2025-09",
+      expiresOn: "2030-09-30",
+      result: "APROBADO",
+      crpcId: null,
+      certificateNumber: null,
+    };
+    const survey = {
+      configurationId: "20",
+      vehicleId: "8",
+      recordedAt: "2026-10-05T15:00:00Z",
+      recordedBy: "11",
+      regulatorId: "50",
+      pairs: [{ position: 1, cylinderId: "60", valveId: "70", ph }],
+      sticker: {
+        number: "OB-ANTERIOR",
+        enabledOn: null,
+        expiresOn: "2027-09-30",
+      },
+      notes: "Datos del equipo relevado",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json(
+          kind === "vehicle"
+            ? {
+                vehicleId: "8",
+                available: true,
+                canRegisterInitialSurvey: false,
+                message: "Configuraciones registradas",
+                currentConfigurationId: "20",
+                configurations: [
+                  {
+                    id: "20",
+                    serviceId: null,
+                    validFrom: survey.recordedAt,
+                    validUntil: null,
+                    components: [],
+                    initialSurvey: survey,
+                  },
+                ],
+              }
+            : {
+                componentId: "60",
+                available: true,
+                message: "Historia registrada",
+                movements: [],
+                activities: [],
+                revisions: [],
+                initialSurveys: [{ ...survey, ph }],
+                cylinderValveLinks: [
+                  {
+                    configurationId: "20",
+                    serviceId: null,
+                    cylinderId: "60",
+                    valveId: "70",
+                    validFrom: survey.recordedAt,
+                    validUntil: null,
+                  },
+                ],
+              },
+        ),
+      ),
+    );
+    render(
+      <TechnicalHistory
+        id={kind === "vehicle" ? "8" : "60"}
+        kind={kind}
+        onClose={vi.fn()}
+        onSessionLost={vi.fn()}
+      />,
+    );
+    const antecedent = await screen.findByRole("region", {
+      name: "Antecedente conocido de PH",
+    });
+    expect(antecedent).toHaveTextContent("Fecha conocida: 2025-09");
+    expect(antecedent).not.toHaveTextContent("2025-09-01");
+    expect(antecedent).toHaveTextContent("Certificado: Sin informar");
+    expect(antecedent).toHaveTextContent("CRPC: Sin informar");
+    expect(antecedent).toHaveTextContent("Resultado: Aprobado");
+    expect(screen.getByText(/Registrado por 11/)).toHaveTextContent(
+      "05/10/2026, 12:00",
+    );
+    if (kind === "component") {
+      expect(
+        screen.getByRole("heading", { name: "Relevamientos iniciales" }),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Sin ensayos registrados.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Sin movimientos registrados."),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("row", { name: /60 70 Relevamiento inicial/ }),
+      ).toHaveTextContent("Vigente");
+    } else {
+      const sticker = screen.getByRole("region", {
+        name: "Antecedente conocido de oblea",
+      });
+      expect(sticker).toHaveTextContent("OB-ANTERIOR");
+      expect(sticker).toHaveTextContent("Habilitación: Sin informar");
+      expect(sticker).toHaveTextContent("Vencimiento informado: 2027-09-30");
+      expect(
+        screen.queryByText("Servicio Sin informar"),
+      ).not.toBeInTheDocument();
+    }
+  },
+);
+
 test("reconstruye las válvulas anterior y vigente del cilindro desde vínculos explícitos", async () => {
   vi.stubGlobal(
     "fetch",

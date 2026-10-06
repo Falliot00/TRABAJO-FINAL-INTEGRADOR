@@ -1,6 +1,7 @@
 /** Contratos de transporte: IDs bigint y fechas se conservan como texto. */
 export * from "./catalog";
 export * from "./components";
+export * from "./initial-survey";
 export * from "./service-drafts";
 export * from "./service-confirmation";
 export type RoleCode = "ADMINISTRADOR" | "OPERADOR";

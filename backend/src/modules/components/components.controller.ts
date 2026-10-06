@@ -25,6 +25,8 @@ import { parseListQuery, parseMasterBody } from "../../common/master-data";
 import { IdentityService } from "../identity/identity.service";
 import { parseId } from "../identity/dto";
 import { ComponentsService } from "./components.service";
+import { InitialEquipmentSurveyDto } from "./initial-survey-dto";
+import { InitialSurveyService } from "./initial-survey.service";
 import {
   ComponentDto,
   ComponentDuplicatesQueryDto,
@@ -35,6 +37,7 @@ import {
   ComponentsPageDto,
   ComponentHistoryResponseDto,
   VehicleConfigurationsResponseDto,
+  InitialEquipmentSurveyResponseDto,
 } from "./responses";
 
 @ApiTags("Componentes")
@@ -151,6 +154,8 @@ export class ComponentsController {
 @Controller("vehicles/:id/configurations")
 export class VehicleConfigurationsController {
   constructor(
+    @Inject(InitialSurveyService)
+    private readonly surveys: InitialSurveyService,
     @Inject(ComponentsService) private readonly components: ComponentsService,
     @Inject(IdentityService) private readonly identity: IdentityService,
     @Inject(Security) private readonly security: Security,
@@ -160,10 +165,31 @@ export class VehicleConfigurationsController {
   @ApiOkResponse({ type: VehicleConfigurationsResponseDto })
   @ApiParam({ name: "id", type: String })
   async get(@Req() req: Request, @Param("id") id: string) {
-    await this.identity.authorize(
+    const actor = await this.identity.authorize(
       this.security.token(req),
       "personas.gestionar",
     );
-    return this.components.configurations(parseId(id));
+    return this.components.configurations(parseId(id), actor);
+  }
+
+  @Post("initial-survey")
+  @ApiCreatedResponse({ type: InitialEquipmentSurveyResponseDto })
+  @ApiBody({ type: InitialEquipmentSurveyDto })
+  @ApiParam({ name: "id", type: String })
+  @ApiHeader({ name: "X-CSRF-Token", required: true })
+  async register(
+    @Req() req: Request,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    this.security.checkCsrf(req);
+    const token = this.security.token(req);
+    const actor = await this.identity.authorize(token, "servicios.gestionar");
+    return this.surveys.register(
+      parseId(id),
+      parseMasterBody(InitialEquipmentSurveyDto, body),
+      actor,
+      token,
+    );
   }
 }

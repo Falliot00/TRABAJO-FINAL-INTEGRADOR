@@ -1,4 +1,8 @@
 import type { ComponentModel, ComponentType } from "./index";
+import type {
+  InitialEquipmentSurvey,
+  KnownPhAntecedent,
+} from "./initial-survey";
 
 export interface ComponentInput {
   modelId: string;
@@ -14,6 +18,13 @@ export interface Component extends Required<ComponentInput> {
 }
 
 export interface ComponentHistory {
+  initialSurveys?: {
+    configurationId: string;
+    vehicleId: string;
+    recordedAt: string;
+    recordedBy: string;
+    ph: KnownPhAntecedent | null;
+  }[];
   componentId: string;
   available: boolean;
   message: string;
@@ -54,11 +65,13 @@ export interface ComponentHistory {
 }
 
 export interface VehicleConfigurations {
+  canRegisterInitialSurvey?: boolean;
   vehicleId: string;
   available: boolean;
   message: string;
   currentConfigurationId: string | null;
   configurations: {
+    initialSurvey?: InitialEquipmentSurvey | null;
     id: string;
     serviceId: string | null;
     validFrom: string;

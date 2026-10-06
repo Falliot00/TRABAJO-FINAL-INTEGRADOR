@@ -1,5 +1,9 @@
 import { ConflictException } from "@nestjs/common";
-import type { ComponentType, VehicleConfigurations } from "@cilgas/contracts";
+import type {
+  ComponentType,
+  InitialEquipmentSurvey,
+  VehicleConfigurations,
+} from "@cilgas/contracts";
 import { Prisma } from "../../generated/prisma/client";
 import type { DraftRow } from "../services/service-drafts.service";
 
@@ -327,10 +331,17 @@ export class ComponentServiceEffects {
       Configuration[]
     >`SELECT id, servicio_origen_id AS "serviceId", vigente_desde AS "validFrom", vigente_hasta AS "validUntil" FROM configuraciones WHERE vehiculo_id = ${vehicleId} ORDER BY vigente_desde DESC, id DESC`;
     const configurations = [];
+    const surveys = await tx.$queryRaw<
+      { response: InitialEquipmentSurvey }[]
+    >`SELECT respuesta AS response FROM relevamientos_iniciales WHERE vehiculo_id = ${vehicleId}`;
     for (const row of rows)
       configurations.push({
         id: String(row.id),
         serviceId: row.serviceId === null ? null : String(row.serviceId),
+        initialSurvey:
+          surveys.find(
+            ({ response }) => response.configurationId === String(row.id),
+          )?.response ?? null,
         validFrom: row.validFrom.toISOString(),
         validUntil: row.validUntil?.toISOString() ?? null,
         components: (await this.members(tx, row.id)).map((member) => ({

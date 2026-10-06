@@ -2,6 +2,7 @@ import type { AuditPage } from "@cilgas/contracts";
 import type { Prisma, PrismaClient } from "../../generated/prisma/client";
 
 type AuditAction =
+  | "EQUIPO_RELEVADO"
   | "USUARIO_INICIAL_CREADO"
   | "SESION_INICIADA"
   | "SESION_CERRADA"
@@ -35,6 +36,7 @@ interface AuditRecord {
   actorId?: string;
   action: AuditAction;
   entity:
+    | "configuraciones"
     | "usuarios"
     | "configuracion_taller"
     | "actores_regulatorios"

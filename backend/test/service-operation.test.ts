@@ -156,6 +156,14 @@ describe("Matriz PH, oblea y limites de mes por HTTP", () => {
         .expect(200)
     ).body;
     const rejected = await confirm(draft, first.configurationId);
+    const history = (
+      await admin.agent
+        .get(`/api/components/${fixture.component.id}/history`)
+        .expect(200)
+    ).body;
+    expect(
+      history.revisions.map((revision: { result: string }) => revision.result),
+    ).toEqual(["APROBADO", "RECHAZADO"]);
     const next = (
       await admin.agent
         .post("/api/service-drafts")

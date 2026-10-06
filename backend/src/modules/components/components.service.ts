@@ -121,7 +121,7 @@ export class ComponentsService {
         testDate: string;
         expiresOn: Date | null;
       })[]
-    >`SELECT id::text, servicio_id::text AS "serviceId", crpc_id::text AS "crpcId", fecha_ensayo AS "testDate", vence_el AS "expiresOn", resultado AS result, numero_certificado AS "certificateNumber" FROM revisiones_cilindros WHERE componente_id = ${id} ORDER BY fecha_ensayo, id`;
+    >`SELECT r.id::text, r.servicio_id::text AS "serviceId", r.crpc_id::text AS "crpcId", r.fecha_ensayo AS "testDate", r.vence_el AS "expiresOn", r.resultado AS result, r.numero_certificado AS "certificateNumber" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id = ${id} ORDER BY left(r.fecha_ensayo, 7), s.fecha_servicio, s.confirmado_en, r.id`;
     const links = await this.db.$queryRaw<
       (NonNullable<ComponentHistory["cylinderValveLinks"]>[number] & {
         validFrom: Date;

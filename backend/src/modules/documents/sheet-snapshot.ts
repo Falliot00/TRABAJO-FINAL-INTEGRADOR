@@ -49,18 +49,48 @@ export function sheetSnapshot(
   const crpcCode = (id: bigint | null) =>
     actors.find((candidate) => candidate.id === id)?.code ?? null;
   const base = (item: DraftRow["interventions"][number]) => ({
+    componenteId: item.componentId === null ? null : String(item.componentId),
     renglon: item.row,
     codigoHomologacion: item.homologationCode,
     numeroSerie: item.serialNumber,
   });
   const prep = row.preparation!;
+  const removedValves = row.interventions
+    .filter(
+      (item) =>
+        item.type === "VALVULA" && ["D", "B"].includes(item.action ?? ""),
+    )
+    .map((item) => {
+      const cylinder = row.interventions.find(
+        (candidate) =>
+          candidate.componentId === item.cylinderId &&
+          candidate.type === "CILINDRO",
+      );
+      return {
+        ...base(item),
+        cilindroId: String(item.cylinderId),
+        accion: item.action,
+        cilindroCodigo: cylinder?.homologationCode ?? null,
+        cilindroSerie: cylinder?.serialNumber ?? null,
+      };
+    });
+  const observations =
+    [
+      prep.notes,
+      ...removedValves.map(
+        (item) =>
+          `Válvula retirada: ${item.codigoHomologacion}, serie ${item.numeroSerie}, ${item.accion}; cilindro ${item.cilindroCodigo}, serie ${item.cilindroSerie} (ID ${item.cilindroId}).`,
+      ),
+    ]
+      .filter(Boolean)
+      .join("\n") || null;
   return {
     documento: {
       numero: `F-${row.id}-1`,
       version: 1,
-      plantillaVersion: "ficha-v1",
+      plantillaVersion: "ficha-v2",
       emitidaEn: now.toISOString(),
-      observaciones: prep.notes,
+      observaciones: observations,
     },
     servicio: {
       id: String(row.id),
@@ -70,6 +100,7 @@ export function sheetSnapshot(
       operacionCodigo: row.sheetOperation,
       operacionDescripcion: evidence.operationDescription,
       incluyePH: row.includesPh,
+      motivoPH: row.phReason,
     },
     habilitacion: {
       fecha: day(prep.enabledOn),
@@ -106,14 +137,30 @@ export function sheetSnapshot(
       .map((item) => ({
         ...base(item),
         condicion: item.condition,
+        valvula: (() => {
+          const valve = row.interventions.find(
+            (candidate) =>
+              candidate.type === "VALVULA" &&
+              candidate.cylinderId === item.componentId &&
+              candidate.finalPosition !== null,
+          );
+          return valve ? { ...base(valve), accion: valve.action } : null;
+        })(),
         fabricacionMes: month(item.manufactureMonth),
-        revisionMes: month(item.revisionMonth),
+        revisionMes: item.performsPh
+          ? (item.testDate?.slice(0, 7) ?? null)
+          : month(item.revisionMonth),
         crpcCodigo: crpcCode(item.crpcId),
         accion: item.action,
       })),
     valvulas: row.interventions
-      .filter((item) => item.type === "VALVULA")
-      .map((item) => ({ ...base(item), accion: item.action })),
+      .filter((item) => item.type === "VALVULA" && item.finalPosition !== null)
+      .map((item) => ({
+        ...base(item),
+        cilindroId: String(item.cylinderId),
+        accion: item.action,
+      })),
+    valvulasRetiradas: removedValves,
     accesorios: row.interventions
       .filter((item) => item.type === "ACCESORIO")
       .map((item) => ({ ...base(item), descripcion: item.description })),
@@ -122,7 +169,7 @@ export function sheetSnapshot(
       .map((item) => ({
         cilindroCodigo: item.homologationCode,
         cilindroSerie: item.serialNumber,
-        fechaEnsayo: day(item.testDate),
+        fechaEnsayo: item.testDate,
         venceEl: day(item.revisionExpiresOn),
         resultado: item.phResult,
         crpcCodigo: crpcCode(item.crpcId),

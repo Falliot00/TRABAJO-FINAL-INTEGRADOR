@@ -15,6 +15,7 @@ import { decimal } from "../catalog/catalog-fields";
 import type { EditableItem } from "./ServiceItemEditor";
 import { ServicePeople } from "./ServicePeople";
 import { ServicePreparation } from "./ServicePreparation";
+import { expirationAtMonthEnd, phExpiration } from "./service-dates";
 import {
   ServiceInterventions,
   type EditableIntervention,
@@ -36,6 +37,7 @@ export function ServiceDraftEditor({
   onSessionLost: () => void;
 }) {
   const [vehicle, setVehicle] = useState(draft.vehicle);
+  const [serviceDate, setServiceDate] = useState(draft.serviceDate);
   const [items, setItems] = useState<EditableItem[]>(() =>
     draft.items.map((item) => ({
       ...item,
@@ -105,16 +107,32 @@ export function ServiceDraftEditor({
       totalAmount: decimal(String(form.get("totalAmount"))),
       notes: String(form.get("notes")).trim() || null,
       people: people.map(({ role, personId }) => ({ role, personId })),
-      preparation,
+      preparation: {
+        ...preparation,
+        enabledOn: serviceDate || null,
+        expiresOn: preparation.newSticker
+          ? expirationAtMonthEnd(serviceDate, 1)
+          : null,
+      },
       interventions: interventions.map(({ key, ...entry }) => {
         void key;
-        return { ...entry, row: Number(entry.row) };
+        return {
+          ...entry,
+          row: Number(entry.row),
+          ...(entry.type === "CILINDRO"
+            ? {
+                revisionExpiresOn: phExpiration(entry),
+              }
+            : {}),
+        };
       }),
       sheetOperation:
         (String(
           form.get("sheetOperation"),
         ) as ServiceDraft["sheetOperation"]) || null,
       includesPh: form.get("includesPh") === "on",
+      phReason:
+        (String(form.get("phReason")) as ServiceDraft["phReason"]) || null,
       items: items.map((item, index) => ({
         ...(item.id ? { id: item.id } : {}),
         order: index + 1,
@@ -186,6 +204,8 @@ export function ServiceDraftEditor({
             vehicle={vehicle}
             pending={pending}
             setVehicle={setVehicle}
+            serviceDate={serviceDate}
+            onServiceDateChange={setServiceDate}
             onSessionLost={onSessionLost}
           />
           <ServicePeople
@@ -203,6 +223,7 @@ export function ServiceDraftEditor({
           />
           <ServicePreparation
             preparation={preparation}
+            serviceDate={serviceDate}
             disabled={pending}
             onChange={setPreparation}
             onSessionLost={onSessionLost}
@@ -222,6 +243,18 @@ export function ServiceDraftEditor({
                 <option value="B">B · Baja</option>
               </select>
             </label>
+            <label className="field">
+              Motivo de PH
+              <select name="phReason" defaultValue={draft.phReason ?? ""}>
+                <option value="">Sin informar</option>
+                <option value="VENCIMIENTO">Vencimiento de la última PH</option>
+                <option value="SERVICIO_PH">Servicio de PH</option>
+                <option value="MODIFICACION">
+                  Modificación con PH antes del vencimiento
+                </option>
+                <option value="CONVERSION">Conversión</option>
+              </select>
+            </label>
             <label className="checkbox-field">
               <input
                 type="checkbox"
@@ -231,6 +264,12 @@ export function ServiceDraftEditor({
               El servicio incluye PH
             </label>
           </div>
+          <p className="records-description">
+            PH por vencimiento o servicio de PH: R. Conversión: C con PH.
+            Modificación con oblea vigente: M. Estos trabajos requieren oblea
+            nueva, aunque la anterior siga vigente. Completá el resultado real y
+            el CRPC de cada ensayo antes de confirmar.
+          </p>
           <ServiceInterventions
             interventions={interventions}
             disabled={pending}

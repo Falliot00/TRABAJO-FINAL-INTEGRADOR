@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException } from "@nestjs/common";
 import type {
   Component,
   ComponentHistory,
+  InitialEquipmentSurvey,
   SessionUser,
   VehicleConfigurations,
 } from "@cilgas/contracts";
@@ -118,12 +119,35 @@ export class ComponentsService {
     >`SELECT id::text, servicio_id::text AS "serviceId", accion AS action, origen AS origin, destino AS destination, ocurrido_en AS "occurredAt" FROM movimientos_componentes WHERE componente_id = ${id} ORDER BY ocurrido_en, id`;
     const revisions = await this.db.$queryRaw<
       (Omit<ComponentHistory["revisions"][number], "testDate" | "expiresOn"> & {
-        testDate: Date;
+        testDate: string;
         expiresOn: Date | null;
       })[]
-    >`SELECT id::text, servicio_id::text AS "serviceId", crpc_id::text AS "crpcId", fecha_ensayo AS "testDate", vence_el AS "expiresOn", resultado AS result, numero_certificado AS "certificateNumber" FROM revisiones_cilindros WHERE componente_id = ${id} ORDER BY fecha_ensayo, id`;
+    >`SELECT r.id::text, r.servicio_id::text AS "serviceId", r.crpc_id::text AS "crpcId", r.fecha_ensayo AS "testDate", r.vence_el AS "expiresOn", r.resultado AS result, r.numero_certificado AS "certificateNumber" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id = ${id} ORDER BY left(r.fecha_ensayo, 7), s.fecha_servicio, s.confirmado_en, r.id`;
+    const links = await this.db.$queryRaw<
+      (NonNullable<ComponentHistory["cylinderValveLinks"]>[number] & {
+        validFrom: Date;
+        validUntil: Date | null;
+      })[]
+    >`SELECT c.id::text AS "configurationId", c.servicio_origen_id::text AS "serviceId", cc.cilindro_id::text AS "cylinderId", cc.componente_id::text AS "valveId", c.vigente_desde AS "validFrom", c.vigente_hasta AS "validUntil" FROM configuracion_componentes cc JOIN configuraciones c ON c.id = cc.configuracion_id WHERE cc.cilindro_id IS NOT NULL AND (cc.componente_id = ${id} OR cc.cilindro_id = ${id}) ORDER BY c.vigente_desde, c.id`;
+    const surveys = await this.db.$queryRaw<
+      { response: InitialEquipmentSurvey }[]
+    >`SELECT r.respuesta AS response FROM relevamientos_iniciales r JOIN configuracion_componentes cc ON cc.configuracion_id = r.configuracion_id WHERE cc.componente_id = ${id} ORDER BY r.registrado_en, r.configuracion_id`;
     return {
       componentId: String(id),
+      initialSurveys: surveys.map(({ response }) => ({
+        configurationId: response.configurationId,
+        vehicleId: response.vehicleId,
+        recordedAt: response.recordedAt,
+        recordedBy: response.recordedBy,
+        ph:
+          response.pairs.find((pair) => pair.cylinderId === String(id))?.ph ??
+          null,
+      })),
+      cylinderValveLinks: links.map((link) => ({
+        ...link,
+        validFrom: link.validFrom.toISOString(),
+        validUntil: link.validUntil?.toISOString() ?? null,
+      })),
       available: true,
       activities: activities.map((row) => ({
         ...row,
@@ -135,20 +159,34 @@ export class ComponentsService {
       })),
       revisions: revisions.map((row) => ({
         ...row,
-        testDate: row.testDate.toISOString().slice(0, 10),
+        testDate: row.testDate,
         expiresOn: row.expiresOn?.toISOString().slice(0, 10) ?? null,
       })),
-      message: "Historia técnica de servicios confirmados.",
+      message: surveys.length
+        ? "Historia técnica de relevamientos y servicios confirmados."
+        : "Historia técnica de servicios confirmados.",
     };
   }
 
-  async configurations(vehicleId: bigint): Promise<VehicleConfigurations> {
+  async configurations(
+    vehicleId: bigint,
+    actor: SessionUser,
+  ): Promise<VehicleConfigurations> {
     const vehicle = await this.db.vehicle.findUnique({
       where: { id: vehicleId },
       select: { id: true },
     });
     if (!vehicle) throw new NotFoundException("Vehículo no encontrado.");
-    return new ComponentServiceEffects().configurations(this.db, vehicleId);
+    const history = await new ComponentServiceEffects().configurations(
+      this.db,
+      vehicleId,
+    );
+    return {
+      ...history,
+      canRegisterInitialSurvey:
+        actor.permissions.includes("servicios.gestionar") &&
+        history.configurations.length === 0,
+    };
   }
 
   async create(input: ComponentDto, actor: SessionUser): Promise<Component> {

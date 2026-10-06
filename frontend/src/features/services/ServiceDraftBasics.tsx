@@ -8,12 +8,16 @@ export function ServiceDraftBasics({
   vehicle,
   pending,
   setVehicle,
+  serviceDate,
+  onServiceDateChange,
   onSessionLost,
 }: {
   draft: ServiceDraft;
   vehicle: ServiceDraft["vehicle"];
   pending: boolean;
   setVehicle: (vehicle: ServiceDraft["vehicle"]) => void;
+  serviceDate: string;
+  onServiceDateChange: (value: string) => void;
   onSessionLost: () => void;
 }) {
   return (
@@ -53,7 +57,8 @@ export function ServiceDraftBasics({
             name="serviceDate"
             type="date"
             required
-            defaultValue={draft.serviceDate}
+            value={serviceDate}
+            onChange={(event) => onServiceDateChange(event.target.value)}
           />
         </label>
         <label className="field">
@@ -85,6 +90,10 @@ export function ServiceDraftBasics({
           />
         </label>
       </div>
+      <p className="records-description">
+        El vehículo necesita marca, modelo, año, dominio, inyección y tipo antes
+        de confirmar. Completá los faltantes en Vehículos.
+      </p>
     </>
   );
 }

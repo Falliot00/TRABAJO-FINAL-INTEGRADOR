@@ -31,6 +31,7 @@ import {
   VehicleConfigurationsController,
 } from "./modules/components/components.controller";
 import { ComponentsService } from "./modules/components/components.service";
+import { InitialSurveyService } from "./modules/components/initial-survey.service";
 import { SuppliersController } from "./modules/suppliers/suppliers.controller";
 import { SuppliersService } from "./modules/suppliers/suppliers.service";
 import { CatalogController } from "./modules/catalog/catalog.controller";
@@ -110,6 +111,10 @@ export async function createApplication(
       },
       { provide: PeopleService, useValue: new PeopleService(db, audit) },
       { provide: VehiclesService, useValue: new VehiclesService(db, audit) },
+      {
+        provide: InitialSurveyService,
+        useValue: new InitialSurveyService(db, audit),
+      },
       {
         provide: ComponentsService,
         useValue: new ComponentsService(db, audit),

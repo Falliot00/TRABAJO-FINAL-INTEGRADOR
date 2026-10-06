@@ -443,7 +443,7 @@ Restricciones declarativas:
 | `accion` | `char(1)` | Sí | — | Marca documental, sin deducirla del estado actual. |
 | `posicion_final` | `smallint` | Sí | — | Posición prevista si queda instalado; nulo para retirados/no instalados. |
 | `fabricacion_mes` | `date` | Sí | — | Mes/año, representado internamente con día 1. |
-| `revision_mes` | `date` | Sí | — | Mes/año que debe figurar en el formulario. |
+| `revision_mes` | `date` | Sí | — | Mes/año de la última PH que figura en «Revisado»; es distinto de fabricación, puede ser antecedente y no acredita por sí solo un ensayo del servicio actual. |
 | `crpc_id` | `bigint` | Sí | — | Centro propuesto si corresponde revisión. |
 | `crpc_tipo` | `varchar(5)` | No | Default: `'CRPC'` | Discriminador de FK. |
 | `realiza_ph` | `boolean` | No | Default: `false` | El renglón de cilindro incluye un ensayo PH. |
@@ -632,14 +632,14 @@ Restricciones declarativas:
 | `id` | `bigint` | No | PK; Identity | Renglón documental; NO implica componente instalado al final. |
 | `ficha_id` | `bigint` | No | FK → `fichas.id` | Versión documental propietaria. |
 | `tipo` | `varchar(15)` | No | — | Sección de la ficha. |
-| `renglon` | `smallint` | No | — | Posición impresa, sin emparejamiento automático cilindro-válvula. |
+| `renglon` | `smallint` | No | — | Posición impresa. Q6 del 05/10/2026 define una pareja cilindro–válvula por fila para las nuevas fichas; su asociación se valida explícitamente y no reinterpreta snapshots previos. |
 | `componente_id` | `bigint` | Sí | — | Componente conocido; opcional para transcripción histórica incompleta. |
 | `codigo_homologacion` | `varchar(50)` | Sí | — | Valor histórico mostrado en esa versión. |
 | `numero_serie` | `varchar(80)` | Sí | — | Serie histórica impresa. |
 | `condicion` | `varchar(30)` | Sí | — | Condición tal como se validó para el formulario. |
-| `accion` | `char(1)` | Sí | — | Marca del renglón; su significado definitivo se valida con CILGAS. |
+| `accion` | `char(1)` | Sí | — | Marca MSDB del renglón: M monta, S sigue instalado, D desmonta y B baja, según definición del equipo del 05/10/2026. |
 | `fabricacion_mes` | `date` | Sí | — | Fabricación con precisión mes/año. |
-| `revision_mes` | `date` | Sí | — | Revisión con precisión mes/año impresa en la ficha. |
+| `revision_mes` | `date` | Sí | — | Última PH con precisión mes/año impresa en «Revisado», conservada como valor histórico de la ficha. |
 | `crpc_codigo` | `varchar(40)` | Sí | — | Código histórico del CRPC impreso. |
 | `descripcion` | `varchar(180)` | Sí | — | Nombre o detalle adicional/accesorio. |
 

@@ -31,6 +31,7 @@ import { itemTypes, serviceTypes } from "../catalog/dto";
 const idPattern = /^[1-9]\d{0,18}$/;
 const moneyPattern = /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/;
 const dayPattern = /^\d{4}-\d{2}-\d{2}$/;
+const preciseDatePattern = /^\d{4}-(?:0[1-9]|1[0-2])(?:-\d{2})?$/;
 const monthPattern = /^\d{4}-(?:0[1-9]|1[0-2])$/;
 
 export class CreateServiceDraftDto {
@@ -129,6 +130,11 @@ export class PreparationDto implements ServicePreparationInput {
   @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()
   @IsString()
+  @Matches(preciseDatePattern)
+  previousStickerExpiresOn?: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
+  @IsString()
   @Matches(idPattern)
   pecId?: string | null;
   @ApiPropertyOptional({ type: String, nullable: true })
@@ -166,6 +172,11 @@ export class PreparationDto implements ServicePreparationInput {
   notes?: string | null;
 }
 export class InterventionDto implements ServiceInterventionInput {
+  @ApiPropertyOptional({ type: String, nullable: true })
+  @IsOptional()
+  @IsString()
+  @Matches(idPattern)
+  cylinderId?: string | null;
   @ApiProperty({
     type: String,
     enum: ["REGULADOR", "CILINDRO", "VALVULA", "ACCESORIO"],
@@ -229,7 +240,7 @@ export class InterventionDto implements ServiceInterventionInput {
   @ApiPropertyOptional({ type: String, nullable: true, format: "date" })
   @IsOptional()
   @IsString()
-  @Matches(dayPattern)
+  @Matches(preciseDatePattern)
   testDate?: string | null;
   @ApiPropertyOptional({ type: String, nullable: true, format: "date" })
   @IsOptional()
@@ -258,6 +269,14 @@ export class InterventionDto implements ServiceInterventionInput {
   description?: string | null;
 }
 export class UpdateServiceDraftDto implements UpdateServiceDraftRequest {
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    enum: ["VENCIMIENTO", "MODIFICACION", "CONVERSION", "SERVICIO_PH"],
+  })
+  @IsOptional()
+  @IsIn(["VENCIMIENTO", "MODIFICACION", "CONVERSION", "SERVICIO_PH"])
+  phReason?: UpdateServiceDraftRequest["phReason"];
   @ApiProperty({ type: Number })
   @IsInt()
   @Min(1)
@@ -348,4 +367,19 @@ export function dateValue(value: string | null | undefined): Date | null {
   )
     throw new BadRequestException("Indique una fecha válida.");
   return result;
+}
+
+/** Valida la precisión recibida sin convertir el mes en un día de ensayo. */
+export function preciseDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  dateValue(value.length === 7 ? `${value}-01` : value);
+  return value;
+}
+export function monthEnd(value: string, years = 0): Date {
+  preciseDate(value);
+  const [year, month] = value.split("-").map(Number);
+  const date = new Date(0);
+  date.setUTCFullYear(year! + years, month!, 0);
+  date.setUTCHours(0, 0, 0, 0);
+  return date;
 }

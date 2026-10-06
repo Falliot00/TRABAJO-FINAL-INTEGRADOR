@@ -55,6 +55,7 @@ export function ServiceSavedDetails({
             ...service.preparation,
             sheetOperation: service.sheetOperation,
             includesPh: service.includesPh,
+            phReason: service.phReason ?? null,
           }}
         />
       </div>

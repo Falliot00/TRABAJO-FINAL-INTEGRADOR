@@ -56,14 +56,13 @@ test("revisa el borrador guardado y muestra sólo los bloqueos de confirmación 
           canConfirm: false,
           blockers: [
             {
-              code: "RF-07",
-              message:
-                "Falta validar la obligatoriedad de la operación con el responsable técnico.",
+              code: "TITULAR_TELEFONO",
+              message: "Completá el teléfono del titular antes de confirmar.",
             },
           ],
         });
       if (url.pathname === "/api/service-drafts/31")
-        return Response.json(draft);
+        return Response.json({ ...draft, phReason: "VENCIMIENTO" });
       if (url.pathname === "/api/service-drafts")
         return Response.json({ items: [draft], nextCursor: null });
       throw new Error(`Petición inesperada: ${input}`);
@@ -78,9 +77,13 @@ test("revisa el borrador guardado y muestra sólo los bloqueos de confirmación 
     name: "Revisar confirmación del servicio 31",
   });
   expect(
-    await within(review).findByText(/Falta validar la obligatoriedad/),
+    await within(review).findByText(/Completá el teléfono del titular/),
   ).toBeInTheDocument();
-  expect(within(review).getByText("RF-07")).toBeInTheDocument();
+  expect(within(review).getByText("TITULAR_TELEFONO")).toBeInTheDocument();
+  expect(within(review).getByText("Motivo de PH")).toBeInTheDocument();
+  expect(
+    within(review).getByText("Vencimiento de la última PH"),
+  ).toBeInTheDocument();
   expect(within(review).getByText(/AA123BB/)).toBeInTheDocument();
   expect(
     within(review).queryByRole("button", { name: "Confirmar servicio" }),
@@ -264,13 +267,39 @@ test("recupera servicios confirmados y consulta la ficha histórica en sólo lec
           pdfStatus: "PENDIENTE",
           issuedAt: service.confirmedAt,
           content: {
-            documento: { emitidaEn: "2026-10-02T01:30:00Z" },
+            documento: {
+              emitidaEn: "2026-10-02T01:30:00Z",
+              observaciones:
+                "Válvula retirada HV / SAL-900 (D), cilindro HC / CIL-900.",
+            },
             vehiculo: { dominio: "AA123BB", marca: "Fiat", modelo: "Siena" },
             titular: {
               nombreRazonSocial: "Titular al confirmar",
               documentoNumero: "20000000",
             },
             revisionesPH: [{ cilindroSerie: "CIL-900", resultado: "APROBADO" }],
+            cilindros: [
+              {
+                componenteId: "60",
+                valvula: {
+                  componenteId: "62",
+                  codigoHomologacion: "HV",
+                  numeroSerie: "NUE-900",
+                  accion: "M",
+                },
+              },
+            ],
+            valvulasRetiradas: [
+              {
+                componenteId: "61",
+                cilindroId: "60",
+                codigoHomologacion: "HV",
+                numeroSerie: "SAL-900",
+                accion: "D",
+                cilindroCodigo: "HC",
+                cilindroSerie: "CIL-900",
+              },
+            ],
           },
         });
       throw new Error(`Petición inesperada: ${input}`);
@@ -289,7 +318,16 @@ test("recupera servicios confirmados y consulta la ficha histórica en sólo lec
   });
   expect(within(sheet).getByText("Titular al confirmar")).toBeInTheDocument();
   expect(within(sheet).getByText("Nombre / razón social")).toBeInTheDocument();
-  expect(within(sheet).getByText("CIL-900")).toBeInTheDocument();
+  expect(within(sheet).getAllByText("CIL-900")).toHaveLength(2);
+  expect(within(sheet).getByText("Válvula del cilindro")).toBeInTheDocument();
+  expect(within(sheet).getByText("Válvulas retiradas")).toBeInTheDocument();
+  expect(within(sheet).getByText("NUE-900")).toBeInTheDocument();
+  expect(within(sheet).getByText("SAL-900")).toBeInTheDocument();
+  expect(
+    within(sheet).getByText(
+      "Válvula retirada HV / SAL-900 (D), cilindro HC / CIL-900.",
+    ),
+  ).toBeInTheDocument();
   expect(within(sheet).getByText("Aprobado")).toBeInTheDocument();
   expect(within(sheet).getByText("01/10/2026, 22:30")).toBeInTheDocument();
   expect(

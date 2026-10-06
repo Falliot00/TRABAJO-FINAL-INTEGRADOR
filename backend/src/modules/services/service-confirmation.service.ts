@@ -1,9 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   NotFoundException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import type {
   ConfirmationBlocker,
@@ -26,8 +24,9 @@ import {
   jsonText,
 } from "../documents/service-sheets.service";
 import { sheetSnapshot } from "../documents/sheet-snapshot";
+import { requiredFields } from "./confirmation-required-fields";
 import { SupplierObligationsService } from "../suppliers/obligations.service";
-import { digest, sessionUser, userInclude } from "../identity/identity.service";
+import { requireTechnicalActor } from "../identity/technical-authorization";
 import { parseId } from "../identity/dto";
 import {
   draftResponse,
@@ -35,9 +34,11 @@ import {
   type DraftRow,
 } from "./service-drafts.service";
 import {
-  PendingRegulatoryValidation,
+  WorkshopRegulatoryValidation,
   type RegulatoryValidation,
 } from "./regulatory-validation";
+
+import { technicalRules } from "./confirmation-technical-rules";
 
 type Confirmation = {
   key: string;
@@ -52,7 +53,7 @@ export class ServiceConfirmationService {
   constructor(
     private readonly db: PrismaClient,
     private readonly audit: AuditService,
-    private readonly regulatory: RegulatoryValidation = new PendingRegulatoryValidation(),
+    private readonly regulatory: RegulatoryValidation = new WorkshopRegulatoryValidation(),
   ) {}
 
   private async lockContext(tx: Prisma.TransactionClient, row: DraftRow) {
@@ -68,7 +69,9 @@ export class ServiceConfirmationService {
           item.componentId ? [item.componentId] : [],
         ),
         ...row.interventions.flatMap((item) =>
-          item.componentId ? [item.componentId] : [],
+          [item.componentId, item.cylinderId].filter(
+            (id): id is bigint => id !== null,
+          ),
         ),
         ...(
           await this.technical.members(
@@ -86,12 +89,24 @@ export class ServiceConfirmationService {
         Prisma.sql`SELECT id FROM modelos_componentes WHERE id IN (SELECT modelo_id FROM componentes WHERE id IN (${Prisma.join(ids)})) ORDER BY id FOR SHARE`,
       );
     }
+    const priorActors = ids.length
+      ? await tx.$queryRaw<{ crpcId: bigint }[]>(
+          Prisma.sql`SELECT DISTINCT ON (r.componente_id) r.crpc_id AS "crpcId" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id IN (${Prisma.join(ids)}) ORDER BY r.componente_id, left(r.fecha_ensayo, 7) DESC, s.fecha_servicio DESC, s.confirmado_en DESC, r.id DESC`,
+        )
+      : [];
+    const surveyedActors = ids.length
+      ? await tx.$queryRaw<{ crpcId: bigint }[]>(
+          Prisma.sql`SELECT DISTINCT crpc_id AS "crpcId" FROM antecedentes_ph_relevados WHERE componente_id IN (${Prisma.join(ids)}) AND crpc_id IS NOT NULL`,
+        )
+      : [];
     const actors = [
       ...new Set(
         [
           row.preparation?.pecId,
           row.preparation?.tdmId,
           ...row.interventions.map((item) => item.crpcId),
+          ...priorActors.map((item) => item.crpcId),
+          ...surveyedActors.map((item) => item.crpcId),
         ].filter((id): id is bigint => id != null),
       ),
     ];
@@ -115,7 +130,8 @@ export class ServiceConfirmationService {
     row: DraftRow,
     actor: SessionUser,
   ) {
-    const blockers: ConfirmationBlocker[] = [];
+    const blockers: ConfirmationBlocker[] = await technicalRules(tx, row);
+    blockers.push(...(await requiredFields(tx, row)));
     const block = (code: string, message: string) =>
       blockers.push({ code, message });
     const total = row.items.reduce(
@@ -168,24 +184,6 @@ export class ServiceConfirmationService {
         "Complete la operación documental, PEC y TdM.",
       );
     const prep = row.preparation;
-    const requiresSticker =
-      row.type === "REVISION_ANUAL" ||
-      row.type === "REVISION_QUINQUENAL" ||
-      row.items.some((item) => item.type === "OBLEA");
-    if (
-      (requiresSticker ||
-        prep?.newSticker ||
-        prep?.enabledOn ||
-        prep?.expiresOn) &&
-      (!prep?.newSticker ||
-        !prep.enabledOn ||
-        !prep.expiresOn ||
-        prep.expiresOn <= prep.enabledOn)
-    )
-      block(
-        "OBLEA_INCOMPLETA",
-        "Complete número de oblea y fechas de habilitación y vencimiento coherentes.",
-      );
     const phRows = row.interventions.filter((item) => item.performsPh);
     if (row.includesPh !== phRows.length > 0)
       block(
@@ -219,6 +217,10 @@ export class ServiceConfirmationService {
           !component ||
           component.type !== item.type ||
           (item.serialNumber && item.serialNumber !== component.serialNumber) ||
+          (item.manufactureMonth &&
+            component.manufactureMonth &&
+            item.manufactureMonth.getTime() !==
+              component.manufactureMonth.getTime()) ||
           (item.homologationCode &&
             item.homologationCode !== component.model.homologationCode)
         )
@@ -305,39 +307,6 @@ export class ServiceConfirmationService {
     );
   }
 
-  private async liveActor(
-    tx: Prisma.TransactionClient,
-    actor: SessionUser,
-    token?: string,
-  ) {
-    await tx.$queryRaw`SELECT id FROM usuarios WHERE id = ${parseId(actor.id)} FOR SHARE`;
-    if (!token)
-      throw new UnauthorizedException("Inicie sesión para continuar.");
-    await tx.$queryRaw`SELECT id FROM sesiones WHERE token_hash = ${digest(token)} FOR SHARE`;
-    const session = await tx.session.findUnique({
-      where: { tokenHash: digest(token) },
-    });
-    if (
-      !session ||
-      session.userId !== parseId(actor.id) ||
-      session.revokedAt ||
-      session.expiresAt <= new Date()
-    )
-      throw new UnauthorizedException("Inicie sesión para continuar.");
-    const user = await tx.user.findUnique({
-      where: { id: parseId(actor.id) },
-      include: userInclude,
-    });
-    if (!user?.active)
-      throw new UnauthorizedException("Inicie sesión para continuar.");
-    const current = sessionUser(user);
-    if (!current.permissions.includes("servicios.gestionar"))
-      throw new ForbiddenException(
-        "No tiene permiso para confirmar servicios.",
-      );
-    return current;
-  }
-
   async confirm(
     id: bigint,
     input: ConfirmServiceRequest,
@@ -347,7 +316,7 @@ export class ServiceConfirmationService {
     try {
       return await this.db.$transaction(
         async (tx) => {
-          const currentActor = await this.liveActor(tx, actor, token);
+          const currentActor = await requireTechnicalActor(tx, actor, token);
           await tx.$queryRaw`SELECT id FROM servicios WHERE id = ${id} FOR UPDATE`;
           const [prior] = await tx.$queryRaw<
             Confirmation[]
@@ -445,7 +414,7 @@ export class ServiceConfirmationService {
               entityId: String(id),
               result: "EXITO",
               correlationId: input.idempotencyKey,
-              detail: `Ficha ${sheetId}; snapshot 1; PDF pendiente.`,
+              detail: `Ficha ${sheetId}; snapshot 2; plantilla ficha-v2; PDF pendiente.`,
             },
             tx,
           );

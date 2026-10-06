@@ -453,6 +453,8 @@ describe("Identidad individual de componentes", () => {
       activities: [],
       movements: [],
       revisions: [],
+      cylinderValveLinks: [],
+      initialSurveys: [],
     });
     const configurations = (
       await operator.agent
@@ -465,6 +467,7 @@ describe("Identidad individual de componentes", () => {
       message: expect.stringMatching(/no hay configuraciones confirmadas/i),
       currentConfigurationId: null,
       configurations: [],
+      canRegisterInitialSurvey: true,
     });
     await request(app.getHttpServer())
       .get(`/api/components/${component.id}/history`)

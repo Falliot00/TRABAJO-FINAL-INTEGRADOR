@@ -3,9 +3,36 @@ import type {
   Component,
   ComponentHistory,
   ComponentType,
+  InitialEquipmentSurvey,
   VehicleConfigurations,
 } from "@cilgas/contracts";
 import { ComponentModelResponseDto } from "../../common/master-responses";
+import {
+  InitialSurveyPairDto,
+  KnownStickerAntecedentDto,
+  KnownPhAntecedentDto,
+} from "./initial-survey-dto";
+
+export class InitialEquipmentSurveyResponseDto implements InitialEquipmentSurvey {
+  @ApiProperty({ type: String }) configurationId!: string;
+  @ApiProperty({ type: String }) vehicleId!: string;
+  @ApiProperty({ type: String, format: "date-time" }) recordedAt!: string;
+  @ApiProperty({ type: String }) recordedBy!: string;
+  @ApiProperty({ type: String }) regulatorId!: string;
+  @ApiProperty({ type: [InitialSurveyPairDto] })
+  pairs!: InitialEquipmentSurvey["pairs"];
+  @ApiProperty({ type: KnownStickerAntecedentDto, nullable: true })
+  sticker!: InitialEquipmentSurvey["sticker"];
+  @ApiProperty({ type: String, nullable: true }) notes!: string | null;
+}
+class ComponentInitialSurveyDto {
+  @ApiProperty({ type: String }) configurationId!: string;
+  @ApiProperty({ type: String }) vehicleId!: string;
+  @ApiProperty({ type: String, format: "date-time" }) recordedAt!: string;
+  @ApiProperty({ type: String }) recordedBy!: string;
+  @ApiProperty({ type: KnownPhAntecedentDto, nullable: true })
+  ph!: InitialEquipmentSurvey["pairs"][number]["ph"];
+}
 
 export class ComponentResponseDto implements Component {
   @ApiProperty({ type: String }) id!: string;
@@ -71,6 +98,8 @@ class ConfigurationMemberDto implements ConfigurationMember {
 }
 
 class ConfigurationDto implements Configuration {
+  @ApiProperty({ type: InitialEquipmentSurveyResponseDto, nullable: true })
+  initialSurvey!: InitialEquipmentSurvey | null;
   @ApiProperty({ type: String }) id!: string;
   @ApiProperty({ type: String, nullable: true }) serviceId!: string | null;
   @ApiProperty({ type: String, format: "date-time" }) validFrom!: string;
@@ -81,6 +110,8 @@ class ConfigurationDto implements Configuration {
 }
 
 export class ComponentHistoryResponseDto implements ComponentHistory {
+  @ApiProperty({ type: [ComponentInitialSurveyDto] })
+  initialSurveys!: ComponentInitialSurveyDto[];
   @ApiProperty({ type: [ComponentActivityDto] })
   activities!: ComponentActivityDto[];
   @ApiProperty({ type: [ComponentMovementDto] })
@@ -93,6 +124,7 @@ export class ComponentHistoryResponseDto implements ComponentHistory {
 }
 
 export class VehicleConfigurationsResponseDto implements VehicleConfigurations {
+  @ApiProperty({ type: Boolean }) canRegisterInitialSurvey!: boolean;
   @ApiProperty({ type: String, nullable: true }) currentConfigurationId!:
     string | null;
   @ApiProperty({ type: [ConfigurationDto] })

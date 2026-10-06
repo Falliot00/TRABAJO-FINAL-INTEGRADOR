@@ -28,6 +28,11 @@ export function ServicePeople({
   return (
     <section aria-label="Personas del servicio">
       <h3>Personas del servicio</h3>
+      <p className="records-description">
+        Para confirmar, el titular debe tener nombre, documento, teléfono,
+        calle, altura o S/N explícito, código postal, localidad y provincia.
+        Piso y departamento son opcionales. Completá los faltantes en Personas.
+      </p>
       <div className="service-people-grid">
         {(Object.entries(roles) as [ServicePersonRole, string][]).map(
           ([role, label]) => {

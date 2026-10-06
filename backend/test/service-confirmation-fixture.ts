@@ -129,6 +129,32 @@ export async function prepareConfirmation(
         .expect(201)
     ).body as Component;
   }
+  const equipment: Component[] = [];
+  for (const type of ["REGULADOR", "VALVULA"] as const) {
+    const model = (
+      await admin.agent
+        .post("/api/component-models")
+        .set(admin.headers)
+        .send({
+          type,
+          homologationCode: `${type}-SYN-${number}`,
+        })
+        .expect(201)
+    ).body;
+    equipment.push(
+      (
+        await admin.agent
+          .post("/api/components")
+          .set(admin.headers)
+          .send({
+            type,
+            modelId: model.id,
+            serialNumber: `${type}-SYN-${number}`,
+          })
+          .expect(201)
+      ).body,
+    );
+  }
   const supplier = (
     await admin.agent
       .post("/api/suppliers")
@@ -169,6 +195,7 @@ export async function prepareConfirmation(
         version: 1,
         sheetOperation: "C",
         includesPh: true,
+        phReason: "CONVERSION",
         totalAmount: "100.00",
         people: [{ role: "TITULAR", personId: person.id }],
         items: [
@@ -195,13 +222,24 @@ export async function prepareConfirmation(
               },
             ],
           },
+          ...equipment.map((item, index) => ({
+            order: index + 2,
+            description: `Instalación ${item.type}`,
+            type: "COMPONENTE",
+            componentId: item.id,
+            action: "INSTALAR",
+            quantity: "1",
+            unitPrice: "0",
+            discount: "0",
+            costs: [],
+          })),
         ],
         preparation: {
           pecId: actors.PEC,
           tdmId: actors.TDM,
           newSticker: `OBLEA-SYN-${number}`,
           enabledOn: "2026-10-02",
-          expiresOn: "2027-10-02",
+          expiresOn: "2027-10-31",
         },
         interventions: [
           {
@@ -218,10 +256,22 @@ export async function prepareConfirmation(
             crpcId: actors.CRPC,
             performsPh: true,
             testDate: "2026-10-01",
-            revisionExpiresOn: "2031-10-01",
+            revisionExpiresOn: "2031-10-31",
             phResult: "APROBADO",
             certificateNumber: `CERT-SYN-${number}`,
           },
+          ...equipment.map((item) => ({
+            type: item.type,
+            row: 1,
+            componentId: item.id,
+            cylinderId: item.type === "VALVULA" ? component.id : null,
+            homologationCode: item.model.homologationCode,
+            serialNumber: item.serialNumber,
+            condition: "USADO",
+            action: "M",
+            finalPosition: 1,
+            performsPh: false,
+          })),
         ],
       })
       .expect(200)
@@ -234,6 +284,8 @@ export async function prepareConfirmation(
     supplierId: supplier.id as string,
     offerId: offer.id as string,
     component,
+    regulator: equipment[0]!,
+    valve: equipment[1]!,
     actors,
   };
 }

@@ -7,6 +7,11 @@ import { componentsApi } from "../../shared/components-api";
 import { errorMessage, isSessionLost } from "../../shared/api";
 import { Loading, RetryNotice } from "../../shared/ui";
 import { workshopInstant } from "../../shared/format";
+import { InitialEquipmentSurvey } from "../vehicles/InitialEquipmentSurvey";
+import {
+  ComponentInitialSurveys,
+  InitialSurveyDetails,
+} from "./InitialSurveyDetails";
 
 export function TechnicalHistory({
   id,
@@ -24,6 +29,8 @@ export function TechnicalHistory({
   >(null);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
+  const [surveying, setSurveying] = useState(false);
+  const [notice, setNotice] = useState("");
   useEffect(() => {
     const controller = new AbortController();
     const load =
@@ -56,6 +63,11 @@ export function TechnicalHistory({
           Cerrar historia
         </button>
       </div>
+      {notice && (
+        <p className="notice notice-success" role="status">
+          {notice}
+        </p>
+      )}
       {error ? (
         <RetryNotice
           message={error}
@@ -69,7 +81,41 @@ export function TechnicalHistory({
           <p className="notice notice-info">{history.message}</p>
           {"movements" in history && <ComponentEvents history={history} />}
           {"configurations" in history && (
-            <EquipmentConfigurations history={history} />
+            <>
+              <EquipmentConfigurations history={history} />
+              {history.canRegisterInitialSurvey && !surveying && (
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => {
+                    setNotice("");
+                    setSurveying(true);
+                  }}
+                >
+                  Relevar equipo existente
+                </button>
+              )}
+              {surveying && (
+                <InitialEquipmentSurvey
+                  vehicleId={id}
+                  onSessionLost={onSessionLost}
+                  onCancel={() => setSurveying(false)}
+                  onReload={() => {
+                    setSurveying(false);
+                    setHistory(null);
+                    setRevision((value) => value + 1);
+                  }}
+                  onSaved={() => {
+                    setSurveying(false);
+                    setHistory(null);
+                    setNotice(
+                      "Relevamiento inicial guardado. Ya podés preparar una revisión o modificación del equipo.",
+                    );
+                    setRevision((value) => value + 1);
+                  }}
+                />
+              )}
+            </>
           )}
         </>
       ) : (
@@ -109,8 +155,14 @@ function EquipmentConfigurations({
             {configuration.validUntil
               ? ` hasta ${workshopInstant(configuration.validUntil)}`
               : " · Sin cierre registrado"}{" "}
-            · Servicio {configuration.serviceId ?? "Sin informar"}
+            ·{" "}
+            {configuration.initialSurvey
+              ? "Relevamiento inicial"
+              : `Servicio ${configuration.serviceId ?? "Sin informar"}`}
           </p>
+          {configuration.initialSurvey && (
+            <InitialSurveyDetails survey={configuration.initialSurvey} />
+          )}
           {configuration.components.length === 0 ? (
             <p>Esta configuración no contiene componentes.</p>
           ) : (
@@ -119,6 +171,9 @@ function EquipmentConfigurations({
                 <li key={component.componentId}>
                   {componentLabels[component.type]} · Componente{" "}
                   {component.componentId} · Posición {component.position}
+                  {component.cylinderId && (
+                    <> · Cilindro {component.cylinderId}</>
+                  )}
                 </li>
               ))}
             </ul>
@@ -141,6 +196,11 @@ const movementLabels: Record<string, string> = {
 function ComponentEvents({ history }: { history: ComponentHistory }) {
   return (
     <>
+      <ComponentInitialSurveys surveys={history.initialSurveys ?? []} />
+      <CylinderValveHistory
+        links={history.cylinderValveLinks ?? []}
+        surveys={history.initialSurveys ?? []}
+      />
       <h3>Movimientos confirmados</h3>
       {history.movements.length === 0 ? (
         <p>Sin movimientos registrados.</p>
@@ -204,6 +264,57 @@ function ComponentEvents({ history }: { history: ComponentHistory }) {
           </table>
         </div>
       )}
+    </>
+  );
+}
+
+function CylinderValveHistory({
+  links,
+  surveys,
+}: {
+  links: NonNullable<ComponentHistory["cylinderValveLinks"]>;
+  surveys: NonNullable<ComponentHistory["initialSurveys"]>;
+}) {
+  if (links.length === 0) return null;
+  return (
+    <>
+      <h3>Vínculos entre cilindros y válvulas</h3>
+      <div className="table-scroll">
+        <table aria-label="Vínculos entre cilindros y válvulas">
+          <thead>
+            <tr>
+              <th>Cilindro</th>
+              <th>Válvula</th>
+              <th>Servicio / origen</th>
+              <th>Desde</th>
+              <th>Hasta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {links.map((link) => (
+              <tr key={`${link.configurationId}-${link.valveId}`}>
+                <td>{link.cylinderId}</td>
+                <td>{link.valveId}</td>
+                <td>
+                  {link.serviceId ??
+                    (surveys.some(
+                      (survey) =>
+                        survey.configurationId === link.configurationId,
+                    )
+                      ? "Relevamiento inicial"
+                      : "Sin informar")}
+                </td>
+                <td>{workshopInstant(link.validFrom)}</td>
+                <td>
+                  {link.validUntil
+                    ? workshopInstant(link.validUntil)
+                    : "Vigente"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

@@ -16,9 +16,14 @@ export class ServiceSheetsService {
   ) {
     const [row] = await tx.$queryRaw<
       { id: bigint }[]
-    >`INSERT INTO fichas (servicio_id, version, plantilla_version, snapshot_version, contenido, pec_id, tdm_id, emitida_por, emitida_en) VALUES (${draft.id}, 1, 'ficha-v1', 1, ${jsonText(content)}::jsonb, ${draft.preparation!.pecId}, ${draft.preparation!.tdmId}, ${actorId}, ${now}) RETURNING id`;
-    for (const item of draft.interventions)
-      await tx.$executeRaw`INSERT INTO ficha_componentes (ficha_id, tipo, renglon, componente_id, codigo_homologacion, numero_serie, condicion, accion, fabricacion_mes, revision_mes, crpc_codigo, descripcion) VALUES (${row.id}, ${item.type}, ${item.row}, ${item.componentId}, ${item.homologationCode}, ${item.serialNumber}, ${item.condition}, ${item.action}, ${item.manufactureMonth}, ${item.revisionMonth}, (SELECT codigo FROM actores_regulatorios WHERE id = ${item.crpcId}), ${item.description})`;
+    >`INSERT INTO fichas (servicio_id, version, plantilla_version, snapshot_version, contenido, pec_id, tdm_id, emitida_por, emitida_en) VALUES (${draft.id}, 1, 'ficha-v2', 2, ${jsonText(content)}::jsonb, ${draft.preparation!.pecId}, ${draft.preparation!.tdmId}, ${actorId}, ${now}) RETURNING id`;
+    for (const item of draft.interventions) {
+      const revisedMonth =
+        item.performsPh && item.testDate
+          ? new Date(`${item.testDate.slice(0, 7)}-01T00:00:00.000Z`)
+          : item.revisionMonth;
+      await tx.$executeRaw`INSERT INTO ficha_componentes (ficha_id, tipo, renglon, componente_id, codigo_homologacion, numero_serie, condicion, accion, fabricacion_mes, revision_mes, crpc_codigo, descripcion, cilindro_id) VALUES (${row.id}, ${item.type}, ${item.row}, ${item.componentId}, ${item.homologationCode}, ${item.serialNumber}, ${item.condition}, ${item.action}, ${item.manufactureMonth}, ${revisedMonth}, (SELECT codigo FROM actores_regulatorios WHERE id = ${item.crpcId}), ${item.description}, ${item.cylinderId})`;
+    }
     return row.id;
   }
   async get(

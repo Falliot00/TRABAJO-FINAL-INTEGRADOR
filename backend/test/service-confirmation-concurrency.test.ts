@@ -64,6 +64,13 @@ describe("Integridad transaccional de la confirmación por HTTP", () => {
       validUntil: null,
       components: [
         { componentId: first.component.id, type: "CILINDRO", position: 1 },
+        { componentId: winner.regulator.id, type: "REGULADOR", position: 1 },
+        {
+          componentId: winner.valve.id,
+          type: "VALVULA",
+          position: 1,
+          cylinderId: first.component.id,
+        },
       ],
     });
     expect(
@@ -91,6 +98,7 @@ describe("Integridad transaccional de la confirmación por HTTP", () => {
       action: "INSTALAR",
     });
     expect(history.revisions).toHaveLength(1);
+    expect(history.cylinderValveLinks).toHaveLength(1);
   });
 
   it("reintenta la misma confirmación concurrentemente sin duplicar ficha, obligación ni auditoría", async () => {
@@ -151,6 +159,7 @@ describe("Integridad transaccional de la confirmación por HTTP", () => {
     ).body;
     expect(history.movements).toHaveLength(1);
     expect(history.revisions).toHaveLength(1);
+    expect(history.cylinderValveLinks).toHaveLength(1);
     const events = (await admin.agent.get("/api/audit?limit=100").expect(200))
       .body.items;
     expect(
@@ -244,7 +253,7 @@ describe("Integridad transaccional de la confirmación por HTTP", () => {
           .get(`/api/components/${component.id}/history`)
           .expect(200)
       ).body,
-    ).toMatchObject({ movements: [], revisions: [] });
+    ).toMatchObject({ movements: [], revisions: [], cylinderValveLinks: [] });
     const events = (await admin.agent.get("/api/audit?limit=100").expect(200))
       .body.items;
     expect(

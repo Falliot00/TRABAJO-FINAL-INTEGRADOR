@@ -26,7 +26,7 @@ describe("Confirmación de servicios", () => {
     await app?.close();
     await dispose?.();
   });
-  it("mantiene editable el borrador y diagnostica las validaciones regulatorias pendientes antes de confirmar", async () => {
+  it("mantiene editable el borrador y diagnostica los datos concretos pendientes antes de confirmar", async () => {
     const admin = await signedIn(app);
     const vehicle = (
       await admin.agent
@@ -73,13 +73,13 @@ describe("Confirmación de servicios", () => {
     });
     expect(check.blockers).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: "RF-07" }),
-        expect.objectContaining({ code: "RF-08" }),
+        expect.objectContaining({ code: "TITULAR_REQUERIDO" }),
+        expect.objectContaining({ code: "VEHICULO_INCOMPLETO" }),
       ]),
     );
     expect(
       check.blockers.map((blocker: { code: string }) => blocker.code),
-    ).not.toEqual(expect.arrayContaining(["RF-03", "RF-05"]));
+    ).not.toEqual(expect.arrayContaining(["RF-07", "RF-08"]));
     await admin.agent
       .post(`/api/service-drafts/${draft.id}/confirm`)
       .set(admin.headers)
@@ -307,9 +307,11 @@ describe("Coherencia de la configuración al confirmar", () => {
   });
   it("conserva inspecciones, ensayos y mantenimiento confirmados en la historia sin convertirlos en movimientos", async () => {
     const { admin, draft, component } = await prepareConfirmation(app, 206);
-    const installation = Object.fromEntries(
-      Object.entries(draft.items[0]!).filter(
-        ([key]) => !["amount", "catalogItemId"].includes(key),
+    const installations = draft.items.map((item) =>
+      Object.fromEntries(
+        Object.entries(item).filter(
+          ([key]) => !["amount", "catalogItemId"].includes(key),
+        ),
       ),
     );
     const activities = [
@@ -336,10 +338,10 @@ describe("Coherencia de la configuración al confirmar", () => {
         .send({
           version: draft.version,
           items: [
-            installation,
+            ...installations,
             ...activities.map((activity, index) => ({
               ...activity,
-              order: index + 2,
+              order: index + installations.length + 1,
               componentId: component.id,
               quantity: "1",
               unitPrice: "0",
@@ -375,7 +377,7 @@ describe("Coherencia de la configuración al confirmar", () => {
     ).body;
     expect(history.activities).toEqual([
       {
-        id: prepared.items[1].id,
+        id: prepared.items[3].id,
         serviceId: draft.id,
         action: "INSPECCIONAR",
         description: "Inspección de fijaciones",
@@ -383,7 +385,7 @@ describe("Coherencia de la configuración al confirmar", () => {
         recordedBy: "9007199254740993",
       },
       {
-        id: prepared.items[2].id,
+        id: prepared.items[4].id,
         serviceId: draft.id,
         action: "ENSAYAR",
         description: "Ensayo del cilindro",
@@ -391,7 +393,7 @@ describe("Coherencia de la configuración al confirmar", () => {
         recordedBy: "9007199254740993",
       },
       {
-        id: prepared.items[3].id,
+        id: prepared.items[5].id,
         serviceId: draft.id,
         action: "MANTENER",
         description: "Mantenimiento exterior",

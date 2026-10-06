@@ -108,6 +108,18 @@ Probar una oferta con precio y costos decimales, editar su composición y recupe
 
 Este tramo no confirma servicios, no registra instalaciones, retiros ni bajas efectivas de componentes y no crea obligaciones, cobros, pagos o saldos. La preservación de valores propios de servicios confirmados y las invariantes de configuración se verificarán junto con M06; no quedan acreditadas por las pruebas de estos maestros.
 
+### Relevamiento inicial de equipos existentes
+
+Desde **Vehículos → Configuraciones**, una cuenta con capacidad `servicios.gestionar` puede relevar un equipo que ya existe. Primero se registran las identidades de sus componentes en **Componentes**; luego se seleccionan un regulador y entre una y cuatro parejas explícitas de cilindro y válvula. Esta carga inicial exige que el vehículo no tenga configuraciones previas. Una configuración vacía o cerrada sigue siendo historia conocida y no habilita otro relevamiento inicial.
+
+Se pueden conservar antecedentes conocidos de PH por cilindro y de oblea del vehículo. Los campos desconocidos se dejan vacíos: no se presupone un resultado aprobado, un CRPC, una fecha de ensayo ni una emisión. La fecha conocida de PH conserva su precisión de mes/año o día completo. Los vencimientos conocidos corresponden al cierre del mes y se contrastan con la duración aplicable cuando se conoce la fecha inicial. Los antecedentes quedan identificados como datos relevados, separados de los ensayos y obleas de servicios confirmados.
+
+Guardar registra la configuración observada desde ese momento, sus parejas y sus antecedentes, junto con usuario y auditoría. No reconstruye la fecha de instalación ni crea servicios, movimientos de instalación, ensayos, emisiones, fichas u obligaciones históricos. El relevamiento guardado se consulta sin edición. Ante una respuesta de red incierta, el reintento de la misma solicitud recupera el mismo resultado; una clave reutilizada con otros datos o una configuración creada concurrentemente producen un conflicto.
+
+La transacción bloquea el vehículo y los componentes para impedir dos cargas iniciales o instalar un componente simultáneamente en vehículos distintos. También rechaza componentes dados de baja técnica y referencias de tipo incorrecto. Una falla revierte conjuntamente configuración, antecedentes y auditoría.
+
+Después se puede preparar una revisión o modificación M06 sobre esa configuración. Al confirmar, los antecedentes conocidos completan la representación documental sin crear un ensayo ni una oblea anterior. Los datos contradictorios, vencidos, rechazados o insuficientes mantienen sus controles específicos. Los resultados posteriores se conservan como hechos del servicio y la ficha conserva el snapshot inmutable. Los movimientos físicos de accesorios, el PDF y las finanzas mantienen su alcance separado.
+
 ### Recorrido de borradores de servicios
 
 Desde **Servicios**, crear un **Nuevo borrador**, buscar el vehículo y seleccionar una oferta activa. La propuesta comercial se copia al servicio: los cambios posteriores del catálogo no reemplazan sus valores. La fecha y las personas por rol pertenecen al trabajo; una misma persona puede ser titular, contacto y pagador. Se pueden ajustar sin modificar las relaciones históricas del vehículo. El alta recupera los vínculos vigentes para la fecha indicada; si hay varios contactos, deja ese rol pendiente para elegirlo explícitamente.
@@ -138,7 +150,7 @@ El [relevamiento de fichas](segunda-entrega/RELEVAMIENTO_FICHAS.md#definiciones-
 
 Las pruebas ejercitan tanto las reglas de producción como las garantías transaccionales por HTTP y PostgreSQL aislado: confirmación completa, rechazos específicos, conservación del borrador, reintentos idempotentes, carreras por componentes y configuración, permisos, auditoría y snapshots. Las pruebas históricas del motor pueden usar un adaptador sintético dentro de su aplicación de prueba; no existe una opción HTTP o de entorno para omitir las validaciones de producción.
 
-Permanecen límites concretos: todavía no hay un recorrido de relevamiento inicial de equipos existentes y los accesorios documentales no identifican por sí solos la configuración física. Sin configuración conocida, sólo una conversión con instalaciones explícitas puede iniciar la historia; los demás casos requieren registrar esa base. Las instalaciones o retiros físicos de accesorios requieren su representación explícita. Las piezas sin identidad suficiente no se completan con números inventados. SICGNC, rectificación externa y ciertos catálogos mantienen sus pendientes específicos, sin bloquear indiscriminadamente servicios completos.
+Permanecen límites concretos: los accesorios documentales no identifican por sí solos la configuración física. Sin configuración conocida, una conversión con instalaciones explícitas puede iniciar la historia; un vehículo con equipo existente requiere el relevamiento inicial antes de confirmar una revisión o modificación. Las instalaciones o retiros físicos de accesorios requieren su representación explícita. Las piezas sin identidad suficiente no se completan con números inventados. SICGNC, rectificación externa y ciertos catálogos mantienen sus pendientes específicos, sin bloquear indiscriminadamente servicios completos.
 
 ### Ejecutar las comprobaciones
 

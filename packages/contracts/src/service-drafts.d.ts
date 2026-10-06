@@ -45,6 +45,8 @@ export interface ServicePreparationInput {
   pecId?: string | null;
   tdmId?: string | null;
   previousSticker?: string | null;
+  /** Vencimiento del antecedente; YYYY-MM o YYYY-MM-DD, hasta fin de mes. */
+  previousStickerExpiresOn?: string | null;
   newSticker?: string | null;
   enabledOn?: string | null;
   expiresOn?: string | null;
@@ -54,6 +56,8 @@ export interface ServiceInterventionInput {
   type: ComponentType | "ACCESORIO";
   row: number;
   componentId?: string | null;
+  /** Identidad del cilindro asociado a esta válvula; nunca se infiere del renglón. */
+  cylinderId?: string | null;
   homologationCode?: string | null;
   serialNumber?: string | null;
   condition?: string | null;
@@ -63,6 +67,7 @@ export interface ServiceInterventionInput {
   revisionMonth?: string | null;
   crpcId?: string | null;
   performsPh: boolean;
+  /** Fecha conocida del ensayo: YYYY-MM o YYYY-MM-DD. */
   testDate?: string | null;
   revisionExpiresOn?: string | null;
   phResult?: "APROBADO" | "RECHAZADO" | null;
@@ -82,6 +87,8 @@ export interface UpdateServiceDraftRequest {
   type?: ServiceType;
   sheetOperation?: "C" | "M" | "R" | "D" | "B" | null;
   includesPh?: boolean;
+  phReason?:
+    "VENCIMIENTO" | "MODIFICACION" | "CONVERSION" | "SERVICIO_PH" | null;
   totalAmount?: string;
   notes?: string | null;
   people?: ServiceDraftPersonInput[];
@@ -101,6 +108,8 @@ export interface ServiceDraft {
   type: ServiceType;
   sheetOperation: "C" | "M" | "R" | "D" | "B" | null;
   includesPh: boolean;
+  phReason?:
+    "VENCIMIENTO" | "MODIFICACION" | "CONVERSION" | "SERVICIO_PH" | null;
   totalAmount: string;
   notes: string | null;
   createdBy: string;

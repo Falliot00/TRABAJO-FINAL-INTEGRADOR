@@ -244,6 +244,7 @@ model ServiceDraft {
   description String @map("descripcion") @db.VarChar(180)
   type String @map("tipo") @db.VarChar(25)
   sheetOperation String? @map("operacion_ficha") @db.Char(1)
+  phReason String? @map("motivo_ph") @db.VarChar(20)
   includesPh Boolean @default(false) @map("incluye_ph")
   totalAmount Decimal @map("importe_total") @db.Decimal(14, 2)
   notes String? @map("observaciones")
@@ -313,6 +314,7 @@ model ServicePreparation {
   serviceId BigInt @id @map("servicio_id")
   pecId BigInt? @map("pec_id")
   tdmId BigInt? @map("tdm_id")
+  previousStickerExpiresOn DateTime? @map("oblea_anterior_vence_el") @db.Date
   previousSticker String? @map("oblea_anterior") @db.VarChar(40)
   newSticker String? @map("oblea_nueva") @db.VarChar(40)
   enabledOn DateTime? @map("habilitada_el") @db.Date
@@ -322,6 +324,7 @@ model ServicePreparation {
   @@map("servicio_preparacion")
 }
 model ServiceIntervention {
+  cylinderId BigInt? @map("cilindro_id")
   id BigInt @id @default(autoincrement())
   serviceId BigInt @map("servicio_id")
   type String @map("tipo") @db.VarChar(15)
@@ -336,7 +339,7 @@ model ServiceIntervention {
   revisionMonth DateTime? @map("revision_mes") @db.Date
   crpcId BigInt? @map("crpc_id")
   performsPh Boolean @default(false) @map("realiza_ph")
-  testDate DateTime? @map("fecha_ensayo") @db.Date
+  testDate String? @map("fecha_ensayo") @db.VarChar(10)
   revisionExpiresOn DateTime? @map("vence_revision_el") @db.Date
   phResult String? @map("resultado_ph") @db.VarChar(15)
   certificateNumber String? @map("numero_certificado") @db.VarChar(80)

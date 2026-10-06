@@ -16,6 +16,8 @@ import { AuditService } from "../audit/audit.service";
 import { parseId } from "../identity/dto";
 import {
   dateValue,
+  preciseDate,
+  monthEnd,
   type CreateServiceDraftDto,
   type UpdateServiceDraftDto,
   type DraftItemDto,
@@ -75,9 +77,9 @@ function interventionData(item: InterventionDto) {
   if (
     (item.type === "REGULADOR" &&
       (item.row > 3 ||
-        item.action === "S" ||
         (item.finalPosition != null && item.finalPosition !== 1))) ||
-    (["CILINDRO", "VALVULA"].includes(item.type) && item.row > 4) ||
+    (item.type === "CILINDRO" && item.row > 4) ||
+    (item.type === "VALVULA" && item.row > 8) ||
     (item.type === "ACCESORIO" &&
       (item.componentId || item.finalPosition != null)) ||
     (item.performsPh && item.type !== "CILINDRO")
@@ -85,15 +87,21 @@ function interventionData(item: InterventionDto) {
     throw new BadRequestException(
       "Revise el tipo, renglón, posición y ensayo de la intervención.",
     );
-  const testDate = dateValue(item.testDate);
+  const testDate = preciseDate(item.testDate);
   const revisionExpiresOn = dateValue(item.revisionExpiresOn);
-  if (testDate && revisionExpiresOn && revisionExpiresOn <= testDate)
+  if (
+    testDate &&
+    revisionExpiresOn &&
+    revisionExpiresOn <=
+      dateValue(testDate.length === 7 ? `${testDate}-01` : testDate)!
+  )
     throw new BadRequestException(
       "El vencimiento de revisión debe ser posterior al ensayo.",
     );
   return {
     ...item,
     componentId: nullableId(item.componentId),
+    cylinderId: nullableId(item.cylinderId),
     crpcId: nullableId(item.crpcId),
     manufactureMonth: dateValue(
       item.manufactureMonth ? `${item.manufactureMonth}-01` : null,
@@ -153,6 +161,7 @@ export function draftResponse(row: DraftRow, actor: SessionUser): ServiceDraft {
     type: row.type as ServiceDraft["type"],
     sheetOperation: row.sheetOperation as ServiceDraft["sheetOperation"],
     includesPh: row.includesPh,
+    phReason: row.phReason as ServiceDraft["phReason"],
     totalAmount: row.totalAmount.toFixed(2),
     notes: row.notes,
     createdBy: String(row.createdBy),
@@ -196,6 +205,9 @@ export function draftResponse(row: DraftRow, actor: SessionUser): ServiceDraft {
           pecId: stringId(row.preparation.pecId),
           tdmId: stringId(row.preparation.tdmId),
           previousSticker: row.preparation.previousSticker,
+          previousStickerExpiresOn: dateText(
+            row.preparation.previousStickerExpiresOn,
+          ),
           newSticker: row.preparation.newSticker,
           enabledOn: dateText(row.preparation.enabledOn),
           expiresOn: dateText(row.preparation.expiresOn),
@@ -206,6 +218,7 @@ export function draftResponse(row: DraftRow, actor: SessionUser): ServiceDraft {
       type: item.type as ServiceDraft["interventions"][number]["type"],
       row: item.row,
       componentId: stringId(item.componentId),
+      cylinderId: stringId(item.cylinderId),
       homologationCode: item.homologationCode,
       serialNumber: item.serialNumber,
       condition: item.condition,
@@ -215,7 +228,7 @@ export function draftResponse(row: DraftRow, actor: SessionUser): ServiceDraft {
       revisionMonth: dateText(item.revisionMonth)?.slice(0, 7) ?? null,
       crpcId: stringId(item.crpcId),
       performsPh: item.performsPh,
-      testDate: dateText(item.testDate),
+      testDate: item.testDate,
       revisionExpiresOn: dateText(item.revisionExpiresOn),
       phResult: item.phResult as "APROBADO" | "RECHAZADO" | null,
       certificateNumber: item.certificateNumber,
@@ -542,6 +555,12 @@ export class ServiceDraftsService {
                 );
               const data = {
                 ...prep,
+                previousStickerExpiresOn:
+                  prep.previousStickerExpiresOn === undefined
+                    ? undefined
+                    : prep.previousStickerExpiresOn
+                      ? monthEnd(prep.previousStickerExpiresOn)
+                      : null,
                 pecId:
                   prep.pecId === undefined ? undefined : nullableId(prep.pecId),
                 tdmId:
@@ -586,6 +605,13 @@ export class ServiceDraftsService {
             for (const item of input.interventions) {
               if (item.componentId)
                 await componentReference(tx, item.componentId, item.type);
+              if (item.cylinderId) {
+                if (item.type !== "VALVULA")
+                  throw new BadRequestException(
+                    "Sólo una válvula admite un cilindro asociado.",
+                  );
+                await componentReference(tx, item.cylinderId, "CILINDRO");
+              }
               if (
                 item.crpcId &&
                 !previous.interventions.some(
@@ -621,6 +647,7 @@ export class ServiceDraftsService {
               type: input.type,
               sheetOperation: input.sheetOperation,
               includesPh: input.includesPh,
+              phReason: input.phReason,
               totalAmount: input.totalAmount,
               notes: input.notes,
             },

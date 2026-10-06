@@ -156,6 +156,19 @@ describe("Relevamiento inicial por HTTP", () => {
       { sticker: { enabledOn: "2999-01-01" } },
       { sticker: { enabledOn: "2024-05-01", expiresOn: "2024-04-30" } },
       { sticker: { expiresOn: "2024-02-30" } },
+      {
+        pairs: [
+          {
+            ...pair,
+            ph: {
+              testDate: "2024-01",
+              expiresOn: "2039-12-31",
+              result: "APROBADO",
+            },
+          },
+        ],
+      },
+      { sticker: { enabledOn: "2020-01-01", expiresOn: "2039-12-31" } },
     ];
     for (const bad of invalid)
       await admin.agent

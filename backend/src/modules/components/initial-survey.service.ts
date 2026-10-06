@@ -16,7 +16,7 @@ import { digest, sessionUser, userInclude } from "../identity/identity.service";
 import { AuditService } from "../audit/audit.service";
 import { jsonText } from "../documents/service-sheets.service";
 import { masterDataError } from "../../common/master-data";
-import { dateValue, preciseDate } from "../services/dto";
+import { dateValue, monthEnd, preciseDate } from "../services/dto";
 
 export class InitialSurveyService {
   constructor(
@@ -82,6 +82,14 @@ export class InitialSurveyService {
           if (!sessionUser(user).permissions.includes("servicios.gestionar"))
             throw new ForbiddenException(
               "No tiene permiso para registrar equipos.",
+            );
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${input.idempotencyKey.toLowerCase()}, 0))::text`;
+          const reusedKey = await tx.$queryRaw<
+            { vehicleId: bigint }[]
+          >`SELECT vehiculo_id AS "vehicleId" FROM relevamientos_iniciales WHERE clave_idempotencia = ${input.idempotencyKey}::uuid`;
+          if (reusedKey.some((prior) => prior.vehicleId !== vehicleId))
+            throw new ConflictException(
+              "La clave de idempotencia ya pertenece al relevamiento de otro vehículo.",
             );
           await tx.$queryRaw`SELECT id FROM vehiculos WHERE id = ${vehicleId} FOR UPDATE`;
           const vehicle = await tx.vehicle.findUnique({
@@ -164,12 +172,26 @@ export class InitialSurveyService {
             throw new BadRequestException(
               "Seleccione componentes existentes del tipo indicado y con modelo activo.",
             );
-          const today = new Date().toISOString().slice(0, 10);
+          const today = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Argentina/Buenos_Aires",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }).format(new Date());
           for (const pair of normalized.pairs) {
             const ph = pair.ph;
             if (!ph) continue;
             preciseDate(ph.testDate);
             dateValue(ph.expiresOn);
+            if (
+              ph.testDate &&
+              ph.expiresOn &&
+              ph.expiresOn !==
+                monthEnd(ph.testDate, 5).toISOString().slice(0, 10)
+            )
+              throw new BadRequestException(
+                "El vencimiento conocido de PH debe corresponder al fin del mes cinco años después del ensayo.",
+              );
             const manufactured = components
               .find((component) => String(component.id) === pair.cylinderId)
               ?.manufactureMonth?.toISOString()
@@ -191,6 +213,15 @@ export class InitialSurveyService {
           if (sticker) {
             dateValue(sticker.enabledOn);
             dateValue(sticker.expiresOn);
+            if (
+              sticker.enabledOn &&
+              sticker.expiresOn &&
+              sticker.expiresOn !==
+                monthEnd(sticker.enabledOn, 1).toISOString().slice(0, 10)
+            )
+              throw new BadRequestException(
+                "El vencimiento conocido de oblea debe corresponder al fin del mismo mes del año siguiente a la habilitación.",
+              );
             if (
               (sticker.enabledOn && sticker.enabledOn > today) ||
               (sticker.enabledOn &&

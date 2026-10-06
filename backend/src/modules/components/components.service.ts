@@ -162,7 +162,9 @@ export class ComponentsService {
         testDate: row.testDate,
         expiresOn: row.expiresOn?.toISOString().slice(0, 10) ?? null,
       })),
-      message: "Historia técnica de servicios confirmados.",
+      message: surveys.length
+        ? "Historia técnica de relevamientos y servicios confirmados."
+        : "Historia técnica de servicios confirmados.",
     };
   }
 

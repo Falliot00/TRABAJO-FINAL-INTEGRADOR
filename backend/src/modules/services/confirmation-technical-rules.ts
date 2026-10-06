@@ -230,14 +230,18 @@ export async function technicalRules(
           "ANTECEDENTE_PH_INCONSISTENTE",
           "El CRPC de la última PH no coincide con el antecedente registrado.",
         );
-      if (!previousExpiry || incompletePrior || (!prior && !item.crpcId))
+      // Un rechazo conocido no tiene vencimiento: exige otra PH, no completar antecedentes.
+      if (
+        prior?.result !== "RECHAZADO" &&
+        (!previousExpiry || incompletePrior || (!prior && !item.crpcId))
+      )
         block(
           "PH_ANTECEDENTE_REQUERIDO",
           "Registre la última PH y su CRPC para el cilindro que permanece instalado.",
         );
       else if (
-        previousExpiry < row.serviceDate ||
-        prior?.result === "RECHAZADO"
+        prior?.result === "RECHAZADO" ||
+        (previousExpiry && previousExpiry < row.serviceDate)
       )
         block(
           "PH_VENCIDA",

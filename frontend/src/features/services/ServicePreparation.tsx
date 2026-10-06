@@ -1,13 +1,16 @@
 import type { ServicePreparationInput } from "@cilgas/contracts";
 import { ServiceActorPicker } from "./ServiceReferences";
+import { expirationAtMonthEnd } from "./service-dates";
 
 export function ServicePreparation({
   preparation,
+  serviceDate,
   disabled,
   onChange,
   onSessionLost,
 }: {
   preparation: ServicePreparationInput;
+  serviceDate: string;
   disabled: boolean;
   onChange: (value: ServicePreparationInput) => void;
   onSessionLost: () => void;
@@ -16,7 +19,9 @@ export function ServicePreparation({
     <section aria-label="Preparación de la ficha">
       <h3>Preparación de la ficha</h3>
       <p className="records-description">
-        Podés dejar datos pendientes y completarlos en otra edición.
+        Podés dejar datos pendientes y completarlos en otra edición. La
+        habilitación toma la fecha del trabajo. La oblea vence al último día del
+        mismo mes del año siguiente. Las firmas y sellos se completan a mano.
       </p>
       <div className="form-grid">
         <label className="field">
@@ -28,6 +33,19 @@ export function ServicePreparation({
               onChange({
                 ...preparation,
                 previousSticker: event.target.value || null,
+              })
+            }
+          />
+        </label>
+        <label className="field">
+          Vencimiento de oblea anterior
+          <input
+            type="month"
+            value={preparation.previousStickerExpiresOn?.slice(0, 7) ?? ""}
+            onChange={(event) =>
+              onChange({
+                ...preparation,
+                previousStickerExpiresOn: event.target.value || null,
               })
             }
           />
@@ -47,28 +65,18 @@ export function ServicePreparation({
         </label>
         <label className="field">
           Fecha de habilitación preparada
-          <input
-            type="date"
-            value={preparation.enabledOn ?? ""}
-            onChange={(event) =>
-              onChange({
-                ...preparation,
-                enabledOn: event.target.value || null,
-              })
-            }
-          />
+          <input type="date" value={serviceDate} readOnly />
         </label>
         <label className="field">
           Vencimiento de oblea preparado
           <input
             type="date"
-            value={preparation.expiresOn ?? ""}
-            onChange={(event) =>
-              onChange({
-                ...preparation,
-                expiresOn: event.target.value || null,
-              })
+            value={
+              preparation.newSticker
+                ? (expirationAtMonthEnd(serviceDate, 1) ?? "")
+                : ""
             }
+            readOnly
           />
         </label>
         <label className="field field-wide">

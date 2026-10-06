@@ -135,8 +135,10 @@ export function PersonEditor({
         {person ? "Editar persona" : "Nueva persona"}
       </h2>
       <p className="records-description">
-        Los datos de contacto y domicilio son opcionales. Se buscarán
-        coincidencias antes de guardar.
+        Podés completar contacto y domicilio después del alta. Para confirmar
+        una ficha se exigen teléfono y domicilio del titular. Escribí S/N en el
+        número si el domicilio no tiene altura. Se buscarán coincidencias antes
+        de guardar.
       </p>
       <form
         onSubmit={submit}

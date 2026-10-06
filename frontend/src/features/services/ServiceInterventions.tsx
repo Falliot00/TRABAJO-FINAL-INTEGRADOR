@@ -48,6 +48,7 @@ function InterventionEditor({
                 ...intervention,
                 type: event.target.value as ServiceInterventionInput["type"],
                 componentId: null,
+                cylinderId: null,
                 finalPosition: null,
                 action: null,
                 performsPh: false,
@@ -70,7 +71,9 @@ function InterventionEditor({
                 ? 3
                 : intervention.type === "ACCESORIO"
                   ? 100
-                  : 4
+                  : intervention.type === "VALVULA"
+                    ? 8
+                    : 4
             }
             required
             value={intervention.row}
@@ -149,6 +152,26 @@ function InterventionEditor({
           onSessionLost={onSessionLost}
         />
       )}
+      {intervention.type === "VALVULA" && (
+        <fieldset className="catalog-item" disabled={disabled}>
+          <legend>Cilindro de la válvula</legend>
+          <p className="records-description">
+            Elegí el cilindro tanto para la válvula resultante como para la
+            retirada. La saliente se conservará en Observaciones con su código,
+            serie y marca D/B.
+          </p>
+          <ServiceComponentPicker
+            componentId={intervention.cylinderId ?? null}
+            type="CILINDRO"
+            disabled={disabled}
+            onSelect={(component) =>
+              onChange({ ...intervention, cylinderId: component.id })
+            }
+            onClear={() => onChange({ ...intervention, cylinderId: null })}
+            onSessionLost={onSessionLost}
+          />
+        </fieldset>
+      )}
       <div className="form-grid">
         {textFields.map(([field, label, maxLength]) => (
           <label className="field" key={field}>
@@ -167,7 +190,9 @@ function InterventionEditor({
         ))}
         {months.map(([field, label]) => (
           <label className="field" key={field}>
-            {label}
+            {field === "revisionMonth" && intervention.performsPh
+              ? "Última PH anterior (si se conoce)"
+              : label}
             <input
               type="month"
               value={intervention[field] ?? ""}
@@ -212,7 +237,9 @@ export function ServiceInterventions({
       <h3>Intervenciones propuestas</h3>
       <p className="records-description">
         Los renglones documentales y las posiciones finales se preparan por
-        separado. Los componentes se conservan sin cambios al guardar.
+        separado. Cada válvula se vincula explícitamente con su cilindro. Podés
+        preparar hasta cuatro recambios conservando las ocho válvulas. Los
+        componentes se conservan sin cambios al guardar.
       </p>
       {interventions.map((intervention, index) => (
         <InterventionEditor

@@ -56,9 +56,8 @@ test("revisa el borrador guardado y muestra sólo los bloqueos de confirmación 
           canConfirm: false,
           blockers: [
             {
-              code: "RF-07",
-              message:
-                "Falta validar la obligatoriedad de la operación con el responsable técnico.",
+              code: "TITULAR_TELEFONO",
+              message: "Completá el teléfono del titular antes de confirmar.",
             },
           ],
         });
@@ -78,9 +77,9 @@ test("revisa el borrador guardado y muestra sólo los bloqueos de confirmación 
     name: "Revisar confirmación del servicio 31",
   });
   expect(
-    await within(review).findByText(/Falta validar la obligatoriedad/),
+    await within(review).findByText(/Completá el teléfono del titular/),
   ).toBeInTheDocument();
-  expect(within(review).getByText("RF-07")).toBeInTheDocument();
+  expect(within(review).getByText("TITULAR_TELEFONO")).toBeInTheDocument();
   expect(within(review).getByText(/AA123BB/)).toBeInTheDocument();
   expect(
     within(review).queryByRole("button", { name: "Confirmar servicio" }),

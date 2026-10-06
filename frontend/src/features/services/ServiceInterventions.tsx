@@ -19,6 +19,12 @@ const months = [
   ["manufactureMonth", "Mes de fabricación"],
   ["revisionMonth", "Mes de revisión"],
 ] as const;
+const rowLimits: Record<ServiceInterventionInput["type"], number> = {
+  REGULADOR: 3,
+  CILINDRO: 4,
+  VALVULA: 8,
+  ACCESORIO: 100,
+};
 
 function InterventionEditor({
   intervention,
@@ -66,15 +72,7 @@ function InterventionEditor({
           <input
             type="number"
             min={1}
-            max={
-              intervention.type === "REGULADOR"
-                ? 3
-                : intervention.type === "ACCESORIO"
-                  ? 100
-                  : intervention.type === "VALVULA"
-                    ? 8
-                    : 4
-            }
+            max={rowLimits[intervention.type]}
             required
             value={intervention.row}
             onChange={(event) => {

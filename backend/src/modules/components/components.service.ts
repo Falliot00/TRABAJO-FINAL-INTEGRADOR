@@ -122,8 +122,19 @@ export class ComponentsService {
         expiresOn: Date | null;
       })[]
     >`SELECT id::text, servicio_id::text AS "serviceId", crpc_id::text AS "crpcId", fecha_ensayo AS "testDate", vence_el AS "expiresOn", resultado AS result, numero_certificado AS "certificateNumber" FROM revisiones_cilindros WHERE componente_id = ${id} ORDER BY fecha_ensayo, id`;
+    const links = await this.db.$queryRaw<
+      (NonNullable<ComponentHistory["cylinderValveLinks"]>[number] & {
+        validFrom: Date;
+        validUntil: Date | null;
+      })[]
+    >`SELECT c.id::text AS "configurationId", c.servicio_origen_id::text AS "serviceId", cc.cilindro_id::text AS "cylinderId", cc.componente_id::text AS "valveId", c.vigente_desde AS "validFrom", c.vigente_hasta AS "validUntil" FROM configuracion_componentes cc JOIN configuraciones c ON c.id = cc.configuracion_id WHERE cc.cilindro_id IS NOT NULL AND (cc.componente_id = ${id} OR cc.cilindro_id = ${id}) ORDER BY c.vigente_desde, c.id`;
     return {
       componentId: String(id),
+      cylinderValveLinks: links.map((link) => ({
+        ...link,
+        validFrom: link.validFrom.toISOString(),
+        validUntil: link.validUntil?.toISOString() ?? null,
+      })),
       available: true,
       activities: activities.map((row) => ({
         ...row,

@@ -40,6 +40,8 @@ import {
   type RegulatoryValidation,
 } from "./regulatory-validation";
 
+import { technicalRules } from "./confirmation-technical-rules";
+
 type Confirmation = {
   key: string;
   version: number;
@@ -69,7 +71,9 @@ export class ServiceConfirmationService {
           item.componentId ? [item.componentId] : [],
         ),
         ...row.interventions.flatMap((item) =>
-          item.componentId ? [item.componentId] : [],
+          [item.componentId, item.cylinderId].filter(
+            (id): id is bigint => id !== null,
+          ),
         ),
         ...(
           await this.technical.members(
@@ -116,7 +120,7 @@ export class ServiceConfirmationService {
     row: DraftRow,
     actor: SessionUser,
   ) {
-    const blockers: ConfirmationBlocker[] = [];
+    const blockers: ConfirmationBlocker[] = await technicalRules(tx, row);
     blockers.push(...(await requiredFields(tx, row)));
     const block = (code: string, message: string) =>
       blockers.push({ code, message });
@@ -170,24 +174,6 @@ export class ServiceConfirmationService {
         "Complete la operación documental, PEC y TdM.",
       );
     const prep = row.preparation;
-    const requiresSticker =
-      row.type === "REVISION_ANUAL" ||
-      row.type === "REVISION_QUINQUENAL" ||
-      row.items.some((item) => item.type === "OBLEA");
-    if (
-      (requiresSticker ||
-        prep?.newSticker ||
-        prep?.enabledOn ||
-        prep?.expiresOn) &&
-      (!prep?.newSticker ||
-        !prep.enabledOn ||
-        !prep.expiresOn ||
-        prep.expiresOn <= prep.enabledOn)
-    )
-      block(
-        "OBLEA_INCOMPLETA",
-        "Complete número de oblea y fechas de habilitación y vencimiento coherentes.",
-      );
     const phRows = row.interventions.filter((item) => item.performsPh);
     if (row.includesPh !== phRows.length > 0)
       block(

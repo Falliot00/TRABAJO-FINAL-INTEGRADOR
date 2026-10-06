@@ -1,0 +1,198 @@
+import type { ConfirmationBlocker } from "@cilgas/contracts";
+import type { Prisma } from "../../generated/prisma/client";
+import type { DraftRow } from "./service-drafts.service";
+import { monthEnd } from "./dto";
+
+const day = (value: Date) => value.toISOString().slice(0, 10);
+
+/** Contrasta la operación con los hechos del servicio y antecedentes conocidos. */
+export async function technicalRules(
+  tx: Prisma.TransactionClient,
+  row: DraftRow,
+) {
+  const blockers: ConfirmationBlocker[] = [];
+  const block = (code: string, message: string) =>
+    blockers.push({ code, message });
+  const prep = row.preparation;
+  const operation = row.sheetOperation;
+  const serviceDay = day(row.serviceDate);
+  const emits = ["C", "M", "R"].includes(operation ?? "") || row.includesPh;
+  if (prep?.enabledOn && day(prep.enabledOn) !== serviceDay)
+    block(
+      "HABILITACION_FECHA",
+      "La habilitación debe coincidir con la fecha del trabajo.",
+    );
+  if (emits && (!prep?.newSticker || !prep.enabledOn || !prep.expiresOn))
+    block(
+      "OBLEA_INCOMPLETA",
+      "Complete número de oblea nueva, habilitación y vencimiento.",
+    );
+  if (emits && prep?.newSticker === prep?.previousSticker)
+    block(
+      "OBLEA_NUEVA_REQUERIDA",
+      "La oblea nueva debe tener un número distinto del antecedente.",
+    );
+  if (
+    emits &&
+    prep?.expiresOn &&
+    day(prep.expiresOn) !== day(monthEnd(serviceDay, 1))
+  )
+    block(
+      "VENCIMIENTO_OBLEA",
+      "La oblea vence al finalizar el mismo mes del año siguiente al trabajo.",
+    );
+  if (
+    ["D", "B"].includes(operation ?? "") &&
+    (row.includesPh || prep?.newSticker || prep?.expiresOn)
+  )
+    block(
+      "RETIRO_SIN_EMISION",
+      "Desmontaje y baja no emiten oblea ni presumen una PH.",
+    );
+  if (
+    (operation === "C" && (!row.includesPh || row.phReason !== "CONVERSION")) ||
+    (row.includesPh &&
+      ((operation === "M" && row.phReason !== "MODIFICACION") ||
+        (operation === "R" &&
+          !["VENCIMIENTO", "SERVICIO_PH"].includes(row.phReason ?? "")) ||
+        !["C", "M", "R"].includes(operation ?? ""))) ||
+    (!row.includesPh && row.phReason)
+  )
+    block(
+      "OPERACION_PH",
+      "Conversión usa C + PH; modificación con PH usa M; PH por servicio o vencimiento usa R, incluso con oblea vigente. Indique el motivo real.",
+    );
+  if (
+    row.type === "MODIFICACION" &&
+    operation === "R" &&
+    (!row.includesPh || row.phReason !== "VENCIMIENTO")
+  )
+    block(
+      "OPERACION_INCONSISTENTE",
+      "Una modificación usa M; la PH motivada por vencimiento usa R.",
+    );
+
+  const [sticker] = await tx.$queryRaw<
+    { number: string; enabled: Date; expires: Date }[]
+  >`SELECT o.numero AS number, o.habilitada_el AS enabled, o.vence_el AS expires FROM obleas o JOIN servicios s ON s.id = o.servicio_id WHERE s.vehiculo_id = ${row.vehicleId} ORDER BY o.habilitada_el DESC, o.id DESC LIMIT 1`;
+  if (
+    sticker &&
+    ((prep?.previousSticker && prep.previousSticker !== sticker.number) ||
+      (prep?.previousStickerExpiresOn &&
+        day(prep.previousStickerExpiresOn) !== day(sticker.expires)) ||
+      sticker.enabled > row.serviceDate)
+  )
+    block(
+      "ANTECEDENTE_OBLEA_INCONSISTENTE",
+      "La oblea anterior o su vigencia contradicen el antecedente registrado del vehículo.",
+    );
+  if (
+    operation === "M" &&
+    (!prep?.previousSticker ||
+      !(sticker?.expires ?? prep.previousStickerExpiresOn) ||
+      (sticker?.expires ?? prep.previousStickerExpiresOn)! < row.serviceDate)
+  )
+    block(
+      "OBLEA_ANTERIOR_VIGENTE",
+      "Una modificación requiere identificar la oblea anterior y acreditar que sigue vigente hasta el final de su mes.",
+    );
+
+  for (const item of row.interventions.filter(
+    (candidate) => candidate.type === "CILINDRO",
+  )) {
+    if (item.performsPh && item.testDate) {
+      if (
+        item.testDate > serviceDay.slice(0, item.testDate.length) ||
+        (item.manufactureMonth &&
+          day(item.manufactureMonth).slice(0, 7) > item.testDate.slice(0, 7))
+      )
+        block(
+          "FECHA_PH",
+          "El ensayo no puede ser posterior al trabajo ni anterior a la fabricación del cilindro.",
+        );
+      if (
+        item.phResult === "APROBADO" &&
+        item.revisionExpiresOn &&
+        day(item.revisionExpiresOn) !== day(monthEnd(item.testDate, 5))
+      )
+        block(
+          "VENCIMIENTO_PH",
+          "La PH aprobada vence al finalizar el mismo mes cinco años después del ensayo.",
+        );
+      if (item.phResult === "RECHAZADO" && item.revisionExpiresOn)
+        block(
+          "PH_RECHAZADA_SIN_VIGENCIA",
+          "Una PH rechazada no habilita un nuevo plazo de vigencia.",
+        );
+    }
+    const [prior] = item.componentId
+      ? await tx.$queryRaw<
+          {
+            date: string;
+            result: string;
+            expires: Date | null;
+            crpcId: bigint;
+          }[]
+        >`SELECT fecha_ensayo AS date, resultado AS result, vence_el AS expires, crpc_id AS "crpcId" FROM revisiones_cilindros WHERE componente_id = ${item.componentId} ORDER BY fecha_ensayo DESC, id DESC LIMIT 1`
+      : [];
+    const providedMonth = item.revisionMonth
+      ? day(item.revisionMonth).slice(0, 7)
+      : null;
+    // En datos previos se usaba Revisado también para el ensayo actual: no reinterpretarlo como antecedente anterior.
+    const antecedentMonth =
+      item.performsPh && providedMonth === item.testDate?.slice(0, 7)
+        ? null
+        : providedMonth;
+    if (prior && antecedentMonth && antecedentMonth !== prior.date.slice(0, 7))
+      block(
+        "ANTECEDENTE_PH_INCONSISTENTE",
+        "El mes de última PH contradice la revisión registrada del cilindro.",
+      );
+    if (prior && prior.date > serviceDay.slice(0, prior.date.length))
+      block(
+        "ANTECEDENTE_PH_INCONSISTENTE",
+        "La PH registrada del cilindro es posterior a este trabajo.",
+      );
+    const previousExpiry =
+      prior?.expires ?? (antecedentMonth ? monthEnd(antecedentMonth, 5) : null);
+    if (
+      item.performsPh &&
+      ["VENCIMIENTO", "MODIFICACION"].includes(row.phReason ?? "")
+    ) {
+      if (!previousExpiry || (!prior && !item.crpcId))
+        block(
+          "PH_ANTECEDENTE_REQUERIDO",
+          "El motivo de la PH requiere conocer la última prueba y su CRPC.",
+        );
+      else if (
+        (row.phReason === "VENCIMIENTO" && previousExpiry >= row.serviceDate) ||
+        (row.phReason === "MODIFICACION" && previousExpiry < row.serviceDate)
+      )
+        block(
+          "MOTIVO_PH_INCONSISTENTE",
+          "El motivo informado no coincide con la vigencia de la PH anterior al día del trabajo.",
+        );
+    }
+    if (!item.performsPh && item.finalPosition !== null) {
+      if (!previousExpiry || (!prior && !item.crpcId))
+        block(
+          "PH_ANTECEDENTE_REQUERIDO",
+          "Registre la última PH y su CRPC para el cilindro que permanece instalado.",
+        );
+      else if (
+        previousExpiry < row.serviceDate ||
+        prior?.result === "RECHAZADO"
+      )
+        block(
+          "PH_VENCIDA",
+          "Un cilindro con PH vencida o rechazada requiere una nueva prueba aprobada para permanecer instalado.",
+        );
+    }
+    if (operation === "C" && item.finalPosition !== null && !item.performsPh)
+      block(
+        "CONVERSION_PH_REQUERIDA",
+        "La conversión incluye la PH de cada cilindro instalado.",
+      );
+  }
+  return blockers;
+}

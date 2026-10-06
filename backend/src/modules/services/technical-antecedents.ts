@@ -1,4 +1,5 @@
 import type { Prisma } from "../../generated/prisma/client";
+import { monthEnd } from "./dto";
 
 type PhAntecedent = {
   date: string | null;
@@ -8,6 +9,7 @@ type PhAntecedent = {
   serviceDate: Date | null;
   recordedAt: Date;
   source: "SERVICE" | "SURVEY";
+  recordId: bigint;
 };
 
 /** La PH acompaña al cilindro. Nunca combina campos de antecedentes distintos. */
@@ -17,47 +19,75 @@ export async function latestPhAntecedent(
 ) {
   const rows = await tx.$queryRaw<
     PhAntecedent[]
-  >`SELECT r.fecha_ensayo AS date, r.resultado AS result, r.vence_el AS expires, r.crpc_id AS "crpcId", s.fecha_servicio AS "serviceDate", s.confirmado_en AS "recordedAt", 'SERVICE' AS source FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id = ${componentId}
-    UNION ALL SELECT a.fecha_ensayo, a.resultado, a.vence_el, a.crpc_id, NULL, r.registrado_en, 'SURVEY' FROM antecedentes_ph_relevados a JOIN relevamientos_iniciales r ON r.configuracion_id = a.configuracion_id WHERE a.componente_id = ${componentId}`;
-  const candidates = rows.filter(
-    (candidate) =>
-      candidate.source !== "SURVEY" ||
-      !rows.some(
-        (other) =>
-          other.source === "SERVICE" &&
-          other.recordedAt > candidate.recordedAt &&
-          other.date &&
-          candidate.date &&
-          other.date.slice(0, 7) >= candidate.date.slice(0, 7),
+  >`SELECT r.fecha_ensayo AS date, r.resultado AS result, r.vence_el AS expires, r.crpc_id AS "crpcId", s.fecha_servicio AS "serviceDate", s.confirmado_en AS "recordedAt", 'SERVICE' AS source, r.id AS "recordId" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id = ${componentId}
+    UNION ALL SELECT a.fecha_ensayo, a.resultado, a.vence_el, a.crpc_id, NULL, r.registrado_en, 'SURVEY', r.configuracion_id FROM antecedentes_ph_relevados a JOIN relevamientos_iniciales r ON r.configuracion_id = a.configuracion_id WHERE a.componente_id = ${componentId}`;
+  const byRecording = (a: PhAntecedent, b: PhAntecedent) =>
+    b.recordedAt.getTime() - a.recordedAt.getTime() ||
+    (a.recordId === b.recordId ? 0 : a.recordId > b.recordId ? -1 : 1);
+  // Los servicios ya tienen un orden de hechos conocido, aun con ensayo mensual.
+  const service = rows
+    .filter((row) => row.source === "SERVICE")
+    .sort(
+      (a, b) =>
+        b.date!.slice(0, 7).localeCompare(a.date!.slice(0, 7)) ||
+        b.serviceDate!.getTime() - a.serviceDate!.getTime() ||
+        byRecording(a, b),
+    )[0];
+  const surveys = rows.filter(
+    (row) =>
+      row.source === "SURVEY" &&
+      !(
+        service &&
+        service.recordedAt > row.recordedAt &&
+        (!row.date ||
+          service.date!.slice(
+            0,
+            row.date.length === 10 && service.date!.length === 10 ? 10 : 7,
+          ) >=
+            row.date.slice(
+              0,
+              row.date.length === 10 && service.date!.length === 10 ? 10 : 7,
+            ))
       ),
   );
-  candidates.sort((a, b) => {
-    if (!a.date || !b.date)
-      return b.recordedAt.getTime() - a.recordedAt.getTime();
-    const month = b.date.slice(0, 7).localeCompare(a.date.slice(0, 7));
-    if (month) return month;
-    if (a.source === "SERVICE" && b.source === "SERVICE")
-      return (
-        b.serviceDate!.getTime() - a.serviceDate!.getTime() ||
-        b.recordedAt.getTime() - a.recordedAt.getTime()
-      );
-    if (a.date.length === 10 && b.date.length === 10 && a.date !== b.date)
-      return b.date.localeCompare(a.date);
-    if (a.source !== b.source) return a.source === "SERVICE" ? -1 : 1;
-    return b.recordedAt.getTime() - a.recordedAt.getTime();
-  });
-  const prior = candidates[0];
-  if (!prior) return null;
-  const ambiguous = candidates.some(
-    (other) =>
-      other !== prior &&
-      (prior.source === "SURVEY" || other.source === "SURVEY") &&
-      prior.date &&
-      other.date &&
-      prior.date.slice(0, 7) === other.date.slice(0, 7) &&
-      (prior.date.length === 7 || other.date.length === 7) &&
-      (other.result !== prior.result || other.crpcId !== prior.crpcId),
+  // Los límites sólo se usan para comparar rangos; nunca se guardan como fecha de ensayo.
+  const dated = [...(service ? [service] : []), ...surveys].flatMap((row) =>
+    row.date
+      ? [
+          {
+            row,
+            lower: row.date.length === 7 ? `${row.date}-01` : row.date,
+            upper:
+              row.date.length === 7
+                ? monthEnd(row.date).toISOString().slice(0, 10)
+                : row.date,
+          },
+        ]
+      : [],
   );
+  dated.sort(
+    (a, b) =>
+      b.upper.localeCompare(a.upper) ||
+      b.lower.localeCompare(a.lower) ||
+      b.row.source.localeCompare(a.row.source) ||
+      byRecording(a.row, b.row),
+  );
+  const selected = dated[0];
+  if (!selected) {
+    const unknown = surveys.sort(byRecording)[0];
+    return unknown ? { ...unknown, ambiguous: false } : null;
+  }
+  const prior = selected.row;
+  const ambiguous =
+    surveys.some((row) => !row.date && row.recordedAt >= prior.recordedAt) ||
+    dated.some(
+      (other) =>
+        other.row !== prior &&
+        other.lower <= selected.upper &&
+        selected.lower <= other.upper &&
+        (other.row.result !== prior.result ||
+          other.row.crpcId !== prior.crpcId),
+    );
   return { ...prior, ambiguous };
 }
 

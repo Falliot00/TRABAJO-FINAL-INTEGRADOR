@@ -181,13 +181,18 @@ export async function technicalRules(
         "La PH registrada del cilindro es posterior a este trabajo.",
       );
     const previousExpiry =
-      prior?.expires ?? (antecedentMonth ? monthEnd(antecedentMonth, 5) : null);
+      prior?.expires ??
+      (prior?.date && prior.result === "APROBADO" && prior.crpcId
+        ? monthEnd(prior.date, 5)
+        : !prior && antecedentMonth
+          ? monthEnd(antecedentMonth, 5)
+          : null);
     const incompletePrior =
       prior && (!prior.date || !prior.crpcId || !prior.result);
-    if (prior?.ambiguous && !item.performsPh)
+    if (prior?.ambiguous && !item.performsPh && item.finalPosition !== null)
       block(
         "ANTECEDENTE_PH_INCONSISTENTE",
-        "La precisión conocida no permite ordenar antecedentes de PH contradictorios del mismo mes.",
+        "La precisión conocida no permite determinar un antecedente de PH vigente sin contradicciones.",
       );
     if (item.performsPh && previousExpiry && previousExpiry < row.serviceDate)
       expiredPhAntecedents += 1;

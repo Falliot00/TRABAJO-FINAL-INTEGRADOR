@@ -130,6 +130,142 @@ describe("Precedencia de antecedentes y hechos técnicos por HTTP", () => {
     await dispose?.();
   });
 
+  it("un antecedente sin fecha entre relevamientos fechados no permite ocultar el rechazo con una aprobación antigua", async () => {
+    const first = await prepareConfirmation(app, 627);
+    let fixture = first;
+    const facts = [
+      { testDate: "2026-09", result: "RECHAZADO", expiresOn: null },
+      { testDate: null, result: null, expiresOn: null },
+      { testDate: "2024-09", result: "APROBADO", expiresOn: "2029-09-30" },
+    ];
+    for (let index = 0; index < facts.length; index += 1) {
+      if (index)
+        fixture = await prepareConfirmation(app, 627 + index, first.component);
+      const { admin, vehicleId, component, regulator, valve, actors } = fixture;
+      const survey = (
+        await admin.agent
+          .post(`/api/vehicles/${vehicleId}/configurations/initial-survey`)
+          .set(admin.headers)
+          .send({
+            idempotencyKey: randomUUID(),
+            regulatorId: regulator.id,
+            pairs: [
+              {
+                position: 1,
+                cylinderId: component.id,
+                valveId: valve.id,
+                ph: { ...facts[index], crpcId: actors.CRPC },
+              },
+            ],
+          })
+          .expect(201)
+      ).body;
+      if (index === facts.length - 1) {
+        const blocked = await work(fixture, {});
+        expect(
+          (
+            await admin.agent
+              .get(`/api/service-drafts/${blocked.id}/confirmation-check`)
+              .expect(200)
+          ).body.canConfirm,
+        ).toBe(false);
+        await admin.agent
+          .post(`/api/service-drafts/${blocked.id}/confirm`)
+          .set(admin.headers)
+          .send({
+            version: blocked.version,
+            expectedConfigurationId: survey.configurationId,
+            idempotencyKey: randomUUID(),
+          })
+          .expect(409);
+      } else {
+        const components = [component, regulator, valve];
+        const retired = await work(fixture, {
+          type: "DESMONTAJE",
+          sheetOperation: "D",
+          preparation: { pecId: actors.PEC, tdmId: actors.TDM },
+          items: components.map((item, i) =>
+            actionItem(item, i + 1, "RETIRAR"),
+          ),
+          interventions: components.map((item) =>
+            documented(item, 1, {
+              action: "D",
+              finalPosition: null,
+              cylinderId: item.type === "VALVULA" ? component.id : null,
+            }),
+          ),
+        });
+        await confirm(fixture, retired, survey.configurationId);
+      }
+    }
+  });
+  it("un rechazo relevado después de una PH real del mismo día mantiene bloqueada la habilitación", async () => {
+    const original = await prepareConfirmation(app, 632);
+    const first = await confirm(original, original.draft, null);
+    const components = [original.component, original.regulator, original.valve];
+    const retired = await work(original, {
+      type: "DESMONTAJE",
+      sheetOperation: "D",
+      preparation: { pecId: original.actors.PEC, tdmId: original.actors.TDM },
+      items: components.map((item, index) =>
+        actionItem(item, index + 1, "RETIRAR"),
+      ),
+      interventions: components.map((item) =>
+        documented(item, 1, {
+          action: "D",
+          finalPosition: null,
+          cylinderId: item.type === "VALVULA" ? original.component.id : null,
+        }),
+      ),
+    });
+    await confirm(original, retired, first.configurationId);
+    const moved = await prepareConfirmation(app, 633, original.component);
+    const survey = (
+      await moved.admin.agent
+        .post(`/api/vehicles/${moved.vehicleId}/configurations/initial-survey`)
+        .set(moved.admin.headers)
+        .send({
+          idempotencyKey: randomUUID(),
+          regulatorId: moved.regulator.id,
+          pairs: [
+            {
+              position: 1,
+              cylinderId: original.component.id,
+              valveId: moved.valve.id,
+              ph: {
+                testDate: "2026-10-01",
+                crpcId: moved.actors.CRPC,
+                result: "RECHAZADO",
+              },
+            },
+          ],
+        })
+        .expect(201)
+    ).body;
+    const blocked = await work(moved, {});
+    expect(
+      (
+        await moved.admin.agent
+          .get(`/api/service-drafts/${blocked.id}/confirmation-check`)
+          .expect(200)
+      ).body,
+    ).toMatchObject({
+      canConfirm: false,
+      blockers: expect.arrayContaining([
+        expect.objectContaining({ code: "ANTECEDENTE_PH_INCONSISTENTE" }),
+      ]),
+    });
+    await moved.admin.agent
+      .post(`/api/service-drafts/${blocked.id}/confirm`)
+      .set(moved.admin.headers)
+      .send({
+        version: blocked.version,
+        expectedConfigurationId: survey.configurationId,
+        idempotencyKey: randomUUID(),
+      })
+      .expect(409);
+  });
+
   it("un relevamiento mensual posterior no oculta un rechazo real y una PH real aprobada posterior lo supera", async () => {
     const original = await prepareConfirmation(app, 620);
     const { admin, component, regulator, valve, actors, vehicleId } = original;

@@ -1,9 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   NotFoundException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import type {
   InitialEquipmentSurvey,
@@ -12,7 +10,7 @@ import type {
 } from "@cilgas/contracts";
 import { Prisma, type PrismaClient } from "../../generated/prisma/client";
 import { parseId } from "../identity/dto";
-import { digest, sessionUser, userInclude } from "../identity/identity.service";
+import { requireTechnicalActor } from "../identity/technical-authorization";
 import { AuditService } from "../audit/audit.service";
 import { jsonText } from "../documents/service-sheets.service";
 import { masterDataError } from "../../common/master-data";
@@ -60,29 +58,7 @@ export class InitialSurveyService {
     try {
       return await this.db.$transaction(
         async (tx) => {
-          await tx.$queryRaw`SELECT id FROM usuarios WHERE id = ${parseId(actor.id)} FOR SHARE`;
-          if (!token)
-            throw new UnauthorizedException("Inicie sesión para continuar.");
-          await tx.$queryRaw`SELECT id FROM sesiones WHERE token_hash = ${digest(token)} FOR SHARE`;
-          const session = await tx.session.findUnique({
-            where: { tokenHash: digest(token) },
-          });
-          const user = await tx.user.findUnique({
-            where: { id: parseId(actor.id) },
-            include: userInclude,
-          });
-          if (
-            !session ||
-            session.userId !== parseId(actor.id) ||
-            session.revokedAt ||
-            session.expiresAt <= new Date() ||
-            !user?.active
-          )
-            throw new UnauthorizedException("Inicie sesión para continuar.");
-          if (!sessionUser(user).permissions.includes("servicios.gestionar"))
-            throw new ForbiddenException(
-              "No tiene permiso para registrar equipos.",
-            );
+          await requireTechnicalActor(tx, actor, token);
           await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${input.idempotencyKey.toLowerCase()}, 0))::text`;
           const reusedKey = await tx.$queryRaw<
             { vehicleId: bigint }[]
@@ -184,6 +160,13 @@ export class InitialSurveyService {
             preciseDate(ph.testDate);
             dateValue(ph.expiresOn);
             if (
+              ph.expiresOn &&
+              ph.expiresOn !== monthEnd(ph.expiresOn).toISOString().slice(0, 10)
+            )
+              throw new BadRequestException(
+                "El vencimiento conocido de PH debe indicar el último día de su mes.",
+              );
+            if (
               ph.testDate &&
               ph.expiresOn &&
               ph.expiresOn !==
@@ -213,6 +196,14 @@ export class InitialSurveyService {
           if (sticker) {
             dateValue(sticker.enabledOn);
             dateValue(sticker.expiresOn);
+            if (
+              sticker.expiresOn &&
+              sticker.expiresOn !==
+                monthEnd(sticker.expiresOn).toISOString().slice(0, 10)
+            )
+              throw new BadRequestException(
+                "El vencimiento conocido de oblea debe indicar el último día de su mes.",
+              );
             if (
               sticker.enabledOn &&
               sticker.expiresOn &&

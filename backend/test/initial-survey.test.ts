@@ -156,6 +156,8 @@ describe("Relevamiento inicial por HTTP", () => {
       { sticker: { enabledOn: "2999-01-01" } },
       { sticker: { enabledOn: "2024-05-01", expiresOn: "2024-04-30" } },
       { sticker: { expiresOn: "2024-02-30" } },
+      { pairs: [{ ...pair, ph: { expiresOn: "2029-09-15" } }] },
+      { sticker: { expiresOn: "2027-09-15" } },
       {
         pairs: [
           {

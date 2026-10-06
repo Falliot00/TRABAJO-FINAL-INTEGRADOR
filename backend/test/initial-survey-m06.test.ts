@@ -102,6 +102,63 @@ describe("Relevamiento inicial como base de M06 por HTTP", () => {
     await dispose?.();
   });
 
+  it("deriva la vigencia anterior desde una PH aprobada de mes conocido al confirmar otra PH por modificación", async () => {
+    const { admin, draft, survey, actors } = await surveyedDraft(app, 617, {
+      expiresOn: null,
+    });
+    const changed = (
+      await admin.agent
+        .patch(`/api/service-drafts/${draft.id}`)
+        .set(admin.headers)
+        .send({
+          version: draft.version,
+          type: "MODIFICACION",
+          sheetOperation: "M",
+          includesPh: true,
+          phReason: "MODIFICACION",
+          interventions: draft.interventions.map((row) =>
+            row.type === "CILINDRO"
+              ? {
+                  ...row,
+                  performsPh: true,
+                  testDate: "2026-10",
+                  phResult: "APROBADO",
+                  revisionExpiresOn: "2031-10-31",
+                  crpcId: actors.CRPC,
+                }
+              : row,
+          ),
+        })
+        .expect(200)
+    ).body as ServiceDraft;
+    expect(
+      (
+        await admin.agent
+          .get(`/api/service-drafts/${draft.id}/confirmation-check`)
+          .expect(200)
+      ).body.blockers,
+    ).toEqual([]);
+    await admin.agent
+      .post(`/api/service-drafts/${draft.id}/confirm`)
+      .set(admin.headers)
+      .send({
+        version: changed.version,
+        expectedConfigurationId: survey.configurationId,
+        idempotencyKey: randomUUID(),
+      })
+      .expect(201);
+    expect(
+      (await admin.agent.get(`/api/services/${draft.id}/sheet`).expect(200))
+        .body.content.revisionesPH,
+    ).toEqual([
+      expect.objectContaining({
+        fechaEnsayo: "2026-10",
+        venceEl: "2031-10-31",
+        resultado: "APROBADO",
+      }),
+    ]);
+  });
+
   it("exige una oblea nueva distinta del antecedente aun cuando completa el número anterior automáticamente", async () => {
     const { admin, draft, survey } = await surveyedDraft(app, 616);
     const changed = (

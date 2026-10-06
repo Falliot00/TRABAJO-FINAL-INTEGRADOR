@@ -453,6 +453,7 @@ describe("Identidad individual de componentes", () => {
       activities: [],
       movements: [],
       revisions: [],
+      cylinderValveLinks: [],
     });
     const configurations = (
       await operator.agent

@@ -148,7 +148,7 @@ async function prepareConversion(page: Page) {
     },
     "patch",
   );
-  return { draft, cylinder, vehicle, person };
+  return { draft, cylinder, vehicle, person, components, actors };
 }
 
 test("confirma una conversión completa con PH mensual y consulta la ficha e historia inmutables", async ({
@@ -237,4 +237,203 @@ test("confirma una conversión completa con PH mensual y consulta la ficha e his
     path: testInfo.outputPath("ficha-confirmada-tablet.png"),
     fullPage: true,
   });
+});
+
+test("releva un equipo existente y confirma una revisión sin crear una PH histórica", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/");
+  await page
+    .getByLabel("Correo electrónico", { exact: true })
+    .fill(administrator.email);
+  await page
+    .getByLabel("Contraseña", { exact: true })
+    .fill(administrator.password);
+  await page.getByRole("button", { name: "Ingresar", exact: true }).click();
+  const navigation = page.getByRole("navigation", {
+    name: "Navegación principal",
+  });
+  await expect(navigation).toBeVisible();
+  const { vehicle, components, actors, draft, cylinder } =
+    await prepareConversion(page);
+  await navigation
+    .getByRole("button", { name: "Vehículos", exact: true })
+    .click();
+  await page
+    .getByLabel("Buscar vehículos", { exact: true })
+    .fill(vehicle.plate);
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: `Ver configuraciones de ${vehicle.plate}`,
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("button", { name: "Relevar equipo existente", exact: true })
+    .click();
+  for (const [type, label] of [
+    ["REGULADOR", "Regulador del equipo"],
+    ["CILINDRO", "Cilindro de pareja 1"],
+    ["VALVULA", "Válvula de pareja 1"],
+  ]) {
+    const component = components.find((candidate) => candidate.type === type);
+    if (!component) throw new Error(`Falta ${type} en la preparación.`);
+    const group = page.getByRole("group", { name: label, exact: true });
+    await group
+      .getByLabel("Buscar componente existente", { exact: true })
+      .fill(component.serialNumber);
+    await group
+      .getByRole("button", { name: "Buscar componentes", exact: true })
+      .click();
+    await group
+      .getByRole("button", {
+        name: `Seleccionar ${component.serialNumber}`,
+        exact: true,
+      })
+      .click();
+  }
+  const crpc = await (
+    await page.request.get(`/api/regulatory-actors/${actors.CRPC}`)
+  ).json();
+  await page
+    .getByLabel("Registrar antecedente conocido de PH", { exact: true })
+    .check();
+  await page
+    .getByLabel("Fecha conocida de PH (mes o día)", { exact: true })
+    .fill("2024-05");
+  await page
+    .getByLabel("Vencimiento conocido de PH", { exact: true })
+    .fill("2029-05-31");
+  await page
+    .getByRole("combobox", { name: "Resultado conocido de PH", exact: true })
+    .selectOption("APROBADO");
+  await page.getByLabel("Buscar CRPC", { exact: true }).fill(crpc.code);
+  await page
+    .getByRole("button", { name: "Buscar actores CRPC", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: `Seleccionar ${crpc.name}`, exact: true })
+    .click();
+  const previousSticker = `ANT${vehicle.plate}`;
+  await page
+    .getByLabel("Registrar antecedente conocido de oblea", { exact: true })
+    .check();
+  await page
+    .getByLabel("Número conocido de oblea", { exact: true })
+    .fill(previousSticker);
+  await page
+    .getByLabel("Fecha conocida de habilitación", { exact: true })
+    .fill("2025-11-05");
+  await page
+    .getByLabel("Vencimiento conocido de oblea", { exact: true })
+    .fill("2026-11-30");
+  await page.setViewportSize({ width: 768, height: 1024 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("relevamiento-inicial-tablet.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Guardar relevamiento inicial", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Relevamiento inicial guardado",
+  );
+  const equipment = await (
+    await page.request.get(`/api/vehicles/${vehicle.id}/configurations`)
+  ).json();
+  expect(equipment.configurations).toHaveLength(1);
+  expect(equipment.configurations[0].serviceId).toBeNull();
+  const before = await (
+    await page.request.get(`/api/components/${cylinder.id}/history`)
+  ).json();
+  expect(before.movements).toEqual([]);
+  expect(before.revisions).toEqual([]);
+  expect(before.initialSurveys).toHaveLength(1);
+
+  await writeFixture(
+    page,
+    `service-drafts/${draft.id}`,
+    {
+      version: draft.version,
+      type: "REVISION_ANUAL",
+      description: "Revisión de un equipo relevado",
+      sheetOperation: "R",
+      includesPh: false,
+      phReason: null,
+      items: components.map((component, index) => ({
+        order: index + 1,
+        description: `Inspección ${component.type}`,
+        type: "COMPONENTE",
+        componentId: component.id,
+        action: "INSPECCIONAR",
+        quantity: "1",
+        unitPrice: "0",
+        discount: "0",
+      })),
+      interventions: draft.interventions.map((intervention) => ({
+        ...intervention,
+        action: intervention.type === "REGULADOR" ? null : "S",
+        performsPh: false,
+        revisionMonth: null,
+        crpcId: null,
+        testDate: null,
+        phResult: null,
+        revisionExpiresOn: null,
+      })),
+    },
+    "patch",
+  );
+  await navigation
+    .getByRole("button", { name: "Servicios", exact: true })
+    .click();
+  await page
+    .getByLabel("Buscar borradores", { exact: true })
+    .fill(vehicle.plate);
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: `Revisar confirmación ${draft.id}`,
+      exact: true,
+    })
+    .click();
+  const review = page.getByRole("region", {
+    name: `Revisar confirmación del servicio ${draft.id}`,
+    exact: true,
+  });
+  await review
+    .getByLabel("Revisé los datos guardados y confirmo el trabajo realizado", {
+      exact: true,
+    })
+    .check();
+  await review
+    .getByRole("button", { name: "Confirmar servicio", exact: true })
+    .click();
+  await expect(
+    page.getByRole("region", { name: "Servicio confirmado", exact: true }),
+  ).toContainText(`Servicio confirmado ${draft.id}`);
+  const sheet = await (
+    await page.request.get(`/api/services/${draft.id}/sheet`)
+  ).json();
+  expect(sheet.content.habilitacion.obleaAnterior).toBe(previousSticker);
+  expect(sheet.content.cilindros).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        revisionMes: "2024-05",
+        crpcCodigo: crpc.code,
+      }),
+    ]),
+  );
+  expect(sheet.content.revisionesPH).toEqual([]);
+  const after = await (
+    await page.request.get(`/api/components/${cylinder.id}/history`)
+  ).json();
+  expect(after.revisions).toEqual([]);
+  expect(after.movements).toEqual([]);
+  expect(after.initialSurveys).toEqual(before.initialSurveys);
 });

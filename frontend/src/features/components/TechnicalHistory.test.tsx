@@ -4,6 +4,57 @@ import { TechnicalHistory } from "./TechnicalHistory";
 
 afterEach(() => vi.unstubAllGlobals());
 
+test("reconstruye las válvulas anterior y vigente del cilindro desde vínculos explícitos", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      Response.json({
+        componentId: "63",
+        available: true,
+        message: "Historia registrada",
+        movements: [],
+        activities: [],
+        revisions: [],
+        cylinderValveLinks: [
+          {
+            configurationId: "20",
+            serviceId: "31",
+            cylinderId: "63",
+            valveId: "106",
+            validFrom: "2026-09-14T15:00:00Z",
+            validUntil: null,
+          },
+          {
+            configurationId: "19",
+            serviceId: "30",
+            cylinderId: "63",
+            valveId: "107",
+            validFrom: "2025-09-14T15:00:00Z",
+            validUntil: "2026-09-14T15:00:00Z",
+          },
+        ],
+      }),
+    ),
+  );
+  render(
+    <TechnicalHistory
+      id="63"
+      kind="component"
+      onSessionLost={vi.fn()}
+      onClose={vi.fn()}
+    />,
+  );
+  const links = await screen.findByRole("table", {
+    name: "Vínculos entre cilindros y válvulas",
+  });
+  expect(
+    within(links).getByRole("row", { name: /63 106 31/ }),
+  ).toHaveTextContent("Vigente");
+  expect(
+    within(links).getByRole("row", { name: /63 107 30/ }),
+  ).toHaveTextContent("14/09/2026, 12:00");
+});
+
 test("consulta movimientos y resultados de PH confirmados del componente", async () => {
   vi.stubGlobal(
     "fetch",

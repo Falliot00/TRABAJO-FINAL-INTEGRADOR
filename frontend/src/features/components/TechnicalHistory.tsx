@@ -119,6 +119,9 @@ function EquipmentConfigurations({
                 <li key={component.componentId}>
                   {componentLabels[component.type]} · Componente{" "}
                   {component.componentId} · Posición {component.position}
+                  {component.cylinderId && (
+                    <> · Cilindro {component.cylinderId}</>
+                  )}
                 </li>
               ))}
             </ul>
@@ -141,6 +144,7 @@ const movementLabels: Record<string, string> = {
 function ComponentEvents({ history }: { history: ComponentHistory }) {
   return (
     <>
+      <CylinderValveHistory links={history.cylinderValveLinks ?? []} />
       <h3>Movimientos confirmados</h3>
       {history.movements.length === 0 ? (
         <p>Sin movimientos registrados.</p>
@@ -204,6 +208,47 @@ function ComponentEvents({ history }: { history: ComponentHistory }) {
           </table>
         </div>
       )}
+    </>
+  );
+}
+
+function CylinderValveHistory({
+  links,
+}: {
+  links: NonNullable<ComponentHistory["cylinderValveLinks"]>;
+}) {
+  if (links.length === 0) return null;
+  return (
+    <>
+      <h3>Vínculos entre cilindros y válvulas</h3>
+      <div className="table-scroll">
+        <table aria-label="Vínculos entre cilindros y válvulas">
+          <thead>
+            <tr>
+              <th>Cilindro</th>
+              <th>Válvula</th>
+              <th>Servicio</th>
+              <th>Desde</th>
+              <th>Hasta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {links.map((link) => (
+              <tr key={`${link.configurationId}-${link.valveId}`}>
+                <td>{link.cylinderId}</td>
+                <td>{link.valveId}</td>
+                <td>{link.serviceId ?? "Sin informar"}</td>
+                <td>{workshopInstant(link.validFrom)}</td>
+                <td>
+                  {link.validUntil
+                    ? workshopInstant(link.validUntil)
+                    : "Vigente"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

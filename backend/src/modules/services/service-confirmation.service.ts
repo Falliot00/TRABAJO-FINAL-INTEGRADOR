@@ -35,7 +35,7 @@ import {
   type DraftRow,
 } from "./service-drafts.service";
 import {
-  PendingRegulatoryValidation,
+  WorkshopRegulatoryValidation,
   type RegulatoryValidation,
 } from "./regulatory-validation";
 
@@ -52,7 +52,7 @@ export class ServiceConfirmationService {
   constructor(
     private readonly db: PrismaClient,
     private readonly audit: AuditService,
-    private readonly regulatory: RegulatoryValidation = new PendingRegulatoryValidation(),
+    private readonly regulatory: RegulatoryValidation = new WorkshopRegulatoryValidation(),
   ) {}
 
   private async lockContext(tx: Prisma.TransactionClient, row: DraftRow) {

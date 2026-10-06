@@ -118,7 +118,7 @@ export class ComponentsService {
     >`SELECT id::text, servicio_id::text AS "serviceId", accion AS action, origen AS origin, destino AS destination, ocurrido_en AS "occurredAt" FROM movimientos_componentes WHERE componente_id = ${id} ORDER BY ocurrido_en, id`;
     const revisions = await this.db.$queryRaw<
       (Omit<ComponentHistory["revisions"][number], "testDate" | "expiresOn"> & {
-        testDate: Date;
+        testDate: string;
         expiresOn: Date | null;
       })[]
     >`SELECT id::text, servicio_id::text AS "serviceId", crpc_id::text AS "crpcId", fecha_ensayo AS "testDate", vence_el AS "expiresOn", resultado AS result, numero_certificado AS "certificateNumber" FROM revisiones_cilindros WHERE componente_id = ${id} ORDER BY fecha_ensayo, id`;
@@ -135,7 +135,7 @@ export class ComponentsService {
       })),
       revisions: revisions.map((row) => ({
         ...row,
-        testDate: row.testDate.toISOString().slice(0, 10),
+        testDate: row.testDate,
         expiresOn: row.expiresOn?.toISOString().slice(0, 10) ?? null,
       })),
       message: "Historia técnica de servicios confirmados.",

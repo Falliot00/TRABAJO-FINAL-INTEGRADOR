@@ -17,6 +17,14 @@ export interface ComponentHistory {
   componentId: string;
   available: boolean;
   message: string;
+  cylinderValveLinks?: {
+    configurationId: string;
+    serviceId: string | null;
+    cylinderId: string;
+    valveId: string;
+    validFrom: string;
+    validUntil: string | null;
+  }[];
   activities: {
     /** Identificador del ítem histórico del servicio. */
     id: string;
@@ -57,6 +65,7 @@ export interface VehicleConfigurations {
     validUntil: string | null;
     components: {
       componentId: string;
+      cylinderId?: string | null;
       type: ComponentType;
       position: number;
     }[];

@@ -70,6 +70,7 @@ export function sheetSnapshot(
       operacionCodigo: row.sheetOperation,
       operacionDescripcion: evidence.operationDescription,
       incluyePH: row.includesPh,
+      motivoPH: row.phReason,
     },
     habilitacion: {
       fecha: day(prep.enabledOn),
@@ -122,7 +123,7 @@ export function sheetSnapshot(
       .map((item) => ({
         cilindroCodigo: item.homologationCode,
         cilindroSerie: item.serialNumber,
-        fechaEnsayo: day(item.testDate),
+        fechaEnsayo: item.testDate,
         venceEl: day(item.revisionExpiresOn),
         resultado: item.phResult,
         crpcCodigo: crpcCode(item.crpcId),

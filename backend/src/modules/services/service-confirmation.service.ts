@@ -96,6 +96,11 @@ export class ServiceConfirmationService {
           Prisma.sql`SELECT DISTINCT ON (r.componente_id) r.crpc_id AS "crpcId" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id IN (${Prisma.join(ids)}) ORDER BY r.componente_id, left(r.fecha_ensayo, 7) DESC, s.fecha_servicio DESC, s.confirmado_en DESC, r.id DESC`,
         )
       : [];
+    const surveyedActors = ids.length
+      ? await tx.$queryRaw<{ crpcId: bigint }[]>(
+          Prisma.sql`SELECT DISTINCT crpc_id AS "crpcId" FROM antecedentes_ph_relevados WHERE componente_id IN (${Prisma.join(ids)}) AND crpc_id IS NOT NULL`,
+        )
+      : [];
     const actors = [
       ...new Set(
         [
@@ -103,6 +108,7 @@ export class ServiceConfirmationService {
           row.preparation?.tdmId,
           ...row.interventions.map((item) => item.crpcId),
           ...priorActors.map((item) => item.crpcId),
+          ...surveyedActors.map((item) => item.crpcId),
         ].filter((id): id is bigint => id != null),
       ),
     ];

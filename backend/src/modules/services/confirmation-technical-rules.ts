@@ -2,6 +2,10 @@ import type { ConfirmationBlocker } from "@cilgas/contracts";
 import type { Prisma } from "../../generated/prisma/client";
 import type { DraftRow } from "./service-drafts.service";
 import { monthEnd } from "./dto";
+import {
+  latestPhAntecedent,
+  latestStickerAntecedent,
+} from "./technical-antecedents";
 
 const day = (value: Date) => value.toISOString().slice(0, 10);
 
@@ -27,11 +31,6 @@ export async function technicalRules(
     block(
       "OBLEA_INCOMPLETA",
       "Complete número de oblea nueva, habilitación y vencimiento.",
-    );
-  if (emits && prep?.newSticker === prep?.previousSticker)
-    block(
-      "OBLEA_NUEVA_REQUERIDA",
-      "La oblea nueva debe tener un número distinto del antecedente.",
     );
   if (
     emits &&
@@ -73,15 +72,25 @@ export async function technicalRules(
       "Una modificación usa M; la PH motivada por vencimiento usa R.",
     );
 
-  const [sticker] = await tx.$queryRaw<
-    { number: string; enabled: Date; expires: Date }[]
-  >`SELECT o.numero AS number, o.habilitada_el AS enabled, o.vence_el AS expires FROM obleas o JOIN servicios s ON s.id = o.servicio_id WHERE s.vehiculo_id = ${row.vehicleId} ORDER BY o.habilitada_el DESC, o.id DESC LIMIT 1`;
+  const sticker = await latestStickerAntecedent(tx, row.vehicleId);
+  if (prep && sticker) {
+    prep.previousSticker ??= sticker.number;
+    prep.previousStickerExpiresOn ??= sticker.expires;
+  }
+  if (emits && prep?.newSticker === prep?.previousSticker)
+    block(
+      "OBLEA_NUEVA_REQUERIDA",
+      "La oblea nueva debe tener un número distinto del antecedente.",
+    );
   if (
     sticker &&
-    ((prep?.previousSticker && prep.previousSticker !== sticker.number) ||
+    ((sticker.number &&
+      prep?.previousSticker &&
+      prep.previousSticker !== sticker.number) ||
       (prep?.previousStickerExpiresOn &&
+        sticker.expires &&
         day(prep.previousStickerExpiresOn) !== day(sticker.expires)) ||
-      sticker.enabled > row.serviceDate)
+      (sticker.enabled && sticker.enabled > row.serviceDate))
   )
     block(
       "ANTECEDENTE_OBLEA_INCONSISTENTE",
@@ -126,23 +135,16 @@ export async function technicalRules(
           "Una PH rechazada no habilita un nuevo plazo de vigencia.",
         );
     }
-    const [prior] = item.componentId
-      ? await tx.$queryRaw<
-          {
-            date: string;
-            result: string;
-            expires: Date | null;
-            crpcId: bigint;
-            serviceDate: Date;
-          }[]
-        >`SELECT r.fecha_ensayo AS date, r.resultado AS result, r.vence_el AS expires, r.crpc_id AS "crpcId", s.fecha_servicio AS "serviceDate" FROM revisiones_cilindros r JOIN servicios s ON s.id = r.servicio_id WHERE r.componente_id = ${item.componentId} ORDER BY left(r.fecha_ensayo, 7) DESC, s.fecha_servicio DESC, s.confirmado_en DESC, r.id DESC LIMIT 1`
-      : [];
+    const prior = item.componentId
+      ? await latestPhAntecedent(tx, item.componentId)
+      : null;
     // Sólo completa la representación de confirmación desde historia inmutable;
     // no modifica el borrador guardado ni reemplaza datos explícitos contradictorios.
     if (!item.performsPh && prior) {
-      item.revisionMonth ??= new Date(
-        `${prior.date.slice(0, 7)}-01T00:00:00.000Z`,
-      );
+      if (prior.date)
+        item.revisionMonth ??= new Date(
+          `${prior.date.slice(0, 7)}-01T00:00:00.000Z`,
+        );
       item.crpcId ??= prior.crpcId;
     }
     const providedMonth = item.revisionMonth
@@ -153,17 +155,22 @@ export async function technicalRules(
       item.performsPh && providedMonth === item.testDate?.slice(0, 7)
         ? null
         : providedMonth;
-    if (prior && antecedentMonth && antecedentMonth !== prior.date.slice(0, 7))
+    if (
+      prior?.date &&
+      antecedentMonth &&
+      antecedentMonth !== prior.date.slice(0, 7)
+    )
       block(
         "ANTECEDENTE_PH_INCONSISTENTE",
         "El mes de última PH contradice la revisión registrada del cilindro.",
       );
     if (
       prior &&
-      (prior.date > serviceDay.slice(0, prior.date.length) ||
-        prior.serviceDate > row.serviceDate ||
+      ((prior.date && prior.date > serviceDay.slice(0, prior.date.length)) ||
+        (prior.serviceDate && prior.serviceDate > row.serviceDate) ||
         (item.performsPh &&
           item.testDate &&
+          prior.date &&
           (prior.date.slice(0, 7) > item.testDate.slice(0, 7) ||
             (prior.date.length === 10 &&
               item.testDate.length === 10 &&
@@ -175,13 +182,25 @@ export async function technicalRules(
       );
     const previousExpiry =
       prior?.expires ?? (antecedentMonth ? monthEnd(antecedentMonth, 5) : null);
+    const incompletePrior =
+      prior && (!prior.date || !prior.crpcId || !prior.result);
+    if (prior?.ambiguous && !item.performsPh)
+      block(
+        "ANTECEDENTE_PH_INCONSISTENTE",
+        "La precisión conocida no permite ordenar antecedentes de PH contradictorios del mismo mes.",
+      );
     if (item.performsPh && previousExpiry && previousExpiry < row.serviceDate)
       expiredPhAntecedents += 1;
     if (
       item.performsPh &&
       ["VENCIMIENTO", "MODIFICACION"].includes(row.phReason ?? "")
     ) {
-      if (!previousExpiry || (!prior && !item.crpcId))
+      if (
+        !previousExpiry ||
+        incompletePrior ||
+        prior?.ambiguous ||
+        (!prior && !item.crpcId)
+      )
         block(
           "PH_ANTECEDENTE_REQUERIDO",
           "El motivo de la PH requiere conocer la última prueba y su CRPC.",
@@ -206,7 +225,7 @@ export async function technicalRules(
           "ANTECEDENTE_PH_INCONSISTENTE",
           "El CRPC de la última PH no coincide con el antecedente registrado.",
         );
-      if (!previousExpiry || (!prior && !item.crpcId))
+      if (!previousExpiry || incompletePrior || (!prior && !item.crpcId))
         block(
           "PH_ANTECEDENTE_REQUERIDO",
           "Registre la última PH y su CRPC para el cilindro que permanece instalado.",

@@ -17,6 +17,8 @@ El repositorio es público y ambos integrantes, `Falliot00` y `GaboAnt`, cuentan
 
 ## Desarrollo — servicios y confirmación transaccional
 
+El [estado de implementación y roadmap al 07/10/2026](docs/ROADMAP.md) contrasta la documentación con el código y detalla los próximos recorridos, sus dependencias y criterios de cierre hasta la entrega final.
+
 La base de la aplicación incorpora el monorepo con React/Vite y NestJS, contratos compartidos y migraciones de PostgreSQL para identidad y auditoría. Permite iniciar y cerrar sesión, administrar cuentas y roles, desactivar usuarios, revocar sesiones y consultar la auditoría según permisos. La interfaz incluye temas oscuro y claro y navegación adaptable.
 
 El primer tramo del incremento 2 incorpora M02 y M03: configuración del taller, actores regulatorios y modelos de componentes, junto con alta, búsqueda y edición de personas y vehículos. Las coincidencias de identificadores permiten recuperar registros existentes; las relaciones de titularidad y contacto conservan su vigencia. Cada modificación queda auditada. La configuración se administra con una capacidad específica; el operador puede consultar las referencias técnicas y gestionar personas y vehículos.
